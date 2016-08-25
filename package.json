@@ -4,12 +4,15 @@
   "description": "Musitop delete music you dont like",
   "main": "server.js",
   "dependencies": {
+    "minimist": "^1.2.0",
     "shuffle-array": "^1.0.0"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "client-good": "node client.js --musicIs=good",
+    "client-bad": "node client.js --musicIs=bad"
   },
   "repository": {
     "type": "git",
