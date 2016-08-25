@@ -25,23 +25,22 @@ server.listen(port, function () {
     console.log('Musitop server listen on ' + port);
 });
 function handleConnection (connection) {
-    var remoteAddress = connection.remoteAddress + ':' + connection.remotePort;
-    console.log('new connection from %s', remoteAddress);
+    // var remoteAddress = connection.remoteAddress + ':' + connection.remotePort;
+    // console.log('new connection from %s', remoteAddress);
     connection.on('data', function (data) {
         var message = data.toString();
         if (message === 'good') {
-            console.log('Client said to keep this good music :)');
+            console.log('Client  : keep this one <3');
+            keepSong();
         } else if (message === 'bad') {
-            console.log('Client said to delete this bad music');
+            console.log('Client  : delete this stuff -_-"');
+            deleteSong();
         } else {
-            console.log('Client said non-handled message : ' + message);
+            console.log('Error   : client said non-handled message "' + message + '"');
         }
     });
-    connection.on('close', function () {
-        console.log('Client closed');
-    });
     connection.on('error', function (e) {
-        console.log('Client error', e);
+        console.log('Error   : client error', e);
     });
 }
 
@@ -55,6 +54,9 @@ function handleConnection (connection) {
  *    ____________▀________________________
  */
 var playlist = [];
+var song = '';
+var player = null;
+var keep = false;
 
 function playFolder (folder, doShuffle) {
     fs.readdir(folder, function (err, files) {
@@ -75,25 +77,75 @@ function playFolder (folder, doShuffle) {
     });
 }
 
-function playList () {
-    // here splice return first item & remove it from playlist
-    var filePath = playlist.splice(0, 1);
-    playSong(filePath);
+function fileName (filePath) {
+    // input  : "C:\Stuff\Music\to test\Miike Sn0wball - Animal.mp3"
+    // output : "Miike Sn0wball - Animal"
+    return path.basename(filePath).split('.')[0];
 }
 
-function playSong (filePath) {
-    var player = spawn('lib/1by1/1by1.exe', [filePath, '/hide', '/close']);
+function playList () {
+    // here splice return first item & remove it from playlist
+    song = playlist.splice(0, 1)[0];
+    console.log('Playing : ' + fileName(song));
+    playSong();
+}
+
+function keepSong () {
+    keep = true;
+}
+
+function moveSong () {
+    doAsync(function (lastSongPath) {
+        fs.rename(lastSongPath, path.join(keepInFolderPath, path.basename(lastSongPath)), function (err) {
+            if (err) throw err;
+            console.log('Moved   : ' + fileName(lastSongPath));
+        });
+    });
+    playList();
+}
+
+function deleteSong () {
+    doAsync(function (lastSongPath) {
+        fs.unlink(lastSongPath, function (err) {
+            if (err) throw err;
+            console.log('Deleted : ' + fileName(lastSongPath));
+        });
+    });
+    player.kill();
+}
+
+function doAsync (callback) {
+    if (!callback) {
+        console.log('Error   : doAsync need a callback');
+    } else {
+        var lastSongPath = song + '';
+        setTimeout(function () {
+            callback(lastSongPath);
+        }, 1000);
+    }
+}
+
+function playSong () {
+    player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         console.log("\n" + 'Stderr : ' + "\n" + stderr);
     });
-    player.on('message', function (message) {
-        console.log('player message : ' + message);
-    });
     player.on('close', function (code) {
-        console.log('player process exited with code ' + code);
-        playList();
+        if (code === null || code === 0) {
+            if (keep) {
+                // start by resetting this toggle
+                keep = false;
+                moveSong();
+            } else {
+                playList();
+            }
+        } else {
+            console.log('Error   : player process exited with non-handled code "' + code + '"');
+        }
     });
 }
 
 // init
-playFolder('D:\\MiCloud\\Music\\brained to test', true);
+var playFolderPath = 'D:\\MiCloud\\Music\\brained to test';
+var keepInFolderPath = 'D:\\MiCloud\\Music\\brained';
+playFolder(playFolderPath, true);
