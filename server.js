@@ -73,7 +73,7 @@ function playFolder (folder, doShuffle) {
         if (doShuffle) {
             shuffle(playlist);
         }
-        playList();
+        playNext();
     });
 }
 
@@ -83,7 +83,7 @@ function fileName (filePath) {
     return path.basename(filePath).split('.')[0];
 }
 
-function playList () {
+function playNext () {
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
     console.log('Playing : ' + fileName(song));
@@ -101,7 +101,7 @@ function moveSong () {
             console.log('Moved   : ' + fileName(lastSongPath));
         });
     });
-    playList();
+    playNext();
 }
 
 function deleteSong () {
@@ -137,7 +137,7 @@ function playSong () {
                 keep = false;
                 moveSong();
             } else {
-                playList();
+                playNext();
             }
         } else {
             console.log('Error   : player process exited with non-handled code "' + code + '"');
