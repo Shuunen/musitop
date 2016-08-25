@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "Musitop delete music you dont like",
   "main": "server.js",
-  "dependencies": {},
+  "dependencies": {
+    "shuffle-array": "^1.0.0"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
