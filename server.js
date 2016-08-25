@@ -4,44 +4,43 @@ var fs = require('fs');
 var path = require('path');
 var shuffle = require('shuffle-array');
 var spawn = require('child_process').spawn;
+var playlist = [];
 
-function playOneInFolder (folder) {
+function playFolder (folder, doShuffle) {
     fs.readdir(folder, function (err, files) {
         if (err) {
             throw new Error(err);
         }
-        var fileNames = [];
         files.forEach(function (fileName) {
             var filePath = path.join(folder, fileName);
             var fileStat = fs.statSync(filePath);
             if (fileStat.isFile()) {
-                fileNames.push(fileName)
+                playlist.push(filePath)
             }
         });
-        playOneOfThese(fileNames);
+        if (doShuffle) {
+            shuffle(playlist);
+        }
+        playList();
     });
 }
 
-function playOneOfThese (fileNames) {
-    if (doShuffle) {
-        shuffle(fileNames);
-    }
-    var fileName = fileNames[0];
-    var filePath = folder + '\\' + fileName;
-    playThisOne(filePath);
+function playList () {
+    // here splice return first item & remove it from playlist
+    var filePath = playlist.splice(0, 1);
+    playSong(filePath);
 }
 
-function playThisOne (filePath) {
+function playSong (filePath) {
     var player = spawn('lib/1by1/1by1.exe', [filePath, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         console.log("\n" + 'Stderr : ' + "\n" + stderr);
     });
     player.on('close', function (code) {
         console.log('player process exited with code ' + code);
+        playList();
     });
 }
 
 // init
-var folder = 'D:\\MiCloud\\Music\\brained to test';
-var doShuffle = true;
-playOneInFolder(folder);
+playFolder('D:\\MiCloud\\Music\\brained to test', true);
