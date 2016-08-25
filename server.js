@@ -1,17 +1,27 @@
-var exec = require('child_process').exec;
+'use strict';
+
+var spawn = require('child_process').spawn;
 
 var folder = 'D:\\MiCloud\\Music\\brained to test';
 
 var music = 'Benny Smiles - Hotline Theme.mp3';
 
+var musicPath = folder + '\\' + music;
+
 // close  Close the program after playing one track
 // hide Hide the window and enable the Systray icon
 // 1by1.exe rain.mp3 /hide /close
-var cmd = 'start lib/1by1/1by1.exe _MUSIC_ /hide /close';
-cmd = cmd.replace(/_MUSIC_/g, folder + '\\' + music);
 
-exec(cmd, function (error, stdout, stderr) {
-    console.log("\n" + 'Error : ' + "\n" + error);
+var player = spawn('lib/1by1/1by1.exe', [musicPath, '/hide', '/close']);
+
+player.stdout.on('data', function (stdout) {
     console.log("\n" + 'Stdout : ' + "\n" + stdout);
+});
+
+player.stderr.on('data', function (stderr) {
     console.log("\n" + 'Stderr : ' + "\n" + stderr);
+});
+
+player.on('close', function (code) {
+    console.log('player process exited with code ' + code);
 });
