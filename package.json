@@ -1,0 +1,28 @@
+{
+  "name": "musitop",
+  "version": "0.0.1",
+  "description": "Musitop delete music you dont like",
+  "main": "server.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shuunen/musitop.git"
+  },
+  "keywords": [
+    "music",
+    "top",
+    "sort",
+    "delete"
+  ],
+  "author": "Shuunen",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Shuunen/musitop/issues"
+  },
+  "homepage": "https://github.com/Shuunen/musitop#readme"
+}
