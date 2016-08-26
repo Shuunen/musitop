@@ -27,15 +27,14 @@ server.listen(port, function () {
 });
 function handleConnection (connection) {
     // var remoteAddress = connection.remoteAddress + ':' + connection.remotePort;
-    // console.log('new connection from %s', remoteAddress);
+    // notify('New connection','From ' + remoteAddress, false);
     connection.on('data', function (data) {
         var message = data.toString();
         if (message === 'good') {
-            console.log('Client  : keep this one <3');
-            notify('Will keep', song);
+            notify('Will keep', fileName(song));
             keepSong();
         } else if (message === 'bad') {
-            console.log('Client  : delete this stuff -_-"');
+            notify('Client', 'Delete this stuff -_-"', false);
             deleteSong();
         } else {
             notify('Error', 'Client said non-handled message "' + message + '"', 'error');
@@ -88,9 +87,12 @@ function fileName (filePath) {
 }
 
 function playNext () {
+    // by default, don't keep newly playing song
+    keep = false;
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
-    console.log('Playing : ' + fileName(song));
+    notify('Playing', fileName(song), false);
+    notify('Remaining', playlist.length + ' track(s)', false);
     playSong();
 }
 
@@ -102,17 +104,18 @@ function moveSong () {
     doAsync(function (lastSongPath) {
         fs.rename(lastSongPath, path.join(keepInFolderPath, path.basename(lastSongPath)), function (err) {
             if (err) throw err;
-            notify('Moved', lastSongPath);
+            notify('Moved', fileName(lastSongPath));
         });
     });
     playNext();
 }
 
 function deleteSong () {
+    keep = false;
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) throw err;
-            notify('Deleted', lastSongPath, 'warn');
+            notify('Deleted', fileName(lastSongPath), 'warn');
         });
     });
     player.kill();
@@ -129,30 +132,30 @@ function doAsync (callback) {
     }
 }
 
-function notify (action, filePath, type) {
-    // notify client side
-    notifier.notify({
-        title: action,
-        message: fileName(filePath),
-        type: (type || 'info')
-    });
+function notify (action, message, type) {
+    if (type !== false) {
+        // notify client side
+        notifier.notify({
+            title: action,
+            message: message,
+            type: (type || 'info')
+        });
+    }
     // in order to align logs :p
-    while (action.length < 7) {
+    while (action.length < 9) {
         action += ' ';
     }
-    console.log(action + ' : ' + fileName(filePath));
+    console.log(action + ' : ' + message);
 }
 
 function playSong () {
     player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
-        console.log("\n" + 'Stderr : ' + "\n" + stderr);
+        notify('Stderr', stderr, 'error');
     });
     player.on('close', function (code) {
         if (code === null || code === 0) {
             if (keep) {
-                // start by resetting this toggle
-                keep = false;
                 moveSong();
             } else {
                 playNext();
