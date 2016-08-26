@@ -93,8 +93,8 @@ function playNext () {
     song = playlist.splice(0, 1)[0];
     playSong();
     setTimeout(function () {
-        notify('Playing', fileName(song), false);
         notify('Remaining', playlist.length + ' track(s)', false);
+        notify('Playing', fileName(song), false);
     }, 1100);
 }
 
