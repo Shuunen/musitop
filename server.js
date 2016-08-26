@@ -91,9 +91,11 @@ function playNext () {
     keep = false;
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
-    notify('Playing', fileName(song), false);
-    notify('Remaining', playlist.length + ' track(s)', false);
     playSong();
+    setTimeout(function () {
+        notify('Playing', fileName(song), false);
+        notify('Remaining', playlist.length + ' track(s)', false);
+    }, 1100);
 }
 
 function keepSong () {
