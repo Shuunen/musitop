@@ -1,13 +1,12 @@
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
 var fs = require('fs');
 var path = require('path');
 var shuffle = require('shuffle-array');
 var spawn = require('child_process').spawn;
 var net = require('net');
 var notifier = require('node-notifier');
-
+// var argv = require('minimist')(process.argv.slice(2));
 // console.log(argv);
 
 /***
@@ -67,6 +66,7 @@ function playFolder (folder, doShuffle) {
             throw new Error(err);
         }
         files.forEach(function (fileName) {
+            //noinspection JSCheckFunctionSignatures
             var filePath = path.join(folder, fileName);
             var fileStat = fs.statSync(filePath);
             if (fileStat.isFile()) {
@@ -81,8 +81,8 @@ function playFolder (folder, doShuffle) {
 }
 
 function fileName (filePath) {
-    // input  : "C:\Stuff\Music\to test\Miike feat. Sn0wball - Animal.mp3"
-    // output : "Miike feat. Sn0wball - Animal"
+    // input  : "C:\Stuff\Music\to test\Mike feat. Snowball - Animal.mp3"
+    // output : "Mike feat. Snowball - Animal"
     return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.');
 }
 
@@ -102,6 +102,7 @@ function keepSong () {
 
 function moveSong () {
     doAsync(function (lastSongPath) {
+        //noinspection JSCheckFunctionSignatures
         fs.rename(lastSongPath, path.join(keepInFolderPath, path.basename(lastSongPath)), function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
