@@ -5,9 +5,9 @@ It delete music you don't like and move the one you want to keep.
 
 ## Install
 
-Install npm dependancies and set your "input" music folder.
+Install npm dependencies and set your "input" music folder.
 
-Optional 1 : if you want to move your favorite music, set the "keep" music folder. 
+Optional 1 : if you want to move your favorite music, set the "keep" music folder.
 
 Optional 2 : drop music-good and/or music-bad to your task bar to have easy shortcuts.
 

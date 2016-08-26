@@ -1,6 +1,6 @@
 {
   "name": "musitop",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Musitop delete music you dont like",
   "main": "server.js",
   "dependencies": {
