@@ -82,9 +82,9 @@ function playFolder (folder, doShuffle) {
 }
 
 function fileName (filePath) {
-    // input  : "C:\Stuff\Music\to test\Miike Sn0wball - Animal.mp3"
-    // output : "Miike Sn0wball - Animal"
-    return path.basename(filePath).split('.')[0];
+    // input  : "C:\Stuff\Music\to test\Miike feat. Sn0wball - Animal.mp3"
+    // output : "Miike feat. Sn0wball - Animal"
+    return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.');
 }
 
 function playNext () {
