@@ -6,6 +6,7 @@ var path = require('path');
 var shuffle = require('shuffle-array');
 var spawn = require('child_process').spawn;
 var net = require('net');
+var notifier = require('node-notifier');
 
 // console.log(argv);
 
@@ -31,16 +32,18 @@ function handleConnection (connection) {
         var message = data.toString();
         if (message === 'good') {
             console.log('Client  : keep this one <3');
+            notify('Will keep', song);
             keepSong();
         } else if (message === 'bad') {
             console.log('Client  : delete this stuff -_-"');
             deleteSong();
         } else {
-            console.log('Error   : client said non-handled message "' + message + '"');
+            notify('Error', 'Client said non-handled message "' + message + '"', 'error');
         }
     });
     connection.on('error', function (e) {
-        console.log('Error   : client error', e);
+        notify('Error', 'Client error, see logs', 'error');
+        console.log(e);
     });
 }
 
@@ -61,6 +64,7 @@ var keep = false;
 function playFolder (folder, doShuffle) {
     fs.readdir(folder, function (err, files) {
         if (err) {
+            notify('Error', 'Fail at reading folder, see logs', 'error');
             throw new Error(err);
         }
         files.forEach(function (fileName) {
@@ -98,7 +102,7 @@ function moveSong () {
     doAsync(function (lastSongPath) {
         fs.rename(lastSongPath, path.join(keepInFolderPath, path.basename(lastSongPath)), function (err) {
             if (err) throw err;
-            console.log('Moved   : ' + fileName(lastSongPath));
+            notify('Moved', lastSongPath);
         });
     });
     playNext();
@@ -108,7 +112,7 @@ function deleteSong () {
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) throw err;
-            console.log('Deleted : ' + fileName(lastSongPath));
+            notify('Deleted', lastSongPath, 'warn');
         });
     });
     player.kill();
@@ -116,13 +120,27 @@ function deleteSong () {
 
 function doAsync (callback) {
     if (!callback) {
-        console.log('Error   : doAsync need a callback');
+        notify('Error', 'Do Async need a callback', 'error');
     } else {
         var lastSongPath = song + '';
         setTimeout(function () {
             callback(lastSongPath);
         }, 1000);
     }
+}
+
+function notify (action, filePath, type) {
+    // notify client side
+    notifier.notify({
+        title: action,
+        message: fileName(filePath),
+        type: (type || 'info')
+    });
+    // in order to align logs :p
+    while (action.length < 7) {
+        action += ' ';
+    }
+    console.log(action + ' : ' + fileName(filePath));
 }
 
 function playSong () {
@@ -140,7 +158,7 @@ function playSong () {
                 playNext();
             }
         } else {
-            console.log('Error   : player process exited with non-handled code "' + code + '"');
+            notify('Error', 'Player process exited with non-handled code "' + code + '"', 'error');
         }
     });
 }

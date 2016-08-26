@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "minimist": "^1.2.0",
+    "node-notifier": "^4.6.1",
     "shuffle-array": "^1.0.0"
   },
   "devDependencies": {},
