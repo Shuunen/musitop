@@ -30,11 +30,14 @@ function handleConnection (connection) {
     connection.on('data', function (data) {
         var message = data.toString();
         if (message === 'good') {
-            notify('Will keep', fileName(song));
+            notify('Will keep', fileName(song), false);
             keepSong();
         } else if (message === 'bad') {
             notify('Client', 'Delete this stuff -_-"', false);
             deleteSong();
+        } else if (message === 'next') {
+            notify('Client', 'Next song please', false);
+            player.kill();
         } else {
             notify('Error', 'Client said non-handled message "' + message + '"', 'error');
         }
@@ -173,3 +176,4 @@ function playSong () {
 var playFolderPath = 'D:\\MiCloud\\Music\\brained to test';
 var keepInFolderPath = 'D:\\MiCloud\\Music\\brained';
 playFolder(playFolderPath, true);
+spawn('node_modules/electron/dist/electron.exe', ['systray']); // add systray controls
