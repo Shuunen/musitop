@@ -155,7 +155,7 @@ function notify (action, message, type) {
 }
 
 function playSong () {
-    player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
+    player = spawn('cvlc', [song]);
     player.stderr.on('data', function (stderr) {
         notify('Stderr', stderr, 'error');
     });
@@ -173,7 +173,7 @@ function playSong () {
 }
 
 // init
-var playFolderPath = 'D:\\MiCloud\\Music\\brained to test';
-var keepInFolderPath = 'D:\\MiCloud\\Music\\brained';
+var playFolderPath = '/home/chou/Cloud/Music/brained to test';
+var keepInFolderPath = '/home/chou/Cloud/Music/brained';
 playFolder(playFolderPath, true);
-spawn('node_modules/electron/dist/electron.exe', ['systray']); // add systray controls
+spawn('node_modules/electron/dist/electron', ['systray']); // add systray controls
