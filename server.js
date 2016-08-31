@@ -26,17 +26,17 @@ server.listen(port, function () {
 });
 function handleConnection (connection) {
     // var remoteAddress = connection.remoteAddress + ':' + connection.remotePort;
-    // notify('New connection','From ' + remoteAddress, false);
+    // notify('New connection','From ' + remoteAddress);
     connection.on('data', function (data) {
         var message = data.toString();
         if (message === 'good') {
-            notify('Will keep', fileName(song), false);
+            notify('Client', 'Keep this song :D');
             keepSong();
         } else if (message === 'bad') {
-            notify('Client', 'Delete this stuff -_-"', false);
+            notify('Client', 'Delete this song :|');
             deleteSong();
         } else if (message === 'next') {
-            notify('Client', 'Next song please', false);
+            notify('Client', 'Next song please :)');
             player.kill();
         } else {
             notify('Error', 'Client said non-handled message "' + message + '"', 'error');
@@ -96,8 +96,8 @@ function playNext () {
     song = playlist.splice(0, 1)[0];
     playSong();
     setTimeout(function () {
-        notify('Remaining', playlist.length + ' track(s)', false);
-        notify('Playing', fileName(song), false);
+        notify('Remaining', playlist.length + ' track(s)');
+        notify('Playing', fileName(song), 'info');
     }, 1100);
 }
 
@@ -121,7 +121,7 @@ function deleteSong () {
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) throw err;
-            notify('Deleted', fileName(lastSongPath), 'warn');
+            notify('Deleted', fileName(lastSongPath));
         });
     });
     player.kill();
@@ -139,12 +139,12 @@ function doAsync (callback) {
 }
 
 function notify (action, message, type) {
-    if (type !== false) {
+    if (type) {
         // notify client side
         notifier.notify({
             title: action,
             message: message,
-            type: (type || 'info')
+            type: type
         });
     }
     // in order to align logs :p
