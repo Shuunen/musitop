@@ -21,7 +21,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 ## Thanks
 
-* 1by1 : for their great music player
+* 1by1 & Vlc : for their great music player
 * Paomedia & Aha-Soft : for their pretty icons
 * Minimist : for easy argument parsing
 * Node-notifier : for easy desktop notification
@@ -36,3 +36,5 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * handle a config file
 * make it work under linux
 * add a demo gif
+* try to switch from 1by1 to cvlc
+* cvlc doesnt quit by itself when music stop ;'(
