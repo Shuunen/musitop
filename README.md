@@ -38,3 +38,29 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * add a demo gif
 * try to switch from 1by1 to cvlc
 * cvlc doesnt quit by itself when music stop ;'(
+
+## FAQ
+
+** What about a generic cross-platform audio player ? **
+It's a fu***ng utopia. 
+
+** What did you mean about a "generic cross-platform audio player" ? **
+I mean a npm package that come with libraries that can play audio files 
+on Windows, Linux & Mac. In this way user does not need to install 
+any package before "npm install". 
+
+** What about including pre-compiled binaries in your repo ? **
+Yes it's not so bad if there are one or just a few files to copy.
+But it's not that simple to find. For example 1by1.exe is a one file
+player that fit in 180kb. Great. 
+I did not find any equivalent binary to include for Linux. Help needed !
+
+** Why not use installed software on the machine ? **
+On Linux yes it's pretty cool & easy, for example we just have to test if
+"mplayer" or "vlc" is here and use them, but in Windows, when use install
+Vlc, depending on Windows version & user choice Vlc is not located every
+time in the same place, so it's far way boring & complicated compared to
+a "npm install myLib" where myLib is simply downloaded & usable in seconds.
+
+** The package "speaker"/"lame"/"lib123" should do the work no ? **
+It does not works with Node 6.x.
