@@ -188,6 +188,7 @@ function getConfig () {
             notify('Error', 'Fail at reading config, see logs', 'error');
             throw new Error(err);
         }
+        notify('Config path', config.path);
         playFolder();
     });
 }
