@@ -117,7 +117,7 @@ function keepSong () {
 function moveSong () {
     doAsync(function (lastSongPath) {
         //noinspection JSCheckFunctionSignatures
-        fs.rename(lastSongPath, path.join(keepInFolderPath, path.basename(lastSongPath)), function (err) {
+        fs.rename(lastSongPath, path.join(path.dirname(lastSongPath) + '/keep', path.basename(lastSongPath)), function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
         });
@@ -164,7 +164,7 @@ function notify (action, message, type) {
 }
 
 function playSong () {
-    player = spawn('cvlc', [song]);
+    player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         notify('Stderr', stderr, 'error');
     });
