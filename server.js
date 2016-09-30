@@ -8,6 +8,7 @@ var net = require('net');
 var notifier = require('node-notifier');
 var config = require('config-prompt')({
     musicPath: { type: 'string', required: true },
+    keepPath: { type: 'string', required: false },
     keepFeature: { type: 'boolean', default: true, required: true },
     deleteFeature: { type: 'boolean', default: true, required: true },
     shuffleMusic: { type: 'boolean', default: true }
@@ -117,7 +118,7 @@ function keepSong () {
 function moveSong () {
     doAsync(function (lastSongPath) {
         //noinspection JSCheckFunctionSignatures
-        fs.rename(lastSongPath, path.join(path.dirname(lastSongPath) + '/keep', path.basename(lastSongPath)), function (err) {
+        fs.rename(lastSongPath, path.join(config.get('keepPath'), path.basename(lastSongPath)), function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
         });
