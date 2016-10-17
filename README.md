@@ -28,16 +28,17 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * Shuffle-array : for easy array shuffling
 * Artists : for creating amazing music
 * Electron : for their great app
+* Config-prompt : for their [configuration lib](https://github.com/ironSource/node-config-prompt)
 
 
 ## TODO
 
-* handle when no more music in input folder
-* handle a config file
-* make it work under linux
-* add a demo gif
-* try to switch from 1by1 to cvlc
-* cvlc doesnt quit by itself when music stop ;'(
+* handle when no music left in input folder
+* make musitop works under linux
+* add links in thanks
+* add a gif demo usage
+* build a web page with controls & desktop notifications like http://singhharkirat.com/notification-logger/
+
 
 ## FAQ
 

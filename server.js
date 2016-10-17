@@ -6,6 +6,14 @@ var shuffle = require('shuffle-array');
 var spawn = require('child_process').spawn;
 var net = require('net');
 var notifier = require('node-notifier');
+var configFile = 'config.json';
+var config = require('config-prompt')({
+    musicPath: { type: 'string', required: true },
+    keepPath: { type: 'string', required: false },
+    keepFeature: { type: 'boolean', default: true, required: true },
+    deleteFeature: { type: 'boolean', default: true, required: true },
+    shuffleMusic: { type: 'boolean', default: true }
+});
 // var argv = require('minimist')(process.argv.slice(2));
 // console.log(argv);
 
@@ -62,21 +70,24 @@ var song = '';
 var player = null;
 var keep = false;
 
-function playFolder (folder, doShuffle) {
-    fs.readdir(folder, function (err, files) {
+function playFolder () {
+    var musicPath = config.get('musicPath');
+    notify('Scanning', '"' + musicPath + '"' + ' for songs');
+    fs.readdir(musicPath, function (err, files) {
         if (err) {
-            notify('Error', 'Fail at reading folder, see logs', 'error');
+            config.trash();
+            notify('Error', 'Fail at reading musicPath, see logs', 'error');
             throw new Error(err);
         }
         files.forEach(function (fileName) {
             //noinspection JSCheckFunctionSignatures
-            var filePath = path.join(folder, fileName);
+            var filePath = path.join(musicPath, fileName);
             var fileStat = fs.statSync(filePath);
             if (fileStat.isFile()) {
                 playlist.push(filePath)
             }
         });
-        if (doShuffle) {
+        if (config.get('shuffleMusic')) {
             shuffle(playlist);
         }
         playNext();
@@ -108,7 +119,7 @@ function keepSong () {
 function moveSong () {
     doAsync(function (lastSongPath) {
         //noinspection JSCheckFunctionSignatures
-        fs.rename(lastSongPath, path.join(keepInFolderPath, path.basename(lastSongPath)), function (err) {
+        fs.rename(lastSongPath, path.join(config.get('keepPath'), path.basename(lastSongPath)), function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
         });
@@ -155,7 +166,7 @@ function notify (action, message, type) {
 }
 
 function playSong () {
-    player = spawn('cvlc', [song]);
+    player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         notify('Stderr', stderr, 'error');
     });
@@ -172,8 +183,54 @@ function playSong () {
     });
 }
 
+function getConfigFromUser (callback) {
+    // will ask user for conf then save it locally
+    config.prompt({ all: false, nodeEnv: false, silent: false }, function (err) {
+        if (err) {
+            config.trash();
+            notify('Error', 'Fail at reading config, see logs', 'error');
+            throw new Error(err);
+        }
+        // move conf file in config store to local folder
+        // from : C:\Users\ME\.config\configstore\musitop.json
+        // to   : .
+        // notify('Config path', config.path);
+        fs.createReadStream(config.path).pipe(fs.createWriteStream(configFile));
+        // if any callback, execute it
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
+    });
+}
+
+function getConfig (callback) {
+    // get local config
+    fs.readFile(configFile, function (err, configContent) {
+        if (err) {
+            notify('Info', 'No local config found');
+        } else {
+            notify('Info', 'Local config found');
+            // set found conf key/values into in-memory conf
+            config.all = JSON.parse(configContent);
+        }
+
+        var configErrors = config.validate();
+        if (configErrors.length) {
+            getConfigFromUser(callback);
+        } else if (callback && typeof callback === 'function') {
+            callback();
+        } else {
+            notify('Error', 'no callback provided');
+        }
+    });
+}
+
+function init () {
+    // get conf then play music
+    getConfig(playFolder);
+}
+
 // init
-var playFolderPath = '/home/chou/Cloud/Music/brained to test';
-var keepInFolderPath = '/home/chou/Cloud/Music/brained';
-playFolder(playFolderPath, true);
+setTimeout(init, 100);
 spawn('node_modules/electron/dist/electron', ['systray']); // add systray controls
+

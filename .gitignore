@@ -38,3 +38,4 @@ jspm_packages
 .idea/workspace.xml
 lib/1by1/1by1.ini
 .idea/dictionaries/ROMAINRA.xml
+config.json
