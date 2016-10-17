@@ -6,6 +6,7 @@ var shuffle = require('shuffle-array');
 var spawn = require('child_process').spawn;
 var net = require('net');
 var notifier = require('node-notifier');
+var configFile = 'config.json';
 var config = require('config-prompt')({
     musicPath: { type: 'string', required: true },
     keepPath: { type: 'string', required: false },
@@ -182,19 +183,54 @@ function playSong () {
     });
 }
 
-function getConfig () {
-    config.prompt({ all: true, nodeEnv: false, silent: false }, function (err) {
+function getConfigFromUser (callback) {
+    // will ask user for conf then save it locally
+    config.prompt({ all: false, nodeEnv: false, silent: false }, function (err) {
         if (err) {
             config.trash();
             notify('Error', 'Fail at reading config, see logs', 'error');
             throw new Error(err);
         }
-        notify('Config path', config.path);
-        playFolder();
+        // move conf file in config store to local folder
+        // from : C:\Users\ME\.config\configstore\musitop.json
+        // to   : .
+        // notify('Config path', config.path);
+        fs.createReadStream(config.path).pipe(fs.createWriteStream(configFile));
+        // if any callback, execute it
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
     });
 }
 
+function getConfig (callback) {
+    // get local config
+    fs.readFile(configFile, function (err, configContent) {
+        if (err) {
+            notify('Info', 'No local config found');
+        } else {
+            notify('Info', 'Local config found');
+            // set found conf key/values into in-memory conf
+            config.all = JSON.parse(configContent);
+        }
+
+        var configErrors = config.validate();
+        if (configErrors.length) {
+            getConfigFromUser(callback);
+        } else if (callback && typeof callback === 'function') {
+            callback();
+        } else {
+            notify('Error', 'no callback provided');
+        }
+    });
+}
+
+function init () {
+    // get conf then play music
+    getConfig(playFolder);
+}
+
 // init
-setTimeout(getConfig, 100);
+setTimeout(init, 100);
 spawn('node_modules/electron/dist/electron', ['systray']); // add systray controls
 
