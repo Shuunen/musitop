@@ -1,19 +1,5 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var shuffle = require('shuffle-array');
-var spawn = require('child_process').spawn;
-var net = require('net');
-var notifier = require('node-notifier');
-var configFile = 'config.json';
-var config = require('config-prompt')({
-    musicPath: { type: 'string', required: true },
-    keepPath: { type: 'string', required: false },
-    keepFeature: { type: 'boolean', default: true, required: true },
-    deleteFeature: { type: 'boolean', default: true, required: true },
-    shuffleMusic: { type: 'boolean', default: true }
-});
 // var argv = require('minimist')(process.argv.slice(2));
 // console.log(argv);
 
@@ -26,6 +12,7 @@ var config = require('config-prompt')({
  *    ____________________▀______█▐____________▀____
  *    ___________________________▐__________________
  */
+var net = require('net');
 var port = 6666;
 var server = net.createServer();
 server.on('connection', handleConnection);
@@ -65,6 +52,19 @@ function handleConnection (connection) {
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
+var fs = require('fs');
+var path = require('path');
+var spawn = require('child_process').spawn;
+var notifier = require('node-notifier');
+var configFile = 'config.json';
+var config = require('config-prompt')({
+    musicPath: { type: 'string', required: true },
+    keepPath: { type: 'string', required: false },
+    keepFeature: { type: 'boolean', default: true, required: true },
+    deleteFeature: { type: 'boolean', default: true, required: true },
+    shuffleMusic: { type: 'boolean', default: true }
+});
+var shuffle = require('shuffle-array');
 var playlist = [];
 var song = '';
 var player = null;
