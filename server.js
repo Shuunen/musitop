@@ -9,36 +9,29 @@
  *    ____________________▀______█▐____________▀____
  *    ___________________________▐__________________
  */
-var net = require('net');
-var port = 6666;
-var server = net.createServer();
-server.on('connection', handleConnection);
-server.listen(port, function () {
-    console.log('Musitop server listen on ' + port);
+var fs = require('fs');
+var path = require('path');
+var port = 404;
+// WEB
+var page = 'web.html';
+var http = require('http');
+var html = fs.readFileSync(page).toString();
+var server = http.createServer(function (request, response) {
+    console.log('In musitop response');
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.end(html);
 });
-function handleConnection (connection) {
-    // var remoteAddress = connection.remoteAddress + ':' + connection.remotePort;
-    // notify('New connection','From ' + remoteAddress);
-    connection.on('data', function (data) {
-        var message = data.toString();
-        if (message === 'good') {
-            notify('Client', 'Keep this song :D');
+server.listen(port, function () {
+    console.log('Musitop server started on http://localhost:' + port);
+});
             keepSong();
-        } else if (message === 'bad') {
-            notify('Client', 'Delete this song :|');
             deleteSong();
-        } else if (message === 'next') {
-            notify('Client', 'Next song please :)');
-            player.kill();
         } else {
-            notify('Error', 'Client said non-handled message "' + message + '"', 'error');
         }
     });
-    connection.on('error', function (e) {
         notify('Error', 'Client error, see logs', 'error');
         console.log(e);
     });
-}
 
 /***
  *    █_▄▄__█____██__▀▄____▄_▄███▄___█▄▄▄▄_
@@ -49,8 +42,6 @@ function handleConnection (connection) {
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
-var fs = require('fs');
-var path = require('path');
 var spawn = require('child_process').spawn;
 var notifier = require('node-notifier');
 var configFile = 'config.json';
