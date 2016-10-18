@@ -11,20 +11,23 @@
  */
 
 var net = require('net');
-var port = 6666;
-var client = new net.Socket();
-client.connect(port, '127.0.0.1', function () {
+var port = 404;
+var io = require('socket.io-client');
+var argv = require('minimist')(process.argv.slice(2));
+var musicIs = argv.musicIs || 'smooth';
+var socket = io.connect('http://localhost:' + port);
+
+socket.on('connect', function () {
     console.log('Client connected');
-    var musicIs = argv.musicIs || 'smooth';
-    client.write(musicIs);
-    client.end();
+    socket.emit('music is', musicIs);
+    socket.emit('debug', JSON.stringify(argv));
+    socket.disconnect();
 });
-client.on('close', function () {
-    console.log('Client close');
+
+socket.on('disconnect', function () {
+    console.log('Client disconnected');
 });
-client.on('end', function () {
-    console.log('Client end');
-});
-client.on('error', function (e) {
+
+socket.on('error', function (e) {
     console.log('Client error', e);
 });

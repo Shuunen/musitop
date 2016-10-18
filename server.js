@@ -24,17 +24,32 @@ var server = http.createServer(function (request, response) {
 server.listen(port, function () {
     console.log('Musitop server started on http://localhost:' + port);
 });
+
+// SOCKET
+var io = require('socket.io')(server);
+io.on('connection', function (socket) {
+    socket.emit('news', 'Ail to server :)');
+    socket.on('music is', function (musicIs) {
+        if (musicIs === 'good') {
+            notify('Client said', 'Keep this song :D');
             keepSong();
+        } else if (musicIs === 'bad') {
+            notify('Client said', 'Delete this song :|');
             deleteSong();
+        } else if (musicIs === 'next') {
+            notify('Client said', 'Next song please :)');
             if (player) {
                 player.kill();
             }
         } else {
+            notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
         }
     });
+    socket.on('error', function (e) {
         notify('Error', 'Client error, see logs', 'error');
         console.log(e);
     });
+});
 
 /***
  *    █_▄▄__█____██__▀▄____▄_▄███▄___█▄▄▄▄_
