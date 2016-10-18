@@ -160,7 +160,7 @@
         });
 
         socket.on('player', function (infos) {
-
+            console.info('Received fresh player infos', infos);
             var el = document.querySelector('.status strong');
             el.innerText = infos.currentlyPlaying;
             el.classList.remove('loader');

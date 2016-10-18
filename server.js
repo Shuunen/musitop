@@ -50,8 +50,10 @@ var pick = function (items, doExtract) {
 };
 var sendDynamicValues = function () {
     if (!socketDoor) {
+        notify('Error', 'Cannot send dynamic values without socket door');
         return;
     }
+    notify('Info', 'Sending dynamic values trough socket door');
     socketDoor.emit('theme', {
         colors: helloColor(bikeShed(), {
             saturation: 1 / 8,
@@ -170,6 +172,7 @@ function playNext () {
     setTimeout(function () {
         notify('Remaining', playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
+        sendDynamicValues();
     }, 1100);
 }
 
