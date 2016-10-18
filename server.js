@@ -1,8 +1,5 @@
 'use strict';
 
-// var argv = require('minimist')(process.argv.slice(2));
-// console.log(argv);
-
 /***
  *    ___▄▄▄▄▄___▄███▄___█▄▄▄▄____▄___▄███▄___█▄▄▄▄_
  *    __█_____▀▄_█▀___▀__█__▄▀_____█__█▀___▀__█__▄▀_
