@@ -8,14 +8,17 @@
     "electron": "^1.3.4",
     "minimist": "^1.2.0",
     "node-notifier": "^4.6.1",
-    "shuffle-array": "^1.0.0"
+    "shuffle-array": "^1.0.0",
+    "socket.io": "^1.5.0",
+    "socket.io-client": "^1.5.0"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "client-good": "node client.js --musicIs=good",
-    "client-bad": "node client.js --musicIs=bad"
+    "client-bad": "node client.js --musicIs=bad",
+    "watch": "nodemon server.js --ext js,html"
   },
   "repository": {
     "type": "git",

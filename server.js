@@ -1,8 +1,5 @@
 'use strict';
 
-// var argv = require('minimist')(process.argv.slice(2));
-// console.log(argv);
-
 /***
  *    ___▄▄▄▄▄___▄███▄___█▄▄▄▄____▄___▄███▄___█▄▄▄▄_
  *    __█_____▀▄_█▀___▀__█__▄▀_____█__█▀___▀__█__▄▀_
@@ -12,36 +9,47 @@
  *    ____________________▀______█▐____________▀____
  *    ___________________________▐__________________
  */
-var net = require('net');
-var port = 6666;
-var server = net.createServer();
-server.on('connection', handleConnection);
-server.listen(port, function () {
-    console.log('Musitop server listen on ' + port);
+var fs = require('fs');
+var path = require('path');
+var port = 404;
+// WEB
+var page = 'web.html';
+var http = require('http');
+var html = fs.readFileSync(page).toString();
+var server = http.createServer(function (request, response) {
+    console.log('In musitop response');
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.end(html);
 });
-function handleConnection (connection) {
-    // var remoteAddress = connection.remoteAddress + ':' + connection.remotePort;
-    // notify('New connection','From ' + remoteAddress);
-    connection.on('data', function (data) {
-        var message = data.toString();
-        if (message === 'good') {
-            notify('Client', 'Keep this song :D');
+server.listen(port, function () {
+    console.log('Musitop server started on http://localhost:' + port);
+});
+
+// SOCKET
+var io = require('socket.io')(server);
+io.on('connection', function (socket) {
+    socket.emit('news', 'Ail to server :)');
+    socket.on('music is', function (musicIs) {
+        if (musicIs === 'good') {
+            notify('Client said', 'Keep this song :D');
             keepSong();
-        } else if (message === 'bad') {
-            notify('Client', 'Delete this song :|');
+        } else if (musicIs === 'bad') {
+            notify('Client said', 'Delete this song :|');
             deleteSong();
-        } else if (message === 'next') {
-            notify('Client', 'Next song please :)');
-            player.kill();
+        } else if (musicIs === 'next') {
+            notify('Client said', 'Next song please :)');
+            if (player) {
+                player.kill();
+            }
         } else {
-            notify('Error', 'Client said non-handled message "' + message + '"', 'error');
+            notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
         }
     });
-    connection.on('error', function (e) {
+    socket.on('error', function (e) {
         notify('Error', 'Client error, see logs', 'error');
         console.log(e);
     });
-}
+});
 
 /***
  *    █_▄▄__█____██__▀▄____▄_▄███▄___█▄▄▄▄_
@@ -52,9 +60,7 @@ function handleConnection (connection) {
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
-var fs = require('fs');
-var path = require('path');
-var spawn = require('child_process').spawn;
+var childProcess = require('child_process');
 var notifier = require('node-notifier');
 var configFile = 'config.json';
 var config = require('config-prompt')({
@@ -131,11 +137,17 @@ function deleteSong () {
     keep = false;
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
-            if (err) throw err;
-            notify('Deleted', fileName(lastSongPath));
+            if (err) {
+                notify('Error', 'Delete failed, see logs');
+                console.log(err);
+            } else {
+                notify('Deleted', fileName(lastSongPath));
+            }
         });
     });
-    player.kill();
+    if (player) {
+        player.kill();
+    }
 }
 
 function doAsync (callback) {
@@ -166,7 +178,7 @@ function notify (action, message, type) {
 }
 
 function playSong () {
-    player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
+    player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         notify('Stderr', stderr, 'error');
     });
@@ -228,9 +240,10 @@ function getConfig (callback) {
 function init () {
     // get conf then play music
     getConfig(playFolder);
+    // add systray controls
+    childProcess.spawn('node_modules/electron/dist/electron', ['systray']);
 }
 
 // init
 setTimeout(init, 100);
-spawn('node_modules/electron/dist/electron', ['systray']); // add systray controls
 
