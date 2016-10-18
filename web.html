@@ -139,35 +139,38 @@
 </div>
 
 <script>
+
     window.onload = function () {
-
         var socket = io('http://localhost:404');
-
-        document.body.onclick = function () {
-            var musicIs = 'weird';
-            console.log('Say that music is "' + musicIs + '"');
-            socket.emit('music is', musicIs);
-        };
-
-        socket.on('theme', function (theme) {
-            console.log(theme);
-            var el = document.body;
-            el.style.backgroundColor = theme.colors.base;
-            el.style.color = theme.colors.color;
-            el.classList.add('loaded');
-            injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));
-            injectPalette(theme.colors.scale, document.querySelector('.palette .scale'));
-        });
-
-        socket.on('player', function (infos) {
-            console.info('Received fresh player infos', infos);
-            var el = document.querySelector('.status strong');
-            el.innerText = infos.currentlyPlaying;
-            el.classList.remove('loader');
-        });
+        socket.emit('music is', 'weird');
+        socket.on('theme', onTheme);
+        socket.on('player', onPlayer);
+        socket.on('disconnect', onDisconnect);
     };
 
+    function onDisconnect () {
+        console.warn('web client disconnected');
+    }
+
+    function onPlayer (infos) {
+        console.info('Received fresh player infos', infos);
+        var el = document.querySelector('.status strong');
+        el.innerText = infos.currentlyPlaying;
+        el.classList.remove('loader');
+    }
+
+    function onTheme (theme) {
+        console.info('Received new theme instructions', theme);
+        var el = document.body;
+        el.style.backgroundColor = theme.colors.base;
+        el.style.color = theme.colors.color;
+        el.classList.add('loaded');
+        injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));
+        injectPalette(theme.colors.scale, document.querySelector('.palette .scale'));
+    }
+
     function injectPalette (palette, el) {
+        el.innerHTML = '';
         for (var i = 0; i < palette.length; i++) {
             var color = palette[i];
             el.innerHTML += '<div class="color" style="background-color:' + color + '"></div>';

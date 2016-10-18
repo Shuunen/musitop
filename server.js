@@ -101,6 +101,7 @@ io.on('connection', function (socket) {
         } else {
             notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
         }
+        sendDynamicValues();
     });
     socket.on('error', function (e) {
         notify('Error', 'Client error, see logs', 'error');
