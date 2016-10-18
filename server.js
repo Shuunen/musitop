@@ -26,6 +26,9 @@ server.listen(port, function () {
 });
             keepSong();
             deleteSong();
+            if (player) {
+                player.kill();
+            }
         } else {
         }
     });
@@ -119,11 +122,17 @@ function deleteSong () {
     keep = false;
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
-            if (err) throw err;
-            notify('Deleted', fileName(lastSongPath));
+            if (err) {
+                notify('Error', 'Delete failed, see logs');
+                console.log(err);
+            } else {
+                notify('Deleted', fileName(lastSongPath));
+            }
         });
     });
-    player.kill();
+    if (player) {
+        player.kill();
+    }
 }
 
 function doAsync (callback) {
