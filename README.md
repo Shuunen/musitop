@@ -29,6 +29,8 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * Artists : for creating amazing music
 * Electron : for their great app
 * Config-prompt : for their [configuration lib](https://github.com/ironSource/node-config-prompt)
+* Hero patterns : for their [nice & simple resources](http://www.heropatterns.com/)
+* Hello color : for [color theme generator](https://github.com/jxnblk/hello-color)
 
 
 ## TODO
@@ -37,7 +39,9 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * make musitop works under linux
 * add links in thanks
 * add a gif demo usage
-* build a web page with controls & desktop notifications like http://singhharkirat.com/notification-logger/
+* handle controls in web page
+* add desktop notifications like http://singhharkirat.com/notification-logger/
+* enhance styling on web page
 
 
 ## FAQ

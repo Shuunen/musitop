@@ -4,8 +4,10 @@
   "description": "Musitop delete music you dont like",
   "main": "server.js",
   "dependencies": {
+    "@jxnblk/bikeshed": "^1.0.0-beta.1",
     "config-prompt": "^1.1.0",
     "electron": "^1.3.4",
+    "hello-color": "^1.0.1",
     "minimist": "^1.2.0",
     "node-notifier": "^4.6.1",
     "shuffle-array": "^1.0.0",

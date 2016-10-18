@@ -15,29 +15,84 @@ var port = 404;
 // WEB
 var page = 'web.html';
 var http = require('http');
+var helloColor = require('hello-color').default;
+var bikeShed = require('@jxnblk/bikeshed');
 var html = fs.readFileSync(page).toString();
+var svgPattern = null;
+var svgPatternPath = 'patterns';
+var svgPatternPick = function () {
+    fs.readdir(svgPatternPath, function (err, files) {
+        if (err) {
+            notify('Error', 'Fail at reading patterns path, see logs', 'error');
+            throw new Error(err);
+        }
+        svgPattern = fs.readFileSync(svgPatternPath + '/' + pick(files)).toString();
+    });
+};
+svgPatternPick();
+var numberBetween = function (min, max) {
+    return Math.floor((Math.random() * ((max - min) + 1)) + min);
+};
+var pick = function (items, doExtract) {
+    var index;
+    var indexMax;
+    var item;
+    if (!items || !items.length) {
+        console.error('called pick without items');
+        return false;
+    }
+    indexMax = items.length - 1;
+    index = indexMax === 0 ? 0 : numberBetween(0, indexMax);
+    // if extract, splice will get & remove item at index
+    // splice return an array, so we get the first one
+    item = doExtract ? items.splice(index, 1)[0] : items[index];
+    return item;
+};
+var sendDynamicValues = function () {
+    if (!socketDoor) {
+        return;
+    }
+    socketDoor.emit('theme', {
+        colors: helloColor(bikeShed(), {
+            saturation: 1 / 8,
+            contrast: 3,
+            hues: 5
+        })
+    });
+    socketDoor.emit('player', {
+        currentlyPlaying: fileName(song)
+    });
+};
 var server = http.createServer(function (request, response) {
-    console.log('In musitop response');
-    response.writeHead(200, { 'Content-Type': 'text/html' });
-    response.end(html);
+    var url = request.url;
+    console.log('url requested : ' + url);
+    if (url.indexOf('svg') !== -1) {
+        response.writeHead(200, { 'Content-Type': 'image/svg+xml' });
+        response.end(svgPattern);
+    } else {
+        response.writeHead(200, { 'Content-Type': 'text/html' });
+        response.end(html);
+        sendDynamicValues();
+    }
 });
 server.listen(port, function () {
     console.log('Musitop server started on http://localhost:' + port);
 });
-
 // SOCKET
+var socketDoor = null;
 var io = require('socket.io')(server);
 io.on('connection', function (socket) {
+    socketDoor = socket;
     socket.emit('news', 'Ail to server :)');
     socket.on('music is', function (musicIs) {
         if (musicIs === 'good') {
-            notify('Client said', 'Keep this song :D');
+            notify('Client', 'Keep this song :D');
             keepSong();
         } else if (musicIs === 'bad') {
-            notify('Client said', 'Delete this song :|');
+            notify('Client', 'Delete this song :|');
             deleteSong();
         } else if (musicIs === 'next') {
-            notify('Client said', 'Next song please :)');
+            notify('Client', 'Next song please :)');
             if (player) {
                 player.kill();
             }

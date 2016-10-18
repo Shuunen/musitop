@@ -12,6 +12,36 @@
             font-family: sans-serif;
             text-align: center;
             padding: 14%;
+            background-color: #0d3c36;
+            color: #ebc2c7;
+            background-image: url('pattern.svg');
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        .content {
+            background-color: whitesmoke;
+            border-radius: 20%;
+            padding: 20%;
+        }
+
+        .status {
+            margin-top: 14px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .controls .icon {
+            margin-top: 14px;
+            border: 2px solid #333;
+            padding: 8px 14px;
         }
 
         .loader {
@@ -63,22 +93,49 @@
                 width: 10px
             }
         }
+
+        .palette {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .palette > div {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .color {
+            display: flex;
+            flex-grow: 1;
+            height: 3vh;
+        }
     </style>
 </head>
 <body>
 
-<h1>Musitop</h1>
+<div class="content">
+    <h1>Musitop</h1>
 
-<h2>Web Server</h2>
+    <h2>Web Server</h2>
 
-<div class="status">
-    <p>Currently playing : <strong class="loader">loading...</strong></p>
+    <div class="status">
+        <p>Currently playing : <strong class="loader">loading...</strong></p>
+    </div>
+
+    <div class="controls">
+        <div class="icon icon-good">Good</div>
+        <div class="icon icon-next">Next</div>
+        <div class="icon icon-bad">Bad</div>
+    </div>
 </div>
 
-<div class="controls">
-    <div class="icon icon-good">Good</div>
-    <div class="icon icon-next">Next</div>
-    <div class="icon icon-bad">Bad</div>
+<div class="palette">
+    <div class="hues"></div>
+    <div class="scale"></div>
 </div>
 
 <script>
@@ -92,12 +149,30 @@
             socket.emit('music is', musicIs);
         };
 
-        socket.on('news', function (data) {
-            console.log(data);
-            document.body.innerHTML += '<br><p>' + data + '</p>';
-            socket.emit('my other event', { my: 'data' });
+        socket.on('theme', function (theme) {
+            console.log(theme);
+            var el = document.body;
+            el.style.backgroundColor = theme.colors.base;
+            el.style.color = theme.colors.color;
+            el.classList.add('loaded');
+            injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));
+            injectPalette(theme.colors.scale, document.querySelector('.palette .scale'));
+        });
+
+        socket.on('player', function (infos) {
+
+            var el = document.querySelector('.status strong');
+            el.innerText = infos.currentlyPlaying;
+            el.classList.remove('loader');
         });
     };
+
+    function injectPalette (palette, el) {
+        for (var i = 0; i < palette.length; i++) {
+            var color = palette[i];
+            el.innerHTML += '<div class="color" style="background-color:' + color + '"></div>';
+        }
+    }
 </script>
 
 </body>
