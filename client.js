@@ -12,10 +12,10 @@
 
 var net = require('net');
 var port = 404;
-var io = require('socket.io-client');
+var ioClient = require('socket.io-client');
 var argv = require('minimist')(process.argv.slice(2));
 var musicIs = argv.musicIs || 'smooth';
-var socket = io.connect('http://localhost:' + port);
+var socket = ioClient.connect('http://localhost:' + port);
 
 socket.on('connect', function () {
     console.log('Client connected');
