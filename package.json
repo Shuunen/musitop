@@ -15,7 +15,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "client-good": "node client.js --musicIs=good",
-    "client-bad": "node client.js --musicIs=bad"
+    "client-bad": "node client.js --musicIs=bad",
+    "watch": "nodemon server.js --ext js,html"
   },
   "repository": {
     "type": "git",
