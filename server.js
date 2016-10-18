@@ -42,7 +42,7 @@ server.listen(port, function () {
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
-var spawn = require('child_process').spawn;
+var childProcess = require('child_process');
 var notifier = require('node-notifier');
 var configFile = 'config.json';
 var config = require('config-prompt')({
@@ -154,7 +154,7 @@ function notify (action, message, type) {
 }
 
 function playSong () {
-    player = spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
+    player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         notify('Stderr', stderr, 'error');
     });
@@ -216,9 +216,10 @@ function getConfig (callback) {
 function init () {
     // get conf then play music
     getConfig(playFolder);
+    // add systray controls
+    childProcess.spawn('node_modules/electron/dist/electron', ['systray']);
 }
 
 // init
 setTimeout(init, 100);
-spawn('node_modules/electron/dist/electron', ['systray']); // add systray controls
 

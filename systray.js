@@ -1,26 +1,5 @@
-var electron = require('electron');
-var path = require('path');
-var net = require('net');
-var port = 6666;
 'use strict';
 
-function tellServer (goodOrBad) {
-    var client = new net.Socket();
-    client.connect(port, '127.0.0.1', function () {
-        console.log('Client connected');
-        client.write(goodOrBad);
-        client.end();
-    });
-    client.on('close', function () {
-        console.log('Client close');
-    });
-    client.on('end', function () {
-        console.log('Client end');
-    });
-    client.on('error', function (e) {
-        console.log('Client error', e);
-    });
-}
 /***
  *    -▄▄▄▄▄▄▄▄▄▄▄--▄---------▄--▄▄▄▄▄▄▄▄▄▄▄--▄▄▄▄▄▄▄▄▄▄▄--▄▄▄▄▄▄▄▄▄▄▄--▄▄▄▄▄▄▄▄▄▄▄--▄---------▄-
  *    ▐░░░░░░░░░░░▌▐░▌-------▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌-------▐░▌
@@ -36,7 +15,9 @@ function tellServer (goodOrBad) {
  *    -------------------------------------------------------------------------------------------
  */
 
-var win = null;
+var electron = require('electron');
+var path = require('path');
+var childProcess = require('child_process');
 var icons = {
     good: {
         send: 'good',
@@ -68,7 +49,13 @@ var icons = {
     }
 };
 
-function addTrayIcon (icon) {
+// communicate with server via generic client
+var tellServer = function (goodOrBad) {
+    childProcess.fork('client.js', ['--musicIs=' + goodOrBad]);
+};
+
+// add one icon in system tray
+var addTrayIcon = function (icon) {
     icon.instance = new electron.Tray(icon.icon);
     icon.instance.setToolTip(icon.tooltip);
     icon.instance.on('click', function () {
@@ -77,14 +64,13 @@ function addTrayIcon (icon) {
         }
         tellServer(this.send);
     }.bind(icon));
-}
+};
 
+// init tray icons
 electron.app.on('ready', function () {
-    // i'm not sure this is required
-    // win = new electron.BrowserWindow({ show: false });
-    // init tray icons
-    // don't know why but in this order, icons are displayed good, next, bad -_-''
+    // don't know why but this order display icons into this order : good, next, bad
     addTrayIcon(icons.next);
     addTrayIcon(icons.bad);
     addTrayIcon(icons.good);
+    // -_-''
 });
