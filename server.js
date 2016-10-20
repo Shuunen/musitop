@@ -53,7 +53,7 @@ var sendDynamicValues = function () {
         notify('Error', 'Cannot send dynamic values without socket door');
         return;
     }
-    notify('Info', 'Sending dynamic values trough socket door');
+    notify('Socket', 'Sending dynamic values trough socket door');
     socketDoor.emit('theme', {
         colors: helloColor(bikeShed(), {
             saturation: 1 / 8,
@@ -81,33 +81,44 @@ server.listen(port, function () {
     console.log('Musitop server started on http://localhost:' + port);
 });
 // SOCKET
-var socketDoor = null;
-var io = require('socket.io')(server);
-io.on('connection', function (socket) {
-    socketDoor = socket;
-    socket.emit('news', 'Ail to server :)');
-    socket.on('music is', function (musicIs) {
-        if (musicIs === 'good') {
-            notify('Client', 'Keep this song :D');
-            keepSong();
-        } else if (musicIs === 'bad') {
-            notify('Client', 'Delete this song :|');
-            deleteSong();
-        } else if (musicIs === 'next') {
-            notify('Client', 'Next song please :)');
-            if (player) {
-                player.kill();
-            }
-        } else {
-            notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
+var onDisconnect = function () {
+    notify('Socket', 'server side disconnected');
+    // connectSocket();
+};
+var onMusicIs = function (musicIs) {
+    if (musicIs === 'good') {
+        notify('Client', 'Keep this song :D');
+        keepSong();
+    } else if (musicIs === 'bad') {
+        notify('Client', 'Delete this song :|');
+        deleteSong();
+    } else if (musicIs === 'next') {
+        notify('Client', 'Next song please :)');
+        if (player) {
+            player.kill();
         }
-        sendDynamicValues();
+    } else {
+        notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
+    }
+    sendDynamicValues();
+};
+var onError = function () {
+    notify('Error', 'Client error, see logs', 'error');
+    console.log(e);
+};
+var socketDoor = null;
+var connectSocket = function () {
+    notify('Socket', 'server connecting...');
+    var io = require('socket.io')(server);
+    io.on('connection', function (socket) {
+        notify('Socket', 'server socket started !');
+        socketDoor = socket;
+        socket.on('music is', onMusicIs);
+        socket.on('error', onError);
+        socket.on('disconnect', onDisconnect);
     });
-    socket.on('error', function (e) {
-        notify('Error', 'Client error, see logs', 'error');
-        console.log(e);
-    });
-});
+};
+connectSocket();
 
 /***
  *    █_▄▄__█____██__▀▄____▄_▄███▄___█▄▄▄▄_

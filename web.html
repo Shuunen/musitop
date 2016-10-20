@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <style>
 
         body {
@@ -17,16 +18,32 @@
             background-image: url('pattern.svg');
             opacity: 0;
             transition: opacity .3s;
+            max-width: 400px;
+            margin: auto;
         }
 
         body.loaded {
             opacity: 1;
         }
 
+        h1 {
+            background-color: rgb(190, 251, 52);
+            width: 100%;
+            position: absolute;
+            left: 0;
+            padding: 10px 0;
+            margin: 0;
+            border-style: solid;
+            border-width: 2px 0;
+        }
+
         .content {
             background-color: whitesmoke;
-            border-radius: 20%;
+            border-radius: 200px 0;
             padding: 20%;
+            position: relative;
+            box-shadow: 2px 2px 22px;
+            overflow: hidden;
         }
 
         .status {
@@ -115,10 +132,11 @@
         }
     </style>
 </head>
-<body>
+<body data-theme-background data-theme-color>
 
 <div class="content">
-    <h1>Musitop</h1>
+
+    <h1 data-theme-background>Musitop</h1>
 
     <h2>Web Server</h2>
 
@@ -131,6 +149,7 @@
         <div class="icon icon-next">Next</div>
         <div class="icon icon-bad">Bad</div>
     </div>
+
 </div>
 
 <div class="palette">
@@ -139,34 +158,94 @@
 </div>
 
 <script>
+    var socketDoor = null;
+    //socketDoor.emit('music is', 'weird');
 
     window.onload = function () {
-        var socket = io('http://localhost:404');
-        socket.emit('music is', 'weird');
-        socket.on('theme', onTheme);
-        socket.on('player', onPlayer);
-        socket.on('disconnect', onDisconnect);
+        connectSocket();
     };
 
-    function onDisconnect () {
-        console.warn('web client disconnected');
-    }
+    var notify = function (action, message, type) {
+        if (type) {
+            // notify client side
+        }
+        // in order to align logs :p
+        while (action.length < 9) {
+            action += ' ';
+        }
+        console.log(action + ' : ' + message);
+    };
+
+    var onDisconnect = function () {
+        notify('Socket', 'web side disconnected');
+        // connectSocket();
+    };
+
+    var onError = function () {
+        notify('Error', 'Client error, see logs', 'error');
+        console.log(e);
+    };
+
+    var onMusicIs = function (musicIs) {
+        if (musicIs === 'good') {
+            notify('Client', 'Keep this song :D');
+        } else if (musicIs === 'bad') {
+            notify('Client', 'Delete this song :|');
+        } else if (musicIs === 'next') {
+            notify('Client', 'Next song please :)');
+        } else {
+            notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
+        }
+    };
+
+    var connectSocket = function () {
+        notify('Socket', 'web connecting...');
+        var socket = io('http://localhost:404');
+        socketDoor = socket;
+        socket.on('theme', onTheme);
+        socket.on('player', onPlayer);
+        socket.on('music is', onMusicIs);
+        socket.on('error', onError);
+        socket.on('disconnect', onDisconnect);
+        socket.on('connection', onConnection);
+    };
+
+    var onConnection = function () {
+        notify('Socket', 'web connection established');
+    };
+
+    var disconnectSocketWhenPossible = _.debounce(function () {
+        socketDoor.disconnect();
+    }, 1000);
 
     function onPlayer (infos) {
-        console.info('Received fresh player infos', infos);
+        notify('Socket', 'received fresh player infos');
+        console.log(infos);
         var el = document.querySelector('.status strong');
         el.innerText = infos.currentlyPlaying;
         el.classList.remove('loader');
+        disconnectSocketWhenPossible();
     }
 
     function onTheme (theme) {
-        console.info('Received new theme instructions', theme);
-        var el = document.body;
-        el.style.backgroundColor = theme.colors.base;
-        el.style.color = theme.colors.color;
-        el.classList.add('loaded');
+        notify('Socket', 'received new theme instructions');
+        console.log(theme);
+        applyTheme('backgroundColor', theme.colors.base, '[data-theme-background]');
+        applyTheme('color', theme.colors.color, '[data-theme-color]');
+        // el.style.backgroundColor = theme.colors.base;
+        // el.style.color = theme.colors.color;
         injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));
         injectPalette(theme.colors.scale, document.querySelector('.palette .scale'));
+        document.body.classList.add('loaded');
+        disconnectSocketWhenPossible();
+    }
+
+    function applyTheme (property, value, selector) {
+        var els = document.querySelectorAll(selector);
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            el.style[property] = value;
+        }
     }
 
     function injectPalette (palette, el) {
