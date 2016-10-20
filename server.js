@@ -17,7 +17,6 @@ var page = 'web.html';
 var http = require('http');
 var helloColor = require('hello-color').default;
 var bikeShed = require('@jxnblk/bikeshed');
-var html = fs.readFileSync(page).toString();
 var svgPattern = null;
 var svgPatternPath = 'patterns';
 var svgPatternPick = function () {
@@ -73,6 +72,7 @@ var server = http.createServer(function (request, response) {
         response.end(svgPattern);
     } else {
         response.writeHead(200, { 'Content-Type': 'text/html' });
+        var html = fs.readFileSync(page).toString();
         response.end(html);
         sendDynamicValues();
     }
