@@ -48,6 +48,8 @@
             box-shadow: 2px 2px 22px;
             overflow: hidden;
             margin: 15vw;
+            width: 100%;
+            max-width: 400px;
         }
 
         .status, .controls {
@@ -113,6 +115,16 @@
 
             .controls button div:last-child {
                 display: inherit;
+            }
+        }
+
+        @media screen and (min-width: 401px) and (max-width: 500px) {
+            .controls button {
+                flex-direction: column;
+                justify-content: space-between;
+            }
+            .controls button .text {
+                margin: 10px 0 4px;
             }
         }
 
