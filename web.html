@@ -12,61 +12,141 @@
         body {
             font-family: sans-serif;
             text-align: center;
-            background-color: #0d3c36;
-            color: #ebc2c7;
+            background-color: lightskyblue;
+            color: darkslategray;
             background-image: url('pattern.svg');
-            opacity: 0;
-            transition: opacity .3s;
-            width: 280px;
-            padding-top: 80px;
-            margin: auto;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        body.loaded {
-            opacity: 1;
+        body.under-cover {
+            background-image: none;
+        }
+
+        body.under-cover .palette {
+            display: none;
         }
 
         h1 {
-            background-color: rgb(190, 251, 52);
+            background-color: skyblue;
+            color: white;
+            text-shadow: 2px 2px black;
             width: 100%;
             padding: 10px 0;
             margin: 0;
             border-style: solid;
-            border-width: 2px 0;
+            border-width: 12px 0 6px;
         }
 
         .content {
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
             background-color: whitesmoke;
-            border-radius: 200px 0;
-            height: 330px;
+            border-radius: 30px;
             position: relative;
             box-shadow: 2px 2px 22px;
             overflow: hidden;
+            margin: 15vw;
+        }
+
+        .status, .controls {
+            padding: 0 5vw;
         }
 
         .status {
             display: flex;
             flex-direction: column;
-            margin-top: 14px;
+            margin-top: 40px;
         }
 
         .status strong {
-            padding: 15px 0;
+            padding: 10px 0;
         }
 
         .controls {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-around;
-            width: 75%;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        .controls .icon {
-            margin-top: 14px;
-            border: 2px solid #333;
-            padding: 8px 14px;
+        .controls button {
+            padding: 10px;
+            background: none;
+            color: currentColor;
+            outline: none;
+            border-width: 2px;
+            border-style: dashed;
+            position: relative;
+            display: flex;
+            align-items: center;
+            opacity: .6;
+            transition: .4s all;
+            cursor: pointer;
+            animation-duration: 1s;
+            animation-fill-mode: both;
+            font-size: 1.2em;
+            width: 30%;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .controls button .text {
+            margin: 0 10px;
+        }
+
+        .controls button div:last-child {
+            display: none;
+        }
+
+        @media screen and (max-width: 400px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .controls button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .controls button div:last-child {
+                display: inherit;
+            }
+        }
+
+        .controls button:hover {
+            opacity: 1;
+        }
+
+        .controls button.clicked {
+            animation-name: rubberBand;
+        }
+
+        button[data-music-is="good"] {
+            color: darkgreen;
+        }
+
+        button[data-music-is="good"]:hover .icon-heart {
+            animation-name: bounceIn;
+        }
+
+        button[data-music-is="next"] {
+
+        }
+
+        button[data-music-is="next"]:hover .icon-arrow-right {
+            animation-name: shake;
+        }
+
+        button[data-music-is="bad"] {
+            color: darkred;
+        }
+
+        button[data-music-is="bad"]:hover .icon-cross {
+            animation-name: jello;
+            transform-origin: center;
         }
 
         .loader {
@@ -119,6 +199,278 @@
             }
         }
 
+        @-webkit-keyframes bounceIn {
+            from, 20%, 40%, 60%, 80%, to {
+                -webkit-animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+                animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+            }
+
+            0% {
+                opacity: 0;
+                -webkit-transform: scale3d(.3, .3, .3);
+                transform: scale3d(.3, .3, .3);
+            }
+
+            20% {
+                -webkit-transform: scale3d(1.1, 1.1, 1.1);
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+
+            40% {
+                -webkit-transform: scale3d(.9, .9, .9);
+                transform: scale3d(.9, .9, .9);
+            }
+
+            60% {
+                opacity: 1;
+                -webkit-transform: scale3d(1.03, 1.03, 1.03);
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+
+            80% {
+                -webkit-transform: scale3d(.97, .97, .97);
+                transform: scale3d(.97, .97, .97);
+            }
+
+            to {
+                opacity: 1;
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @keyframes bounceIn {
+            from, 20%, 40%, 60%, 80%, to {
+                -webkit-animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+                animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+            }
+
+            0% {
+                opacity: 0;
+                -webkit-transform: scale3d(.3, .3, .3);
+                transform: scale3d(.3, .3, .3);
+            }
+
+            20% {
+                -webkit-transform: scale3d(1.1, 1.1, 1.1);
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+
+            40% {
+                -webkit-transform: scale3d(.9, .9, .9);
+                transform: scale3d(.9, .9, .9);
+            }
+
+            60% {
+                opacity: 1;
+                -webkit-transform: scale3d(1.03, 1.03, 1.03);
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+
+            80% {
+                -webkit-transform: scale3d(.97, .97, .97);
+                transform: scale3d(.97, .97, .97);
+            }
+
+            to {
+                opacity: 1;
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @-webkit-keyframes jello {
+            from, 11.1%, to {
+                -webkit-transform: none;
+                transform: none;
+            }
+
+            22.2% {
+                -webkit-transform: skewX(-12.5deg) skewY(-12.5deg);
+                transform: skewX(-12.5deg) skewY(-12.5deg);
+            }
+
+            33.3% {
+                -webkit-transform: skewX(6.25deg) skewY(6.25deg);
+                transform: skewX(6.25deg) skewY(6.25deg);
+            }
+
+            44.4% {
+                -webkit-transform: skewX(-3.125deg) skewY(-3.125deg);
+                transform: skewX(-3.125deg) skewY(-3.125deg);
+            }
+
+            55.5% {
+                -webkit-transform: skewX(1.5625deg) skewY(1.5625deg);
+                transform: skewX(1.5625deg) skewY(1.5625deg);
+            }
+
+            66.6% {
+                -webkit-transform: skewX(-0.78125deg) skewY(-0.78125deg);
+                transform: skewX(-0.78125deg) skewY(-0.78125deg);
+            }
+
+            77.7% {
+                -webkit-transform: skewX(0.390625deg) skewY(0.390625deg);
+                transform: skewX(0.390625deg) skewY(0.390625deg);
+            }
+
+            88.8% {
+                -webkit-transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+                transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+            }
+        }
+
+        @keyframes jello {
+            from, 11.1%, to {
+                -webkit-transform: none;
+                transform: none;
+            }
+
+            22.2% {
+                -webkit-transform: skewX(-12.5deg) skewY(-12.5deg);
+                transform: skewX(-12.5deg) skewY(-12.5deg);
+            }
+
+            33.3% {
+                -webkit-transform: skewX(6.25deg) skewY(6.25deg);
+                transform: skewX(6.25deg) skewY(6.25deg);
+            }
+
+            44.4% {
+                -webkit-transform: skewX(-3.125deg) skewY(-3.125deg);
+                transform: skewX(-3.125deg) skewY(-3.125deg);
+            }
+
+            55.5% {
+                -webkit-transform: skewX(1.5625deg) skewY(1.5625deg);
+                transform: skewX(1.5625deg) skewY(1.5625deg);
+            }
+
+            66.6% {
+                -webkit-transform: skewX(-0.78125deg) skewY(-0.78125deg);
+                transform: skewX(-0.78125deg) skewY(-0.78125deg);
+            }
+
+            77.7% {
+                -webkit-transform: skewX(0.390625deg) skewY(0.390625deg);
+                transform: skewX(0.390625deg) skewY(0.390625deg);
+            }
+
+            88.8% {
+                -webkit-transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+                transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+            }
+        }
+
+        @-webkit-keyframes rubberBand {
+            from {
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+
+            30% {
+                -webkit-transform: scale3d(1.25, 0.75, 1);
+                transform: scale3d(1.25, 0.75, 1);
+            }
+
+            40% {
+                -webkit-transform: scale3d(0.75, 1.25, 1);
+                transform: scale3d(0.75, 1.25, 1);
+            }
+
+            50% {
+                -webkit-transform: scale3d(1.15, 0.85, 1);
+                transform: scale3d(1.15, 0.85, 1);
+            }
+
+            65% {
+                -webkit-transform: scale3d(.95, 1.05, 1);
+                transform: scale3d(.95, 1.05, 1);
+            }
+
+            75% {
+                -webkit-transform: scale3d(1.05, .95, 1);
+                transform: scale3d(1.05, .95, 1);
+            }
+
+            to {
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @keyframes rubberBand {
+            from {
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+
+            30% {
+                -webkit-transform: scale3d(1.25, 0.75, 1);
+                transform: scale3d(1.25, 0.75, 1);
+            }
+
+            40% {
+                -webkit-transform: scale3d(0.75, 1.25, 1);
+                transform: scale3d(0.75, 1.25, 1);
+            }
+
+            50% {
+                -webkit-transform: scale3d(1.15, 0.85, 1);
+                transform: scale3d(1.15, 0.85, 1);
+            }
+
+            65% {
+                -webkit-transform: scale3d(.95, 1.05, 1);
+                transform: scale3d(.95, 1.05, 1);
+            }
+
+            75% {
+                -webkit-transform: scale3d(1.05, .95, 1);
+                transform: scale3d(1.05, .95, 1);
+            }
+
+            to {
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @-webkit-keyframes shake {
+            from, to {
+                -webkit-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
+            }
+
+            10%, 50%, 90% {
+                -webkit-transform: translate3d(-5px, 0, 0);
+                transform: translate3d(-5px, 0, 0);
+            }
+
+            30%, 70% {
+                -webkit-transform: translate3d(5px, 0, 0);
+                transform: translate3d(5px, 0, 0);
+            }
+        }
+
+        @keyframes shake {
+            from, to {
+                -webkit-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
+            }
+
+            10%, 50%, 90% {
+                -webkit-transform: translate3d(-5px, 0, 0);
+                transform: translate3d(-5px, 0, 0);
+            }
+
+            30%, 70% {
+                -webkit-transform: translate3d(5px, 0, 0);
+                transform: translate3d(5px, 0, 0);
+            }
+        }
+
         .palette {
             display: flex;
             flex-direction: column;
@@ -138,13 +490,50 @@
             flex-grow: 1;
             height: 3vh;
         }
+
+        .icon {
+            display: block;
+            position: relative;
+            line-height: 100%;
+            animation-duration: 1s;
+            animation-fill-mode: both;
+            width: 20px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .icon-heart {
+            font-size: 150%;
+        }
+
+        .icon-heart:after {
+            content: '♡';
+        }
+
+        .icon-arrow-right {
+            height: 18px;
+            font-size: 17px;
+        }
+
+        .icon-arrow-right:after {
+            content: '❯';
+        }
+
+        .icon-cross {
+            height: 24px;
+            font-size: 22px;
+        }
+
+        .icon-cross:after {
+            content: 'x';
+        }
     </style>
 </head>
 <body data-theme-background data-theme-color>
 
 <div class="content">
 
-    <h1 data-theme-background>Musitop</h1>
+    <h1 data-theme-background data-theme-border-color>Musitop</h1>
 
     <div class="status">
         <em>Currently playing</em>
@@ -152,9 +541,21 @@
     </div>
 
     <div class="controls">
-        <div class="icon icon-good">Good</div>
-        <div class="icon icon-next">Next</div>
-        <div class="icon icon-bad">Bad</div>
+        <button data-music-is="good">
+            <div class="icon icon-heart"></div>
+            <div class="text">Good</div>
+            <div class="icon icon-heart"></div>
+        </button>
+        <button data-music-is="next">
+            <div class="icon icon-arrow-right"></div>
+            <div class="text">Next</div>
+            <div class="icon icon-arrow-right"></div>
+        </button>
+        <button data-music-is="bad">
+            <div class="icon icon-cross"></div>
+            <div class="text">Bad</div>
+            <div class="icon icon-cross"></div>
+        </button>
     </div>
 
 </div>
@@ -170,6 +571,27 @@
 
     window.onload = function () {
         connectSocket();
+        handleControls();
+    };
+
+    var handleControls = function () {
+        var ctrls = document.querySelectorAll('.controls button');
+        for (var i = 0; i < ctrls.length; i++) {
+            var ctrl = ctrls[i];
+            ctrl.addEventListener('click', function (event) {
+                var button = event.currentTarget;
+                var musicIs = button.getAttribute('data-music-is') || '';
+                if (musicIs.length) {
+                    socketDoor.emit('music is', musicIs);
+                    button.classList.add('clicked');
+                    setTimeout(function () {
+                        button.classList.remove('clicked');
+                    }, 2000);
+                } else {
+                    notify('Error', 'Cannot say how music is :(', 'error');
+                }
+            });
+        }
     };
 
     var notify = function (action, message, type) {
@@ -184,7 +606,7 @@
     };
 
     var onDisconnect = function () {
-        notify('Socket', 'web side disconnected');
+        notify('Socket', 'client side disconnected');
         // connectSocket();
     };
 
@@ -206,7 +628,7 @@
     };
 
     var connectSocket = function () {
-        notify('Socket', 'web connecting...');
+        notify('Socket', 'client side connecting...');
         var socket = io('http://localhost:404');
         socketDoor = socket;
         socket.on('theme', onTheme);
@@ -214,15 +636,16 @@
         socket.on('music is', onMusicIs);
         socket.on('error', onError);
         socket.on('disconnect', onDisconnect);
-        socket.on('connection', onConnection);
+        socket.on('connect', onConnection);
     };
 
     var onConnection = function () {
-        notify('Socket', 'web connection established');
+        notify('Socket', 'client side connection established');
     };
 
     var disconnectSocketWhenPossible = _.debounce(function () {
         socketDoor.disconnect();
+        connectSocket();
     }, 1000);
 
     function onPlayer (infos) {
@@ -239,6 +662,7 @@
         console.log(theme);
         applyTheme('backgroundColor', theme.colors.base, '[data-theme-background]');
         applyTheme('color', theme.colors.color, '[data-theme-color]');
+        applyTheme('borderColor', theme.colors.color, '[data-theme-border-color]');
         // el.style.backgroundColor = theme.colors.base;
         // el.style.color = theme.colors.color;
         injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));

@@ -48,21 +48,26 @@ var pick = function (items, doExtract) {
     return item;
 };
 var sendDynamicValues = function () {
-    if (!socketDoor) {
-        notify('Error', 'Cannot send dynamic values without socket door');
+    if (!updatedData) {
+        notify('Info', 'No new data to send');
         return;
     }
-    notify('Socket', 'Sending dynamic values trough socket door');
-    socketDoor.emit('theme', {
-        colors: helloColor(bikeShed(), {
-            saturation: 1 / 8,
-            contrast: 3,
-            hues: 5
-        })
+    notify('Socket', 'Sending dynamic values to clients');
+    var colors = helloColor(bikeShed(), {
+        saturation: 1 / 8,
+        contrast: 3,
+        hues: 5
     });
-    socketDoor.emit('player', {
+    // while under cover
+    // colors.base = '#eee';
+    // colors.color = '#ddd';
+    io.emit('theme', {
+        colors: colors
+    });
+    io.emit('player', {
         currentlyPlaying: fileName(song)
     });
+    updatedData = false;
 };
 var server = http.createServer(function (request, response) {
     var url = request.url;
@@ -74,6 +79,7 @@ var server = http.createServer(function (request, response) {
         response.writeHead(200, { 'Content-Type': 'text/html' });
         var html = fs.readFileSync(page).toString();
         response.end(html);
+        updatedData = true;
         sendDynamicValues();
     }
 });
@@ -83,7 +89,9 @@ server.listen(port, function () {
 // SOCKET
 var onDisconnect = function () {
     notify('Socket', 'server side disconnected');
-    // connectSocket();
+};
+var onConnection = function () {
+    notify('Socket', 'server side connection established');
 };
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
@@ -100,22 +108,22 @@ var onMusicIs = function (musicIs) {
     } else {
         notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
     }
-    sendDynamicValues();
 };
 var onError = function () {
     notify('Error', 'Client error, see logs', 'error');
     console.log(e);
 };
-var socketDoor = null;
+var updatedData = false;
+var io = require('socket.io')(server);
 var connectSocket = function () {
     notify('Socket', 'server connecting...');
-    var io = require('socket.io')(server);
     io.on('connection', function (socket) {
-        notify('Socket', 'server socket started !');
-        socketDoor = socket;
+        notify('Socket', 'server side connection detected');
         socket.on('music is', onMusicIs);
         socket.on('error', onError);
         socket.on('disconnect', onDisconnect);
+        socket.on('connect', onConnection);
+        sendDynamicValues();
     });
 };
 connectSocket();
@@ -184,6 +192,7 @@ function playNext () {
     setTimeout(function () {
         notify('Remaining', playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
+        updatedData = true;
         sendDynamicValues();
     }, 1100);
 }
