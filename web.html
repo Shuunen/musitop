@@ -73,11 +73,25 @@
             flex-direction: column;
             padding-top: 40px;
             border-radius: 25px;
-            box-shadow: 0px -20px 0px 5px;
+            box-shadow: 0px -14px 20px -12px #333, 0px -20px 0px 5px;
         }
 
         .status strong {
             padding: 10px 0;
+        }
+
+        picture {
+            max-height: 330px;
+            height: 90vw;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-width: 5px;
+            border-style: double;
+            border-radius: 0 35px 0;
+            background-color: currentColor;
         }
 
         .controls {
@@ -190,7 +204,7 @@
             content: "";
             width: 40px;
             position: absolute;
-            top: 110%;
+            top: 55%;
             left: 40%;
             margin: -20px 0 0 -20px;
             -webkit-transition: all .75s ease 0s;
@@ -572,6 +586,7 @@
 
     <div class="status">
         <em>Currently playing</em>
+        <picture class="loader"></picture>
         <strong class="loader">loading...</strong>
     </div>
 
@@ -675,6 +690,7 @@
         socketDoor = socket;
         socket.on('theme', onTheme);
         socket.on('player', onPlayer);
+        socket.on('metadata', onMetadata);
         socket.on('music is', onMusicIs);
         socket.on('error', onError);
         socket.on('disconnect', onDisconnect);
@@ -698,6 +714,27 @@
         el.classList.remove('loader');
         disconnectSocketWhenPossible();
     }
+
+    function onMetadata (metadata) {
+        notify('Socket', 'received fresh metadata infos');
+        console.log(metadata);
+
+        var picture = document.querySelector('picture');
+        var dataUrl = arrayBufferToDataUrl(metadata.picture[0].data);
+        if (dataUrl) {
+            picture.style.backgroundImage = 'url(' + dataUrl + ')';
+            picture.classList.remove('loader');
+        }
+        disconnectSocketWhenPossible();
+    }
+
+    var arrayBufferToDataUrl = function (arrayBuffer) {
+        // Obtain a blob: URL for the image data.
+        var arrayBufferView = new Uint8Array(arrayBuffer);
+        var blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+        var urlCreator = window.URL || window.webkitURL;
+        return urlCreator.createObjectURL(blob);
+    };
 
     function onTheme (theme) {
         notify('Socket', 'received new theme instructions');

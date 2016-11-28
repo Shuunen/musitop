@@ -11,12 +11,13 @@
  */
 var fs = require('fs');
 var path = require('path');
+var musicMetadata = require('musicmetadata');
 var port = 404;
 // WEB
 var page = 'web.html';
 var http = require('http');
 var themes = ['lightskyblue:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#2C8182:#966900',
-    '#DFEDF3:#525252', '#D3D5D6:#1B69A3','#E2E0E0:#586172'];
+    '#DFEDF3:#525252', '#D3D5D6:#1B69A3', '#E2E0E0:#586172'];
 var svgPattern = null;
 var svgPatternPath = 'patterns';
 var svgPatternPick = function () {
@@ -60,6 +61,15 @@ var sendDynamicValues = function () {
     });
     io.emit('player', {
         currentlyPlaying: fileName(song)
+    });
+    var readableStream = fs.createReadStream(song);
+    musicMetadata(readableStream, function (err, metadata) {
+        if (err) {
+            notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
+            throw new Error(err);
+        }
+        io.emit('metadata', metadata);
+        readableStream.close();
     });
     updatedData = false;
 };
