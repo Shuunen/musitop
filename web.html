@@ -7,6 +7,7 @@
     <meta name="description" content=""/>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Fugaz+One|Amatic+SC:400,700" rel="stylesheet">
     <style>
 
         html, body {
@@ -14,7 +15,8 @@
         }
 
         body {
-            font-family: sans-serif;
+            font-family: 'Amatic SC', sans-serif;
+            font-size: 30px;
             text-align: center;
             background-color: lightskyblue;
             color: darkslategray;
@@ -45,9 +47,10 @@
         header h1 {
             text-shadow: 2px 2px black, -1px -1px 5px black, -2px 2px 4px black;
             color: white;
-            letter-spacing: 1px;
-            font-size: 2.7em;
+            letter-spacing: 2px;
+            font-size: 2em;
             margin: 0.4em;
+            font-family: 'Fugaz One', sans-serif;
         }
 
         .content {
@@ -61,11 +64,11 @@
             width: 100%;
             max-width: 400px;
             transition: color 1s;
-            box-shadow: 2px 2px 10px 3px #999;
+            box-shadow: 2px 2px 10px 3px #666;
         }
 
         .status, .controls {
-            padding: 0 5vw;
+            padding: 0 30px;
         }
 
         .status {
@@ -105,7 +108,7 @@
             box-shadow: 0px 20px 0px 5px;
         }
 
-        .controls button {
+        .controls .button {
             padding: 10px;
             background: none;
             color: currentColor;
@@ -121,16 +124,18 @@
             animation-duration: 1s;
             animation-fill-mode: both;
             font-size: 1.2em;
-            width: 30%;
+            width: 25%;
             overflow: hidden;
             justify-content: center;
         }
 
-        .controls button .text {
+        .controls .button .text {
             margin: 0 10px;
+            font-weight: bold;
+            font-family: 'Amatic SC', sans-serif;
         }
 
-        .controls button div:last-child {
+        .controls .button div:last-child {
             display: none;
         }
 
@@ -139,58 +144,59 @@
                 flex-direction: column;
             }
 
-            .controls button {
+            .controls .button {
                 width: 100%;
                 margin-bottom: 10px;
+                max-height: 20px;
             }
 
-            .controls button div:last-child {
+            .controls .button div:last-child {
                 display: inherit;
             }
         }
 
         @media screen and (min-width: 401px) and (max-width: 500px) {
-            .controls button {
+            .controls .button {
                 flex-direction: column;
                 justify-content: space-between;
             }
 
-            .controls button .text {
+            .controls .button .text {
                 margin: 10px 0 4px;
             }
         }
 
-        .controls button:hover {
+        .controls .button:hover {
             opacity: 1;
         }
 
-        .controls button.clicked {
+        .controls .button.clicked {
             animation-name: rubberBand;
         }
 
         .content[data-control-hover="good"],
-        button[data-music-is="good"] {
+        .button[data-music-is="good"] {
             color: darkgreen;
         }
 
-        button[data-music-is="good"]:hover .icon-heart {
+        .button[data-music-is="good"]:hover .icon-heart {
             animation-name: bounceIn;
         }
 
-        button[data-music-is="next"] {
+        .button[data-music-is="next"] {
 
         }
 
-        button[data-music-is="next"]:hover .icon-arrow-right {
+        .button[data-music-is="next"]:hover .icon-arrow-right {
             animation-name: shake;
         }
 
         .content[data-control-hover="bad"],
-        button[data-music-is="bad"] {
+        .button[data-music-is="bad"] {
             color: darkred;
         }
 
-        button[data-music-is="bad"]:hover .icon-cross {
+        .button[data-music-is="bad"]:hover .icon-cross {
             animation-name: jello;
             transform-origin: center;
         }
@@ -546,11 +552,12 @@
             animation-fill-mode: both;
             width: 20px;
             flex-shrink: 0;
-            overflow: hidden;
+            font-family: sans-serif;
         }
 
         .icon-heart {
-            font-size: 150%;
+            font-size: 38px;
+            transform: rotate(-2deg);
         }
 
         .icon-heart:after {
@@ -558,8 +565,8 @@
         }
 
         .icon-arrow-right {
-            height: 18px;
-            font-size: 17px;
+            font-size: 30px;
+            transform: rotate(3deg);
         }
 
         .icon-arrow-right:after {
@@ -567,8 +574,8 @@
         }
 
         .icon-cross {
-            height: 24px;
-            font-size: 22px;
+            font-size: 42px;
+            transform: rotate(-2deg);
         }
 
         .icon-cross:after {
@@ -591,21 +598,21 @@
     </div>
 
     <div class="controls">
-        <button data-music-is="good">
+        <div class="button" data-music-is="good">
             <div class="icon icon-heart"></div>
             <div class="text">Good</div>
             <div class="icon icon-heart"></div>
-        </button>
-        <button data-music-is="next">
+        </div>
+        <div class="button" data-music-is="next">
             <div class="icon icon-arrow-right"></div>
             <div class="text">Next</div>
             <div class="icon icon-arrow-right"></div>
-        </button>
-        <button data-music-is="bad">
+        </div>
+        <div class="button" data-music-is="bad">
             <div class="icon icon-cross"></div>
             <div class="text">Bad</div>
             <div class="icon icon-cross"></div>
-        </button>
+        </div>
     </div>
 
 </div>
@@ -625,7 +632,7 @@
     };
 
     var handleControls = function () {
-        var ctrls = document.querySelectorAll('.controls button');
+        var ctrls = document.querySelectorAll('.controls .button');
         for (var i = 0; i < ctrls.length; i++) {
             var ctrl = ctrls[i];
             ctrl.onclick = ctrl.onmouseenter = ctrl.onmouseleave = handleControlsEvent;
