@@ -47,7 +47,7 @@
             color: white;
             letter-spacing: 1px;
             font-size: 2.7em;
-            margin: 0.3em;
+            margin: 0.4em;
         }
 
         .content {
@@ -61,6 +61,7 @@
             width: 100%;
             max-width: 400px;
             transition: color 1s;
+            box-shadow: 2px 2px 10px 3px #999;
         }
 
         .status, .controls {
@@ -701,11 +702,9 @@
     function onTheme (theme) {
         notify('Socket', 'received new theme instructions');
         console.log(theme);
-        applyTheme('backgroundColor', theme.colors.base, '[data-theme-background]');
-        applyTheme('color', theme.colors.color, '[data-theme-color]');
-        applyTheme('borderColor', theme.colors.color, '[data-theme-border-color]');
-        injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));
-        injectPalette(theme.colors.scale, document.querySelector('.palette .scale'));
+        applyTheme('backgroundColor', theme.background, '[data-theme-background]');
+        applyTheme('color', theme.color, '[data-theme-color]');
+        applyTheme('borderColor', theme.color, '[data-theme-border-color]');
         document.body.classList.add('loaded');
         disconnectSocketWhenPossible();
     }
@@ -715,14 +714,6 @@
         for (var i = 0; i < els.length; i++) {
             var el = els[i];
             el.style[property] = value;
-        }
-    }
-
-    function injectPalette (palette, el) {
-        el.innerHTML = '';
-        for (var i = 0; i < palette.length; i++) {
-            var color = palette[i];
-            el.innerHTML += '<div class="color" style="background-color:' + color + '"></div>';
         }
     }
 </script>

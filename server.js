@@ -15,8 +15,8 @@ var port = 404;
 // WEB
 var page = 'web.html';
 var http = require('http');
-var helloColor = require('hello-color').default;
-var bikeShed = require('@jxnblk/bikeshed');
+var themes = ['lightskyblue:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#2C8182:#966900',
+    '#DFEDF3:#525252', '#D3D5D6:#1B69A3','#E2E0E0:#586172'];
 var svgPattern = null;
 var svgPatternPath = 'patterns';
 var svgPatternPick = function () {
@@ -53,16 +53,10 @@ var sendDynamicValues = function () {
         return;
     }
     notify('Socket', 'Sending dynamic values to clients');
-    var colors = helloColor(bikeShed(), {
-        saturation: 1 / 8,
-        contrast: 3,
-        hues: 5
-    });
-    // while under cover
-    // colors.base = '#eee';
-    // colors.color = '#ddd';
+    var theme = pick(themes).split(':');
     io.emit('theme', {
-        colors: colors
+        background: theme[0],
+        color: theme[1]
     });
     io.emit('player', {
         currentlyPlaying: fileName(song)
