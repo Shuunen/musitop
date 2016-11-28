@@ -9,6 +9,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <style>
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: sans-serif;
             text-align: center;
@@ -16,8 +20,11 @@
             color: darkslategray;
             background-image: url('pattern.svg');
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             overflow: hidden;
+            box-shadow: inset 2px 2px 40px black;
+            margin: 0;
         }
 
         body.under-cover {
@@ -28,28 +35,32 @@
             display: none;
         }
 
-        h1 {
-            background-color: skyblue;
-            color: white;
-            text-shadow: 2px 2px black;
+        header {
+            background-color: currentColor;
             width: 100%;
             padding: 10px 0;
             margin: 0;
-            border-style: solid;
-            border-width: 12px 0 6px;
+        }
+
+        header h1 {
+            text-shadow: 2px 2px black, -1px -1px 5px black, -2px 2px 4px black;
+            color: white;
+            letter-spacing: 1px;
+            font-size: 2.7em;
+            margin: 0.3em;
         }
 
         .content {
             display: flex;
             flex-direction: column;
             background-color: whitesmoke;
-            border-radius: 30px;
+            border-radius: 25px;
             position: relative;
-            box-shadow: 2px 2px 22px;
             overflow: hidden;
             margin: 15vw;
             width: 100%;
             max-width: 400px;
+            transition: color 1s;
         }
 
         .status, .controls {
@@ -59,7 +70,9 @@
         .status {
             display: flex;
             flex-direction: column;
-            margin-top: 40px;
+            padding-top: 40px;
+            border-radius: 25px;
+            box-shadow: 0px -20px 0px 5px;
         }
 
         .status strong {
@@ -72,6 +85,9 @@
             justify-content: space-around;
             margin-top: 20px;
             margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-radius: 25px;
+            box-shadow: 0px 20px 0px 5px;
         }
 
         .controls button {
@@ -123,6 +139,7 @@
                 flex-direction: column;
                 justify-content: space-between;
             }
+
             .controls button .text {
                 margin: 10px 0 4px;
             }
@@ -136,6 +153,7 @@
             animation-name: rubberBand;
         }
 
+        .content[data-control-hover="good"],
         button[data-music-is="good"] {
             color: darkgreen;
         }
@@ -152,6 +170,7 @@
             animation-name: shake;
         }
 
+        .content[data-control-hover="bad"],
         button[data-music-is="bad"] {
             color: darkred;
         }
@@ -490,6 +509,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
+            z-index: -1;
         }
 
         .palette > div {
@@ -543,9 +563,11 @@
 </head>
 <body data-theme-background data-theme-color>
 
-<div class="content">
+<div class="content" data-control-hover>
 
-    <h1 data-theme-background data-theme-border-color>Musitop</h1>
+    <header>
+        <h1>Musitop</h1>
+    </header>
 
     <div class="status">
         <em>Currently playing</em>
@@ -590,19 +612,27 @@
         var ctrls = document.querySelectorAll('.controls button');
         for (var i = 0; i < ctrls.length; i++) {
             var ctrl = ctrls[i];
-            ctrl.addEventListener('click', function (event) {
-                var button = event.currentTarget;
-                var musicIs = button.getAttribute('data-music-is') || '';
-                if (musicIs.length) {
-                    socketDoor.emit('music is', musicIs);
-                    button.classList.add('clicked');
-                    setTimeout(function () {
-                        button.classList.remove('clicked');
-                    }, 2000);
-                } else {
-                    notify('Error', 'Cannot say how music is :(', 'error');
-                }
-            });
+            ctrl.onclick = ctrl.onmouseenter = ctrl.onmouseleave = handleControlsEvent;
+        }
+    };
+
+    var handleControlsEvent = function (event) {
+        var button = event.currentTarget;
+        var musicIs = button.getAttribute('data-music-is') || '';
+        if (musicIs.length) {
+            if (event.type === 'click') {
+                socketDoor.emit('music is', musicIs);
+                button.classList.add('clicked');
+                setTimeout(function () {
+                    button.classList.remove('clicked');
+                }, 2000);
+            } else if (event.type === 'mouseenter' || event.type === 'mouseleave') {
+                document.querySelector('body > .content').setAttribute('data-control-hover', (event.type === 'mouseenter' ? musicIs : ''));
+            } else {
+                notify('Info', 'catched event "' + event.type + '" on button but not handled yet');
+            }
+        } else {
+            notify('Error', 'Cannot say how music is :(', 'error');
         }
     };
 
@@ -619,7 +649,6 @@
 
     var onDisconnect = function () {
         notify('Socket', 'client side disconnected');
-        // connectSocket();
     };
 
     var onError = function () {
@@ -675,8 +704,6 @@
         applyTheme('backgroundColor', theme.colors.base, '[data-theme-background]');
         applyTheme('color', theme.colors.color, '[data-theme-color]');
         applyTheme('borderColor', theme.colors.color, '[data-theme-border-color]');
-        // el.style.backgroundColor = theme.colors.base;
-        // el.style.color = theme.colors.color;
         injectPalette(theme.colors.hues, document.querySelector('.palette .hues'));
         injectPalette(theme.colors.scale, document.querySelector('.palette .scale'));
         document.body.classList.add('loaded');
