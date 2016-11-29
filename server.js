@@ -14,22 +14,20 @@ var path = require('path');
 var musicMetadata = require('musicmetadata');
 var port = 404;
 // WEB
-var page = 'web.html';
 var http = require('http');
-var themes = ['lightskyblue:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#2C8182:#966900',
-    '#DFEDF3:#525252', '#D3D5D6:#1B69A3', '#E2E0E0:#586172'];
-var svgPattern = null;
+var themes = ['papayawhip:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#DFEDF3:#525252', '#D3D5D6:#1B69A3',
+    '#E2E0E0:#586172'];
+var svgPatterns = [];
 var svgPatternPath = 'patterns';
-var svgPatternPick = function () {
-    fs.readdir(svgPatternPath, function (err, files) {
-        if (err) {
-            notify('Error', 'Fail at reading patterns path, see logs', 'error');
-            throw new Error(err);
-        }
-        svgPattern = fs.readFileSync(svgPatternPath + '/' + pick(files)).toString();
+fs.readdir(svgPatternPath, function (err, files) {
+    if (err) {
+        notify('Error', 'Fail at reading patterns path, see logs', 'error');
+        throw new Error(err);
+    }
+    files.forEach(function (fileName) {
+        svgPatterns.push(svgPatternPath + '/' + fileName);
     });
-};
-svgPatternPick();
+});
 var numberBetween = function (min, max) {
     return Math.floor((Math.random() * ((max - min) + 1)) + min);
 };
@@ -48,43 +46,68 @@ var pick = function (items, doExtract) {
     item = doExtract ? items.splice(index, 1)[0] : items[index];
     return item;
 };
-var sendDynamicValues = function () {
+var sendDynamicValues = function (bForce) {
+    if (bForce) {
+        updatedData = true;
+    }
     if (!updatedData) {
-        notify('Info', 'No new data to send');
+        notify('info', 'no new data to send');
         return;
     }
-    notify('Socket', 'Sending dynamic values to clients');
+    // notify('info', 'sending dynamic values to clients');
     var theme = pick(themes).split(':');
     io.emit('theme', {
         background: theme[0],
-        color: theme[1]
+        color: theme[1],
+        pattern: pick(svgPatterns)
     });
     io.emit('player', {
         currentlyPlaying: fileName(song)
     });
-    var readableStream = fs.createReadStream(song);
-    musicMetadata(readableStream, function (err, metadata) {
-        if (err) {
-            notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
-            throw new Error(err);
-        }
-        io.emit('metadata', metadata);
-        readableStream.close();
-    });
+    io.emit('metadata', metadata);
     updatedData = false;
 };
 var server = http.createServer(function (request, response) {
+
+    var code = 200;
+    var contentType = '';
     var url = request.url;
-    console.log('url requested : ' + url);
-    if (url.indexOf('svg') !== -1) {
-        response.writeHead(200, { 'Content-Type': 'image/svg+xml' });
-        response.end(svgPattern);
+
+    if (url === '/' || url.indexOf('/v') === 0) {
+        contentType = 'text/html';
+        var match = url.match(/^\/(v)?(\d)?/);
+        var design = (match && match[2] ? match[2] : 1);
+        url = 'layouts/v' + design + '.html';
+    } else if (url.indexOf('.svg') !== -1) {
+        contentType = 'image/svg+xml';
+    } else if (url.indexOf('.js') !== -1) {
+        contentType = 'application/javascript';
     } else {
-        response.writeHead(200, { 'Content-Type': 'text/html' });
-        var html = fs.readFileSync(page).toString();
-        response.end(html);
-        updatedData = true;
-        sendDynamicValues();
+        code = 404;
+    }
+
+    if (code !== 404) {
+        if (url[0] === '/') {
+            url = url.substr(1);
+        }
+        var fileStat = fs.statSync(url);
+        if (fileStat.isFile()) {
+            response.writeHead(code, { 'Content-Type': contentType });
+            // notify('Info', 'router serve file : ' + url);
+            var file = fs.readFileSync(url).toString();
+            response.end(file);
+            if (contentType === 'text/html') {
+                updatedData = true;
+            }
+        } else {
+            code = 404;
+        }
+    }
+
+    if (code === 404) {
+        response.writeHead(code, { 'Content-Type': 'text/plain' });
+        notify('Error', 'router cannot serve file : ' + url);
+        response.end('file or resource not found :\'(');
     }
 });
 server.listen(port, function () {
@@ -156,6 +179,7 @@ var playlist = [];
 var song = '';
 var player = null;
 var keep = false;
+var metadata = null;
 
 function playFolder () {
     var musicPath = config.get('musicPath');
@@ -192,13 +216,25 @@ function playNext () {
     keep = false;
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
+    getMetadata();
     playSong();
     setTimeout(function () {
         notify('Remaining', playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
-        updatedData = true;
-        sendDynamicValues();
+        sendDynamicValues(true);
     }, 1100);
+}
+
+function getMetadata () {
+    var readableStream = fs.createReadStream(song);
+    musicMetadata(readableStream, function (err, meta) {
+        if (err) {
+            notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
+            throw new Error(err);
+        }
+        metadata = meta;
+        readableStream.close();
+    });
 }
 
 function keepSong () {
