@@ -72,12 +72,11 @@ var server = http.createServer(function (request, response) {
     var code = 200;
     var contentType = '';
     var url = request.url;
+    var match = url.match(/^\/(v)?(\d)?/);
 
-    if (url === '/' || url.indexOf('/v') === 0) {
+    if (url === '/' || (match && match[2])) {
         contentType = 'text/html';
-        var match = url.match(/^\/(v)?(\d)?/);
-        var design = (match && match[2] ? match[2] : 1);
-        url = 'layouts/v' + design + '.html';
+        url = 'layouts/v' + match[2] + '.html';
     } else if (url.indexOf('.svg') !== -1) {
         contentType = 'image/svg+xml';
     } else if (url.indexOf('.js') !== -1) {
