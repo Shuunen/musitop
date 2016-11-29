@@ -98,17 +98,56 @@ function onMetadata (metadata) {
     notify('Socket', 'received fresh metadata infos');
     console.log(metadata);
 
-    var picture = document.querySelector('picture');
-    if (picture) {
-        var dataUrl = arrayBufferToDataUrl(metadata.picture[0].data);
-        if (dataUrl) {
-            picture.style.backgroundImage = 'url(' + dataUrl + ')';
-            picture.classList.remove('loader');
+    injectData(metadata.albumartist[0], '[data-artist]');
+    injectData(metadata.title, '[data-title]');
+    // specific process for covers
+    var dataUrl = arrayBufferToDataUrl(metadata.picture[0].data);
+    if (dataUrl) {
+        var els = document.querySelectorAll('[data-cover]');
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            var type = el.getAttribute('data-cover');
+            if (type === 'background') {
+                el.style.backgroundImage = 'url(' + dataUrl + ')';
+            } else if (type === 'src') {
+                el.src = dataUrl;
+                el.onload = function () {
+                    notify('info', 'cover image loaded');
+                    var el = document.querySelectorAll('[data-cover="gradient"]');
+                    if (el) {
+                        Grade(el);
+                        var colors = document.body.style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
+                        if (colors.length === 2) {
+                            notify('info', 'got colors from cover');
+                            console.log(colors);
+                            applyTheme('backgroundColor', colors[0], '[data-background-primary]');
+                            applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
+                            applyTheme('color', colors[0], '[data-color-primary]');
+                            applyTheme('color', colors[1], '[data-color-secondary]');
+                        } else {
+                            notify('error', 'did not retrieved primary & secondary colors from cover');
+                        }
+                    }
+                }
+            }
+            el.classList.remove('loader');
+        }
+        if (!els) {
+            notify('warning', 'no picture to populate');
         }
     } else {
-        notify('warning', 'no picture to populate');
+        notify('warning', 'no cover embedded in music');
     }
 }
+
+var injectData = function (value, selector) {
+    var els = document.querySelectorAll(selector);
+    for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        el.innerText = value;
+        el.classList.remove('loader');
+    }
+};
 
 var arrayBufferToDataUrl = function (arrayBuffer) {
     // Obtain a blob: URL for the image data.
@@ -124,7 +163,7 @@ function onTheme (theme) {
     applyTheme('backgroundColor', theme.background, '[data-theme-background]');
     applyTheme('color', theme.color, '[data-theme-color]');
     applyTheme('borderColor', theme.color, '[data-theme-border-color]');
-    document.body.background = theme.pattern;
+    applyTheme('background', theme.pattern, '[data-theme-pattern]');
     document.body.classList.add('loaded');
 }
 
@@ -132,6 +171,10 @@ function applyTheme (property, value, selector) {
     var els = document.querySelectorAll(selector);
     for (var i = 0; i < els.length; i++) {
         var el = els[i];
-        el.style[property] = value;
+        if (property === 'background') {
+            el[property] = value;
+        } else {
+            el.style[property] = value;
+        }
     }
 }

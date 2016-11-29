@@ -7,8 +7,9 @@
     <meta name="description" content=""/>
     <script src="vendors/socket-io-slim_171.js"></script>
     <script src="vendors/underscore_183.js"></script>
-    <script src="vendors/colorify_103.js"></script>
+    <script src="vendors/grade_101.js"></script>
     <script src="scripts/web.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Rock+Salt|Satisfy" rel="stylesheet">
     <style>
 
         html, body {
@@ -16,25 +17,106 @@
         }
 
         body {
-            font-family: sans-serif;
+            font-family: 'Satisfy', sans-serif;
             font-size: 20px;
             text-align: center;
             color: white;
             background-color: lightsalmon;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            align-items: center;
+            box-shadow: inset 2px 2px 40px #333;
+            margin: 0;
         }
 
+        .player {
+            display: flex;
+            flex-direction: column;
+            width: 550px;
+            height: 350px;
+            overflow: hidden;
+            border-radius: 20px;
+            top: -30px;
+            position: relative;
+            align-items: flex-start;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0px 0px 20px 1px #333, 0px 11px 1px #333;
+        }
+
+        .player .cover {
+            position: absolute;
+            top: 23px;
+            left: 130px;
+            height: 310px;
+            z-index: 0;
+        }
+
+        .player .cover.blur {
+            left: 0;
+            top: 0;
+            -webkit-filter: blur(10px);
+            height: auto;
+            width: 100%;
+        }
+
+        .player [data-artist] {
+            margin-top: auto;
+            font-size: 30px;
+            margin-bottom: 4px;
+        }
+
+        .player [data-title],
+        .player [data-artist] {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px 10px 40px;
+            margin-left: -30px;
+            text-shadow: 1px 1px 1px black, 0px 0px 4px white;
+            border-radius: 0 5px 5px 0;
+            /*box-shadow: inset 8px 0px 18px -7px whitesmoke;*/
+            color: whitesmoke;
+            z-index: 10;
+        }
+
+        .player-border {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            box-shadow: inset 2px 2px 12px whitesmoke;
+            z-index: 20;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+        }
+
+        footer h1 {
+            -webkit-filter: invert(1) opacity(0.1);
+            font-family: 'Rock Salt', sans-serif;
+            letter-spacing: 1px;
+            font-size: 2.6em;
+            text-shadow: 1px 3px 1px black, -1px -1px 1px white;
+        }
     </style>
 </head>
-<body>
+<body data-cover="gradient">
 
 <div class="player">
-    <div class="icon icon-heart"></div>
-    <div class="artist">Tycho</div>
-    <div class="title">Crystal brake</div>
+    <div data-music-is="good" class="icon icon-heart"></div>
+    <strong data-artist>Tycho</strong>
+    <div data-title>Crystal brake</div>
+    <img class="loader cover blur" data-cover="src"/>
+    <img class="loader cover" data-cover="src" alt="song cover"/>
+    <div class="player-border"></div>
 </div>
 
 <footer>
-    <h1>Musitop</h1>
+    <h1 data-color-primary>Musitop</h1>
 </footer>
 
 </body>
