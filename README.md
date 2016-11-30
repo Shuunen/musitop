@@ -36,7 +36,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 * handle case when no music left in input folder
 * handle case when no music left in playlist
-* metadata always give duration to 0
+* send timestamp to client when music started to play, so the progress bar will be accurate
 * make musitop works under linux
 * add links in thanks
 * add a gif demo usage

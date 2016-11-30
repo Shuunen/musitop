@@ -225,7 +225,7 @@ function playNext () {
 
 function getMetadata () {
     var readableStream = fs.createReadStream(song);
-    musicMetadata(readableStream, function (err, meta) {
+    musicMetadata(readableStream, { duration: true }, function (err, meta) {
         if (err) {
             notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
             throw new Error(err);

@@ -94,6 +94,19 @@ function onMetadata (metadata) {
 
     if (!metadata.duration) {
         notify('warn', 'duration not specified (' + metadata.duration + ')');
+    } else {
+        var secondTotal = Math.round(metadata.duration);
+        var secondLeft = secondTotal;
+        var progressBar = document.querySelector('.progress-bar-inner');
+        var updateProgressBar = setInterval(function () {
+            secondLeft--;
+            var percentDone = Math.round(10000 - (secondLeft / secondTotal * 10000)) / 100;
+            console.log('updateProgressBar, secondLeft : ' + percentDone + '%');
+            progressBar.style.width = percentDone + '%';
+            if (percentDone > 99) {
+                clearInterval(updateProgressBar);
+            }
+        }, 1000);
     }
 
     injectData(metadata.albumartist[0], '[data-artist]');
