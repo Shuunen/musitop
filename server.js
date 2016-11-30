@@ -61,9 +61,6 @@ var sendDynamicValues = function (bForce) {
         color: theme[1],
         pattern: pick(svgPatterns)
     });
-    io.emit('player', {
-        currentlyPlaying: fileName(song)
-    });
     io.emit('metadata', metadata);
     updatedData = false;
 };
@@ -79,6 +76,8 @@ var server = http.createServer(function (request, response) {
         url = 'layouts/v' + match[2] + '.html';
     } else if (url.indexOf('.svg') !== -1) {
         contentType = 'image/svg+xml';
+    } else if (url.indexOf('.png') !== -1) {
+        contentType = 'image/png';
     } else if (url.indexOf('.js') !== -1) {
         contentType = 'application/javascript';
     } else {

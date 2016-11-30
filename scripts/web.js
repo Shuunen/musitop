@@ -6,7 +6,7 @@ window.onload = function () {
 };
 
 var handleControls = function () {
-    var ctrls = document.querySelectorAll('.controls .button');
+    var ctrls = document.querySelectorAll('[data-music-is]');
     for (var i = 0; i < ctrls.length; i++) {
         var ctrl = ctrls[i];
         ctrl.onclick = ctrl.onmouseenter = ctrl.onmouseleave = handleControlsEvent;
@@ -24,7 +24,10 @@ var handleControlsEvent = function (event) {
                 button.classList.remove('clicked');
             }, 2000);
         } else if (event.type === 'mouseenter' || event.type === 'mouseleave') {
-            document.querySelector('body > .content').setAttribute('data-control-hover', (event.type === 'mouseenter' ? musicIs : ''));
+            var el = document.querySelector('[data-control-hover]');
+            if (el) {
+                el.setAttribute('data-control-hover', (event.type === 'mouseenter' ? musicIs : ''));
+            }
         } else {
             notify('Info', 'catched event "' + event.type + '" on button but not handled yet');
         }
@@ -37,11 +40,15 @@ var notify = function (action, message, type) {
     if (type) {
         // notify client side
     }
-    // in order to align logs :p
-    while (action.length < 9) {
-        action += ' ';
+    if (console[action]) {
+        console[action](message);
+    } else {
+        // in order to align logs :p
+        while (action.length < 9) {
+            action += ' ';
+        }
+        console.log(action + ' : ' + message);
     }
-    console.log(action + ' : ' + message);
 };
 
 var onDisconnect = function () {
@@ -70,7 +77,6 @@ var connectSocket = function () {
     var socket = io('http://localhost:404');
     socketDoor = socket;
     socket.on('theme', onTheme);
-    socket.on('player', onPlayer);
     socket.on('metadata', onMetadata);
     socket.on('music is', onMusicIs);
     socket.on('error', onError);
@@ -82,21 +88,13 @@ var onConnection = function () {
     notify('Socket', 'client side connection init');
 };
 
-function onPlayer (infos) {
-    notify('Socket', 'received fresh player infos');
-    console.log(infos);
-    var el = document.querySelector('.status strong');
-    if (el) {
-        el.innerText = infos.currentlyPlaying;
-        el.classList.remove('loader');
-    } else {
-        notify('warning', 'no status to populate');
-    }
-}
-
 function onMetadata (metadata) {
     notify('Socket', 'received fresh metadata infos');
     console.log(metadata);
+
+    if (!metadata.duration) {
+        notify('warn', 'duration not specified (' + metadata.duration + ')');
+    }
 
     injectData(metadata.albumartist[0], '[data-artist]');
     injectData(metadata.title, '[data-title]');
@@ -114,7 +112,7 @@ function onMetadata (metadata) {
                 el.onload = function () {
                     notify('info', 'cover image loaded');
                     var el = document.querySelectorAll('[data-cover="gradient"]');
-                    if (el) {
+                    if (el.length) {
                         Grade(el);
                         var colors = document.body.style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
                         if (colors && colors.length === 2) {
