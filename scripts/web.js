@@ -117,7 +117,7 @@ function onMetadata (metadata) {
                     if (el) {
                         Grade(el);
                         var colors = document.body.style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
-                        if (colors.length === 2) {
+                        if (colors && colors.length === 2) {
                             notify('info', 'got colors from cover');
                             console.log(colors);
                             applyTheme('backgroundColor', colors[0], '[data-background-primary]');

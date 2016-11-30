@@ -30,18 +30,16 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * Electron : for their great app
 * Config-prompt : for their [configuration lib](https://github.com/ironSource/node-config-prompt)
 * Hero patterns : for their [nice & simple resources](http://www.heropatterns.com/)
-* Hello color : for [color theme generator](https://github.com/jxnblk/hello-color)
 
 
 ## TODO
 
-* handle when no music left in input folder
+* handle case when no music left in input folder
+* handle case when no music left in playlist
 * make musitop works under linux
 * add links in thanks
 * add a gif demo usage
-* handle controls in web page
 * add desktop notifications like http://singhharkirat.com/notification-logger/
-* enhance styling on web page
 
 
 ## FAQ

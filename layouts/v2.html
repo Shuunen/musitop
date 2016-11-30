@@ -21,7 +21,6 @@
             font-size: 20px;
             text-align: center;
             color: white;
-            background-color: lightsalmon;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -44,22 +43,37 @@
             padding: 30px;
             box-sizing: border-box;
             box-shadow: 0px 0px 20px 1px #333, 0px 11px 1px #333;
+            z-index: 20;
+            -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(70%, transparent), to(rgba(250, 250, 250, 0.1)));
         }
 
-        .player .cover {
+        .cover {
             position: absolute;
-            top: 23px;
-            left: 130px;
-            height: 310px;
+            top: -65px;
+            left: -10px;
+            width: calc(100% + 20px);
+            z-index: 30;
+        }
+
+        .cover-blur {
+            left: -40px;
+            top: -40px;
+            -webkit-filter: blur(20px) brightness(140%) invert(10%);
+            min-height: calc(100% + 80px);
+            min-width: calc(100% + 80px);
+            position: absolute;
+            box-shadow: inset 2px 2px 40px #333;
             z-index: 0;
         }
 
-        .player .cover.blur {
-            left: 0;
+        .inside-shadow {
+            box-shadow: inset 2px 2px 40px #333;
+            z-index: 0;
+            position: absolute;
             top: 0;
-            -webkit-filter: blur(10px);
-            height: auto;
+            left: 0;
             width: 100%;
+            height: 100%;
         }
 
         .player [data-artist] {
@@ -70,14 +84,25 @@
 
         .player [data-title],
         .player [data-artist] {
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px 15px 10px 40px;
+            padding: 10px 0 0 30px;
+            margin-bottom: -15px;
             margin-left: -30px;
-            text-shadow: 1px 1px 1px black, 0px 0px 4px white;
-            border-radius: 0 5px 5px 0;
-            /*box-shadow: inset 8px 0px 18px -7px whitesmoke;*/
+            text-shadow: 1px 1px 1px black, 0 0 4px white;
             color: whitesmoke;
-            z-index: 10;
+            z-index: 40;
+        }
+
+        .bottom-top-gradient {
+            position: absolute;
+            height: 160px;
+            width: 100%;
+            bottom: -10px;
+            left: 0;
+            z-index: 30;
+            /* background: linear-gradient(45deg, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); */
+            /* background-image: -webkit-gradient(linear, 0% 95%, 0% 0%, from(rgba(50, 50, 50, 0.8)), color-stop(0.2, rgb(50, 50, 50)), to(rgba(150, 150, 150, 0))); */
+            background-image: -webkit-gradient(linear, 7% 100%, 14% 5%, from(rgba(0, 0, 0, 0.8)), color-stop(0.2, rgb(0, 0, 0)), to(rgba(0, 0, 0, 0)));
+            -webkit-filter: blur(10px);
         }
 
         .player-border {
@@ -87,7 +112,7 @@
             top: 0;
             left: 0;
             box-shadow: inset 2px 2px 12px whitesmoke;
-            z-index: 20;
+            z-index: 30;
         }
 
         footer {
@@ -96,24 +121,37 @@
         }
 
         footer h1 {
-            -webkit-filter: invert(1) opacity(0.1);
+            -webkit-filter: opacity(0.4);
             font-family: 'Rock Salt', sans-serif;
             letter-spacing: 1px;
             font-size: 2.6em;
             text-shadow: 1px 3px 1px black, -1px -1px 1px white;
         }
+
+        .icon {
+            height: 40px;
+            width: 40px;
+        }
+
+        .icon-heart {
+            background-image: url("icons/Anastasya-Bolshakova/like.png");
+        }
     </style>
 </head>
-<body data-cover="gradient">
+<body>
+
+<img class="loader cover-blur" data-cover="src"/>
 
 <div class="player">
     <div data-music-is="good" class="icon icon-heart"></div>
     <strong data-artist>Tycho</strong>
     <div data-title>Crystal brake</div>
-    <img class="loader cover blur" data-cover="src"/>
     <img class="loader cover" data-cover="src" alt="song cover"/>
+    <div class="bottom-top-gradient"></div>
     <div class="player-border"></div>
 </div>
+
+<div class="inside-shadow"></div>
 
 <footer>
     <h1 data-color-primary>Musitop</h1>
