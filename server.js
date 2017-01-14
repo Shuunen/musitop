@@ -24,7 +24,6 @@ fs.readdir(svgPatternPath, function (err, files) {
         notify('Error', 'Fail at reading patterns path, see logs', 'error');
         throw new Error(err);
     }
-
     files.forEach(function (fileName) {
         svgPatterns.push(svgPatternPath + '/' + fileName);
     });
@@ -42,7 +41,6 @@ var pick = function (items, doExtract) {
         notify('Error', 'called pick without items');
         return false;
     }
-
     indexMax = items.length - 1;
     index = indexMax === 0 ? 0 : numberBetween(0, indexMax);
 
@@ -56,12 +54,10 @@ var sendDynamicValues = function (bForce) {
     if (bForce) {
         updatedData = true;
     }
-
     if (!updatedData) {
         notify('info', 'no new data to send');
         return;
     }
-
     // notify('info', 'sending dynamic values to clients');
     var theme = pick(themes).split(':');
     io.emit('theme', {
@@ -93,35 +89,32 @@ var server = http.createServer(function (request, response) {
     } else {
         code = 404;
     }
-
     if (code !== 404) {
         if (url[0] === '/') {
             url = url.substr(1);
         }
-
         var fileStat = fs.statSync(url);
         if (fileStat.isFile()) {
             response.writeHead(code, {
                 'Content-Type': contentType
             });
-
             // notify('Info', 'router serve file : ' + url);
             var file = fs.readFileSync(url).toString();
             response.end(file);
             if (contentType === 'text/html') {
                 updatedData = true;
             }
-
         } else {
             code = 404;
         }
     }
-
     if (code === 404) {
         response.writeHead(code, {
             'Content-Type': 'text/plain'
         });
-        notify('Error', 'router cannot serve file : ' + url);
+        if (url.indexOf('.map') === -1) {
+            notify('Error', 'router cannot serve file : ' + url);
+        }
         response.end('file or resource not found :\'(');
     }
 });
@@ -229,7 +222,6 @@ function playFolder() {
             notify('Error', 'Fail at reading musicPath, see logs', 'error');
             throw new Error(err);
         }
-
         files.forEach(function (fileName) {
             //noinspection JSCheckFunctionSignatures
             var filePath = path.join(musicPath, fileName);
@@ -242,7 +234,6 @@ function playFolder() {
         if (config.get('shuffleMusic')) {
             shuffle(playlist);
         }
-
         playNext();
     });
 }
@@ -277,7 +268,6 @@ function getMetadata() {
             notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
             throw new Error(err);
         }
-
         metadata = meta;
         readableStream.close();
     });
@@ -340,12 +330,10 @@ function notify(action, message, type) {
             type: type
         });
     }
-
     // in order to align logs :p
     while (action.length < 9) {
         action += ' ';
     }
-
     console.log(action + ' : ' + message); // eslint-disable-line no-console
 }
 
@@ -381,7 +369,6 @@ function getConfigFromUser(callback) {
             notify('Error', 'Fail at reading config, see logs', 'error');
             throw new Error(err);
         }
-
         // move conf file in config store to local folder
         // from : C:\Users\ME\.config\configstore\musitop.json
         // to   : .
@@ -404,7 +391,6 @@ function getConfig(callback) {
             notify('Info', 'Local config found, set found conf key/values into in-memory conf');
             config.all = JSON.parse(configContent);
         }
-
         var configErrors = config.validate();
         if (err || configErrors.length) {
             getConfigFromUser(callback);
@@ -417,10 +403,8 @@ function getConfig(callback) {
 }
 
 function init() {
-
     // get conf then play music
     getConfig(playFolder);
-
     // add systray controls
     childProcess.spawn('node_modules/electron/dist/electron', ['systray']);
 }

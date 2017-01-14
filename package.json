@@ -27,11 +27,15 @@
   },
   "jscsConfig": {
     "preset": "airbnb",
-    "maximumLineLength": 200,
-    "requireTrailingComma": false,
     "disallowTrailingComma": true,
-    "validateIndentation": 4,
-    "requireLineFeedAtFileEnd": false
+    "maximumLineLength": 200,
+    "requireLineFeedAtFileEnd": false,
+    "requirePaddingNewLinesAfterBlocks": false,
+    "requirePaddingNewLinesBeforeLineComments": {
+      "allExcept": "firstAfterCurly"
+    },
+    "requireTrailingComma": false,
+    "validateIndentation": 4
   },
   "repository": {
     "type": "git",
