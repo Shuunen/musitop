@@ -13,10 +13,10 @@ var fs = require('fs');
 var path = require('path');
 var musicMetadata = require('musicmetadata');
 var port = 404;
+
 // WEB
 var http = require('http');
-var themes = ['papayawhip:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#DFEDF3:#525252', '#D3D5D6:#1B69A3',
-    '#E2E0E0:#586172'];
+var themes = ['papayawhip:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#DFEDF3:#525252', '#D3D5D6:#1B69A3', '#E2E0E0:#586172'];
 var svgPatterns = [];
 var svgPatternPath = 'patterns';
 fs.readdir(svgPatternPath, function (err, files) {
@@ -24,36 +24,44 @@ fs.readdir(svgPatternPath, function (err, files) {
         notify('Error', 'Fail at reading patterns path, see logs', 'error');
         throw new Error(err);
     }
+
     files.forEach(function (fileName) {
         svgPatterns.push(svgPatternPath + '/' + fileName);
     });
 });
+
 var numberBetween = function (min, max) {
     return Math.floor((Math.random() * ((max - min) + 1)) + min);
 };
+
 var pick = function (items, doExtract) {
     var index;
     var indexMax;
     var item;
     if (!items || !items.length) {
-        console.error('called pick without items');
+        notify('Error', 'called pick without items');
         return false;
     }
+
     indexMax = items.length - 1;
     index = indexMax === 0 ? 0 : numberBetween(0, indexMax);
+
     // if extract, splice will get & remove item at index
     // splice return an array, so we get the first one
     item = doExtract ? items.splice(index, 1)[0] : items[index];
     return item;
 };
+
 var sendDynamicValues = function (bForce) {
     if (bForce) {
         updatedData = true;
     }
+
     if (!updatedData) {
         notify('info', 'no new data to send');
         return;
     }
+
     // notify('info', 'sending dynamic values to clients');
     var theme = pick(themes).split(':');
     io.emit('theme', {
@@ -64,6 +72,7 @@ var sendDynamicValues = function (bForce) {
     io.emit('metadata', metadata);
     updatedData = false;
 };
+
 var server = http.createServer(function (request, response) {
 
     var code = 200;
@@ -89,36 +98,47 @@ var server = http.createServer(function (request, response) {
         if (url[0] === '/') {
             url = url.substr(1);
         }
+
         var fileStat = fs.statSync(url);
         if (fileStat.isFile()) {
-            response.writeHead(code, { 'Content-Type': contentType });
+            response.writeHead(code, {
+                'Content-Type': contentType
+            });
+
             // notify('Info', 'router serve file : ' + url);
             var file = fs.readFileSync(url).toString();
             response.end(file);
             if (contentType === 'text/html') {
                 updatedData = true;
             }
+
         } else {
             code = 404;
         }
     }
 
     if (code === 404) {
-        response.writeHead(code, { 'Content-Type': 'text/plain' });
+        response.writeHead(code, {
+            'Content-Type': 'text/plain'
+        });
         notify('Error', 'router cannot serve file : ' + url);
         response.end('file or resource not found :\'(');
     }
 });
+
 server.listen(port, function () {
-    console.log('Musitop server started on http://localhost:' + port);
+    notify('Server', 'Musitop server started on http://localhost:' + port);
 });
+
 // SOCKET
 var onDisconnect = function () {
     notify('Socket', 'server side disconnected');
 };
+
 var onConnection = function () {
     notify('Socket', 'server side connection established');
 };
+
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', 'Keep this song :D');
@@ -135,10 +155,12 @@ var onMusicIs = function (musicIs) {
         notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
     }
 };
-var onError = function () {
+
+var onError = function (e) {
     notify('Error', 'Client error, see logs', 'error');
-    console.log(e);
+    notify('Error', e);
 };
+
 var updatedData = false;
 var io = require('socket.io')(server);
 var connectSocket = function () {
@@ -152,6 +174,7 @@ var connectSocket = function () {
         sendDynamicValues();
     });
 };
+
 connectSocket();
 
 /***
@@ -167,11 +190,28 @@ var childProcess = require('child_process');
 var notifier = require('node-notifier');
 var configFile = 'config.json';
 var config = require('config-prompt')({
-    musicPath: { type: 'string', required: true },
-    keepPath: { type: 'string', required: false },
-    keepFeature: { type: 'boolean', default: true, required: true },
-    deleteFeature: { type: 'boolean', default: true, required: true },
-    shuffleMusic: { type: 'boolean', default: true }
+    musicPath: {
+        type: 'string',
+        required: true
+    },
+    keepPath: {
+        type: 'string',
+        required: true
+    },
+    keepFeature: {
+        type: 'boolean',
+        default: true,
+        required: false
+    },
+    deleteFeature: {
+        type: 'boolean',
+        default: true,
+        required: false
+    },
+    shuffleMusic: {
+        type: 'boolean',
+        default: true
+    }
 });
 var shuffle = require('shuffle-array');
 var playlist = [];
@@ -180,7 +220,7 @@ var player = null;
 var keep = false;
 var metadata = null;
 
-function playFolder () {
+function playFolder() {
     var musicPath = config.get('musicPath');
     notify('Scanning', '"' + musicPath + '"' + ' for songs');
     fs.readdir(musicPath, function (err, files) {
@@ -189,30 +229,34 @@ function playFolder () {
             notify('Error', 'Fail at reading musicPath, see logs', 'error');
             throw new Error(err);
         }
+
         files.forEach(function (fileName) {
             //noinspection JSCheckFunctionSignatures
             var filePath = path.join(musicPath, fileName);
             var fileStat = fs.statSync(filePath);
             if (fileStat.isFile()) {
-                playlist.push(filePath)
+                playlist.push(filePath);
             }
         });
+
         if (config.get('shuffleMusic')) {
             shuffle(playlist);
         }
+
         playNext();
     });
 }
 
-function fileName (filePath) {
+function fileName(filePath) {
     // input  : "C:\Stuff\Music\to test\Mike feat. Snowball - Animal.mp3"
     // output : "Mike feat. Snowball - Animal"
     return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.');
 }
 
-function playNext () {
+function playNext() {
     // by default, don't keep newly playing song
     keep = false;
+
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
     getMetadata();
@@ -224,52 +268,59 @@ function playNext () {
     }, 1100);
 }
 
-function getMetadata () {
+function getMetadata() {
     var readableStream = fs.createReadStream(song);
-    musicMetadata(readableStream, { duration: true }, function (err, meta) {
+    musicMetadata(readableStream, {
+        duration: true
+    }, function (err, meta) {
         if (err) {
             notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
             throw new Error(err);
         }
+
         metadata = meta;
         readableStream.close();
     });
 }
 
-function keepSong () {
+function keepSong() {
     keep = true;
 }
 
-function moveSong () {
+function moveSong() {
+
     doAsync(function (lastSongPath) {
         var newLastSongPath = path.join(config.get('keepPath'), path.basename(lastSongPath));
+
         // notify('Info', 'will move it to : "' + newLastSongPath + '"');
         fs.rename(lastSongPath, newLastSongPath, function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
         });
     });
+
     playNext();
 }
 
-function deleteSong () {
+function deleteSong() {
     keep = false;
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) {
                 notify('Error', 'Delete failed, see logs');
-                console.log(err);
+                notify('Error', err);
             } else {
                 notify('Deleted', fileName(lastSongPath));
             }
         });
     });
+
     if (player) {
         player.kill();
     }
 }
 
-function doAsync (callback) {
+function doAsync(callback) {
     if (!callback) {
         notify('Error', 'Do Async need a callback', 'error');
     } else {
@@ -280,7 +331,7 @@ function doAsync (callback) {
     }
 }
 
-function notify (action, message, type) {
+function notify(action, message, type) {
     if (type) {
         // notify client side
         notifier.notify({
@@ -289,18 +340,21 @@ function notify (action, message, type) {
             type: type
         });
     }
+
     // in order to align logs :p
     while (action.length < 9) {
         action += ' ';
     }
-    console.log(action + ' : ' + message);
+
+    console.log(action + ' : ' + message); // eslint-disable-line no-console
 }
 
-function playSong () {
+function playSong() {
     player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     player.stderr.on('data', function (stderr) {
         notify('Stderr', stderr, 'error');
     });
+
     player.on('close', function (code) {
         if (code === null || code === 0) {
             if (keep) {
@@ -321,16 +375,19 @@ function getConfigFromUser(callback) {
         nodeEnv: false,
         silent: false
     }, function (err) {
+
         if (err) {
             config.trash();
             notify('Error', 'Fail at reading config, see logs', 'error');
             throw new Error(err);
         }
+
         // move conf file in config store to local folder
         // from : C:\Users\ME\.config\configstore\musitop.json
         // to   : .
         // notify('Config path', config.path);
         fs.createReadStream(config.path).pipe(fs.createWriteStream(configFile));
+
         // if any callback, execute it
         if (callback && typeof callback === 'function') {
             callback();
@@ -338,14 +395,13 @@ function getConfigFromUser(callback) {
     });
 }
 
-function getConfig (callback) {
+function getConfig(callback) {
     // get local config
     fs.readFile(configFile, function (err, configContent) {
         if (err) {
             notify('Info', 'No local config found');
         } else {
-            notify('Info', 'Local config found');
-            // set found conf key/values into in-memory conf
+            notify('Info', 'Local config found, set found conf key/values into in-memory conf');
             config.all = JSON.parse(configContent);
         }
 
@@ -360,13 +416,14 @@ function getConfig (callback) {
     });
 }
 
-function init () {
+function init() {
+
     // get conf then play music
     getConfig(playFolder);
+
     // add systray controls
     childProcess.spawn('node_modules/electron/dist/electron', ['systray']);
 }
 
 // init
 setTimeout(init, 100);
-
