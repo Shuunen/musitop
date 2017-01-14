@@ -40,6 +40,7 @@ var notify = function (action, message, type) {
     if (type) {
         // notify client side
     }
+    /* eslint-disable no-console */
     if (console[action]) {
         console[action](message);
     } else {
@@ -49,15 +50,16 @@ var notify = function (action, message, type) {
         }
         console.log(action + ' : ' + message);
     }
+    /* eslint-enable no-console */
 };
 
 var onDisconnect = function () {
     notify('Socket', 'client side disconnected');
 };
 
-var onError = function () {
+var onError = function (e) {
     notify('Error', 'Client error, see logs', 'error');
-    console.log(e);
+    notify('Error', e);
 };
 
 var onMusicIs = function (musicIs) {
@@ -88,7 +90,7 @@ var onConnection = function () {
     notify('Socket', 'client side connection init');
 };
 
-function onMetadata (metadata) {
+function onMetadata(metadata) {
     notify('Socket', 'received fresh metadata infos');
     console.log(metadata);
 
@@ -96,11 +98,13 @@ function onMetadata (metadata) {
         notify('warn', 'duration not specified (' + metadata.duration + ')');
     } else {
         var secondTotal = Math.round(metadata.duration);
-        var secondLeft = secondTotal;
+        var secondLeft = null;
+        var actualTimestamp = null;
         var progressBar = document.querySelector('.progress-bar-inner');
         var updateProgressBar = setInterval(function () {
-            secondLeft--;
-            var percentDone = Math.round(10000 - (secondLeft / secondTotal * 10000)) / 100;
+            actualTimestamp = Math.round(Date.now() / 1000);
+            secondLeft = metadata.startTimestamp - actualTimestamp;
+            var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
             console.log('updateProgressBar, secondLeft : ' + percentDone + '%');
             progressBar.style.width = percentDone + '%';
             if (percentDone > 99) {
@@ -112,7 +116,7 @@ function onMetadata (metadata) {
     injectData(metadata.albumartist[0], '[data-artist]');
     injectData(metadata.title, '[data-title]');
     // specific process for covers
-    var dataUrl = arrayBufferToDataUrl(metadata.picture[0].data);
+    var dataUrl = metadata.picture[0] ? arrayBufferToDataUrl(metadata.picture[0].data) : null;
     if (dataUrl) {
         var els = document.querySelectorAll('[data-cover]');
         for (var i = 0; i < els.length; i++) {
@@ -163,12 +167,14 @@ var injectData = function (value, selector) {
 var arrayBufferToDataUrl = function (arrayBuffer) {
     // Obtain a blob: URL for the image data.
     var arrayBufferView = new Uint8Array(arrayBuffer);
-    var blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+    var blob = new Blob([arrayBufferView], {
+        type: "image/jpeg"
+    });
     var urlCreator = window.URL || window.webkitURL;
     return urlCreator.createObjectURL(blob);
 };
 
-function onTheme (theme) {
+function onTheme(theme) {
     notify('Socket', 'received new theme instructions');
     console.log(theme);
     applyTheme('backgroundColor', theme.background, '[data-theme-background]');
@@ -178,7 +184,7 @@ function onTheme (theme) {
     document.body.classList.add('loaded');
 }
 
-function applyTheme (property, value, selector) {
+function applyTheme(property, value, selector) {
     var els = document.querySelectorAll(selector);
     for (var i = 0; i < els.length; i++) {
         var el = els[i];

@@ -212,6 +212,7 @@ var song = '';
 var player = null;
 var keep = false;
 var metadata = null;
+var startTimestamp = null;
 
 function playFolder() {
     var musicPath = config.get('musicPath');
@@ -260,6 +261,7 @@ function playNext() {
 }
 
 function getMetadata() {
+    startTimestamp = Math.round(Date.now() / 1000);
     var readableStream = fs.createReadStream(song);
     musicMetadata(readableStream, {
         duration: true
@@ -269,6 +271,7 @@ function getMetadata() {
             throw new Error(err);
         }
         metadata = meta;
+        metadata.startTimestamp = startTimestamp;
         readableStream.close();
     });
 }
