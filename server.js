@@ -151,7 +151,7 @@ var onMusicIs = function (musicIs) {
 
 var onError = function (e) {
     notify('Error', 'Client error, see logs', 'error');
-    notify('Error', e);
+    notify('error', e);
 };
 
 var updatedData = false;

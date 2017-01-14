@@ -37,10 +37,10 @@ var handleControlsEvent = function (event) {
 };
 
 var notify = function (action, message, type) {
-    if (type) {
-        // notify client side
-    }
     /* eslint-disable no-console */
+    if (type) {
+        console.log('notify client side with a toaster type "' + type + '"');
+    }
     if (console[action]) {
         console[action](message);
     } else {
@@ -59,7 +59,7 @@ var onDisconnect = function () {
 
 var onError = function (e) {
     notify('Error', 'Client error, see logs', 'error');
-    notify('Error', e);
+    notify('error', e);
 };
 
 var onMusicIs = function (musicIs) {
@@ -92,7 +92,7 @@ var onConnection = function () {
 
 function onMetadata(metadata) {
     notify('Socket', 'received fresh metadata infos');
-    console.log(metadata);
+    // console.log(metadata);
 
     if (!metadata.duration) {
         notify('warn', 'duration not specified (' + metadata.duration + ')');
@@ -105,7 +105,6 @@ function onMetadata(metadata) {
             actualTimestamp = Math.round(Date.now() / 1000);
             secondLeft = metadata.startTimestamp - actualTimestamp;
             var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
-            console.log('updateProgressBar, secondLeft : ' + percentDone + '%');
             progressBar.style.width = percentDone + '%';
             if (percentDone > 99) {
                 clearInterval(updateProgressBar);
@@ -116,6 +115,7 @@ function onMetadata(metadata) {
     injectData(metadata.albumartist[0], '[data-artist]');
     injectData(metadata.title, '[data-title]');
     // specific process for covers
+    var gettingColorAtLeastForOne = false;
     var dataUrl = metadata.picture[0] ? arrayBufferToDataUrl(metadata.picture[0].data) : null;
     if (dataUrl) {
         var els = document.querySelectorAll('[data-cover]');
@@ -126,23 +126,26 @@ function onMetadata(metadata) {
                 el.style.backgroundImage = 'url(' + dataUrl + ')';
             } else if (type === 'src') {
                 el.src = dataUrl;
-                el.onload = function () {
-                    notify('info', 'cover image loaded');
-                    var el = document.querySelectorAll('[data-cover="gradient"]');
-                    if (el.length) {
-                        Grade(el);
-                        var colors = document.body.style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
-                        if (colors && colors.length === 2) {
-                            notify('info', 'got colors from cover');
-                            console.log(colors);
-                            applyTheme('backgroundColor', colors[0], '[data-background-primary]');
-                            applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
-                            applyTheme('color', colors[0], '[data-color-primary]');
-                            applyTheme('color', colors[1], '[data-color-secondary]');
-                        } else {
-                            notify('error', 'did not retrieved primary & secondary colors from cover');
+                if (!gettingColorAtLeastForOne) {
+                    gettingColorAtLeastForOne = true;
+                    el.onload = function () {
+                        notify('info', 'cover image loaded');
+                        var target = document.querySelectorAll('[data-cover="gradient"]');
+                        if (target.length) {
+                            Grade(target);
+                            var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
+                            if (colors && colors.length === 2) {
+                                notify('Grade', 'got colors from cover');
+                                notify('info', colors);
+                                applyTheme('backgroundColor', colors[0], '[data-background-primary]');
+                                applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
+                                applyTheme('color', colors[0], '[data-color-primary]');
+                                applyTheme('color', colors[1], '[data-color-secondary]');
+                            } else {
+                                notify('error', 'did not retrieved primary & secondary colors from cover');
+                            }
                         }
-                    }
+                    };
                 }
             }
             el.classList.remove('loader');
@@ -168,7 +171,7 @@ var arrayBufferToDataUrl = function (arrayBuffer) {
     // Obtain a blob: URL for the image data.
     var arrayBufferView = new Uint8Array(arrayBuffer);
     var blob = new Blob([arrayBufferView], {
-        type: "image/jpeg"
+        type: 'image/jpeg'
     });
     var urlCreator = window.URL || window.webkitURL;
     return urlCreator.createObjectURL(blob);
@@ -176,7 +179,7 @@ var arrayBufferToDataUrl = function (arrayBuffer) {
 
 function onTheme(theme) {
     notify('Socket', 'received new theme instructions');
-    console.log(theme);
+    notify('info', theme);
     applyTheme('backgroundColor', theme.background, '[data-theme-background]');
     applyTheme('color', theme.color, '[data-theme-color]');
     applyTheme('borderColor', theme.color, '[data-theme-border-color]');
