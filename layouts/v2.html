@@ -226,12 +226,13 @@
         }
 
         footer h1 {
-            -webkit-filter: opacity(0.4);
-            filter: opacity(0.4);
             font-family: 'Rock Salt', sans-serif;
             letter-spacing: 1px;
             font-size: 2.6em;
             text-shadow: 1px 3px 1px black, -1px -1px 1px white;
+            position: relative;
+            z-index: 10;
+            top: 7vh;
         }
 
         .icon {
@@ -277,6 +278,31 @@
         .icon-next:hover {
             animation-name: subtle-shake;
         }
+
+        .triangle {
+            -webkit-clip-path: url(#cp);
+            clip-path: url(#cp);
+            width: 20vh;
+            height: 20vh;
+            background-size: cover;
+            background-blend-mode: screen;
+            position: absolute;
+            top: 25%;
+            left: 50%;
+        }
+
+        .first {
+            background-color: #C5075C;
+            /*background-image: url("https://45.media.tumblr.com/d6946dbae92220c65838e861a365affb/tumblr_mzs9uzNKDZ1qddrn0o1_500.gif");*/
+            transform: translateX(-65%) translateY(-50%) rotate(180deg);
+        }
+
+        .second {
+            background-color: #03B897;
+            /*background-image: url("https://media1.giphy.com/media/fLg3MEWdgH5Ti/200.gif");*/
+            transform: translateX(-35%) translateY(-50%) rotate(180deg);
+            opacity: 0.8;
+        }
     </style>
 </head>
 
@@ -304,7 +330,20 @@
     </div>
     <div class="inside-shadow"></div>
     <footer>
-        <h1 data-color-primary>Musitop</h1>
+        <!-- Thanks "Reverse clip path with blend modes" by Zach Saucier -->
+        <!-- http://codepen.io/Zeaklous/pen/mVEwje -->
+        <h1>Musitop</h1>
+        <!-- Define our SVG clip path -->
+        <svg width='0' height='0'>
+            <defs>
+                <clipPath id="cp" clipPathUnits="objectBoundingBox">
+                    <path d="M0.500, 0.945 L0.994, 0.090 L0.006, 0.090 L0.500, 0.945 L0.500, 0.650 L0.262, 0.238 L0.738, 0.237 L0.500, 0.650z"></path>
+                </clipPath>
+            </defs>
+        </svg>
+        <!-- The actual elements we're using -->
+        <div class="triangle first" data-cover="background"></div>
+        <div class="triangle second" data-cover="background"></div>
     </footer>
 </body>
 
