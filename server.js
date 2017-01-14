@@ -70,8 +70,9 @@ var server = http.createServer(function (request, response) {
     var contentType = '';
     var url = request.url;
     var match = url.match(/^\/(v)?(\d)?/);
+    var layoutVersion = (match && match[2]) ? match[2] : '2';
 
-    if (url === '/' || (match && match[2])) {
+    if (url === '/') {
         contentType = 'text/html';
         url = 'layouts/v' + match[2] + '.html';
     } else if (url.indexOf('.svg') !== -1) {
