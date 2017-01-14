@@ -31,9 +31,7 @@
     "maximumLineLength": 200,
     "requireLineFeedAtFileEnd": false,
     "requirePaddingNewLinesAfterBlocks": false,
-    "requirePaddingNewLinesBeforeLineComments": {
-      "allExcept": "firstAfterCurly"
-    },
+    "requirePaddingNewLinesBeforeLineComments": false,
     "requireTrailingComma": false,
     "validateIndentation": 4
   },
