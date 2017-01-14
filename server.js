@@ -242,8 +242,9 @@ function keepSong () {
 
 function moveSong () {
     doAsync(function (lastSongPath) {
-        //noinspection JSCheckFunctionSignatures
-        fs.rename(lastSongPath, path.join(config.get('keepPath'), path.basename(lastSongPath)), function (err) {
+        var newLastSongPath = path.join(config.get('keepPath'), path.basename(lastSongPath));
+        // notify('Info', 'will move it to : "' + newLastSongPath + '"');
+        fs.rename(lastSongPath, newLastSongPath, function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
         });
