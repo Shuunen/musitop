@@ -3,6 +3,41 @@ var socketDoor = null;
 window.onload = function () {
     connectSocket();
     handleControls();
+    handleProgressBar();
+};
+
+var startTimestamp;
+var secondTotal;
+var handleProgressBar = function (metadata) {
+    // reset loop data
+    startTimestamp = null;
+    secondTotal = 0;
+    // init loop
+    if (!metadata) {
+        var secondLeft = 0;
+        var actualTimestamp = null;
+        var progressBar = document.querySelector('.progress-bar-inner');
+        setInterval(function () {
+            if (startTimestamp && secondTotal) {
+                actualTimestamp = Math.round(Date.now() / 1000);
+                secondLeft = startTimestamp - actualTimestamp;
+                var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
+                // notify('info', 'percent done : ' + percentDone + '%');
+                progressBar.style.width = percentDone + '%';
+            }
+        }, 1000);
+    }
+    // update loop
+    else {
+        if (!metadata.duration) {
+            notify('warn', 'duration not specified (' + metadata.duration + ')');
+        } else if (!metadata.startTimestamp) {
+            notify('warn', 'startTimestamp not specified (' + metadata.startTimestamp + ')');
+        } else {
+            startTimestamp = metadata.startTimestamp;
+            secondTotal = Math.round(metadata.duration);
+        }
+    }
 };
 
 var handleControls = function () {
@@ -92,26 +127,8 @@ var onConnection = function () {
 
 function onMetadata(metadata) {
     notify('Socket', 'received fresh metadata infos');
-    // console.log(metadata);
-
-    if (!metadata.duration) {
-        notify('warn', 'duration not specified (' + metadata.duration + ')');
-    } else {
-        var secondTotal = Math.round(metadata.duration);
-        var secondLeft = null;
-        var actualTimestamp = null;
-        var progressBar = document.querySelector('.progress-bar-inner');
-        var updateProgressBar = setInterval(function () {
-            actualTimestamp = Math.round(Date.now() / 1000);
-            secondLeft = metadata.startTimestamp - actualTimestamp;
-            var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
-            progressBar.style.width = percentDone + '%';
-            if (percentDone > 99) {
-                clearInterval(updateProgressBar);
-            }
-        }, 1000);
-    }
-
+    notify('info', metadata);
+    handleProgressBar(metadata);
     injectData(metadata.albumartist[0], '[data-artist]');
     injectData(metadata.title, '[data-title]');
     // specific process for covers
