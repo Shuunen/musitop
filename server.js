@@ -314,9 +314,13 @@ function playSong () {
     });
 }
 
-function getConfigFromUser (callback) {
-    // will ask user for conf then save it locally
-    config.prompt({ all: false, nodeEnv: false, silent: false }, function (err) {
+function getConfigFromUser(callback) {
+    notify('Conf', 'will ask user for conf then save it locally');
+    config.prompt({
+        all: true,
+        nodeEnv: false,
+        silent: false
+    }, function (err) {
         if (err) {
             config.trash();
             notify('Error', 'Fail at reading config, see logs', 'error');
@@ -346,7 +350,7 @@ function getConfig (callback) {
         }
 
         var configErrors = config.validate();
-        if (configErrors.length) {
+        if (err || configErrors.length) {
             getConfigFromUser(callback);
         } else if (callback && typeof callback === 'function') {
             callback();
