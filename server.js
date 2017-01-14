@@ -74,7 +74,7 @@ var server = http.createServer(function (request, response) {
 
     if (url === '/') {
         contentType = 'text/html';
-        url = 'layouts/v' + match[2] + '.html';
+        url = 'layouts/v' + layoutVersion + '.html';
     } else if (url.indexOf('.svg') !== -1) {
         contentType = 'image/svg+xml';
     } else if (url.indexOf('.png') !== -1) {
