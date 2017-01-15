@@ -84,6 +84,8 @@ var server = http.createServer(function (request, response) {
         contentType = 'image/svg+xml';
     } else if (url.indexOf('.png') !== -1) {
         contentType = 'image/png';
+    } else if (url.indexOf('.ico') !== -1) {
+        contentType = 'image/vnd.microsoft.icon';
     } else if (url.indexOf('.js') !== -1) {
         contentType = 'application/javascript';
     } else {
