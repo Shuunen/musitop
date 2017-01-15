@@ -99,8 +99,8 @@ var server = http.createServer(function (request, response) {
                 'Content-Type': contentType
             });
             // notify('Info', 'router serve file : ' + url);
-            var file = fs.readFileSync(url).toString();
-            response.end(file);
+            var file = fs.readFileSync(url);
+            response.end(file, 'binary');
             if (contentType === 'text/html') {
                 updatedData = true;
             }
@@ -267,7 +267,7 @@ function getMetadata() {
         duration: true
     }, function (err, meta) {
         if (err) {
-            notify('Error', 'Fail at reading mp3 metadata, see logs', 'error');
+            notify('Error', 'Fail at reading mp3 metadata for ' + song + ', see logs', 'error');
             throw new Error(err);
         }
         metadata = meta;
