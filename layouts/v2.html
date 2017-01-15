@@ -31,7 +31,7 @@
                 transform: translate3d(5px, 0, 0);
             }
         }
-        
+
         @keyframes subtle-shake {
             from,
             to {
@@ -50,12 +50,12 @@
                 transform: translate3d(5px, 0, 0);
             }
         }
-        
+
         html,
         body {
             height: 100%;
         }
-        
+
         body {
             font-family: 'Satisfy', sans-serif;
             font-size: 20px;
@@ -69,7 +69,7 @@
             box-shadow: inset 2px 2px 40px #333;
             margin: 0;
         }
-        
+
         .gradient-overlay {
             position: absolute;
             z-index: 20;
@@ -79,11 +79,11 @@
             height: 100%;
             opacity: 0.5;
         }
-        
+
         .gradient-overlay img {
             display: none;
         }
-        
+
         .player {
             display: flex;
             flex-direction: column;
@@ -106,11 +106,11 @@
             color: #39c131;
         }
         */
-        
+
         [data-control-hover="bad"] {
             color: #d45050;
         }
-        
+
         .cover-wrap {
             position: absolute;
             top: 0;
@@ -121,7 +121,7 @@
             overflow: hidden;
             border-radius: 20px;
         }
-        
+
         .cover {
             position: absolute;
             top: -65px;
@@ -129,7 +129,7 @@
             width: calc(100% + 20px);
             z-index: 30;
         }
-        
+
         .cover-blur {
             left: -40px;
             top: -40px;
@@ -141,7 +141,7 @@
             box-shadow: inset 2px 2px 40px #333;
             z-index: 0;
         }
-        
+
         .inside-shadow {
             box-shadow: inset 40px 40px 220px #333;
             z-index: 20;
@@ -152,13 +152,13 @@
             height: 100%;
             pointer-events: none;
         }
-        
+
         .player [data-artist] {
             margin-top: auto;
             font-size: 30px;
             margin-bottom: 4px;
         }
-        
+
         .player [data-title],
         .player [data-artist] {
             padding: 10px 0 0 30px;
@@ -167,7 +167,7 @@
             text-shadow: 1px 1px 1px black, 0 0 4px white;
             z-index: 40;
         }
-        
+
         .bottom-top-gradient {
             position: absolute;
             height: 160px;
@@ -181,7 +181,7 @@
             -webkit-filter: blur(10px);
             filter: blur(10px);
         }
-        
+
         .player-border {
             position: absolute;
             height: 100%;
@@ -192,7 +192,7 @@
             z-index: 30;
             border-radius: 20px;
         }
-        
+
         .progress-bar-wrapper {
             position: absolute;
             bottom: -10px;
@@ -201,7 +201,7 @@
             left: 0;
             overflow: hidden;
         }
-        
+
         .progress-bar {
             position: relative;
             height: 6px;
@@ -213,7 +213,7 @@
             box-shadow: 0 0 15px 0px;
             overflow: hidden;
         }
-        
+
         .progress-bar-inner {
             background: currentColor;
             width: 30%;
@@ -221,7 +221,7 @@
             box-shadow: 1px 1px 32px black;
             transition: width .4s;
         }
-        
+
         footer {
             position: absolute;
             bottom: 0;
@@ -232,7 +232,7 @@
             border-radius: 100% 0 0 0;
             box-shadow: 0px 0px 10px 1px rgba(51, 51, 51, 0.5), 0px 12px 70px rgba(51, 51, 51, 0.5);
         }
-        
+
         footer h1 {
             font-family: 'Rock Salt', sans-serif;
             letter-spacing: 1px;
@@ -244,7 +244,7 @@
             top: 7vh;
             left: -9%;
         }
-        
+
         .icon {
             height: 35px;
             width: 35px;
@@ -257,23 +257,23 @@
             animation-duration: 1s;
             animation-fill-mode: both;
         }
-        
+
         .icon:hover {
             -webkit-filter: blur(0px) invert(100%) drop-shadow(2px 2px 2px black);
             filter: blur(0px) invert(100%) drop-shadow(2px 2px 2px black);
         }
-        
+
         .icon-like {
             background-image: url("icons/Anastasya-Bolshakova/like.svg");
         }
-        
+
         .icon-dislike {
             background-image: url("icons/Icons-Mind/Unlike-2.svg");
             position: absolute;
             bottom: 25px;
             right: 30px;
         }
-        
+
         .icon-next {
             background-image: url("icons/Anastasya-Bolshakova/right.svg");
             position: absolute;
@@ -284,11 +284,11 @@
             -webkit-filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
             filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
         }
-        
+
         .icon-next:hover {
             animation-name: subtle-shake;
         }
-        
+
         .triangle {
             -webkit-clip-path: url(#cp);
             clip-path: url(#cp);
@@ -300,11 +300,11 @@
             top: 25%;
             left: 42%;
         }
-        
+
         .first {
             transform: translateX(-65%) translateY(-50%) rotate(180deg);
         }
-        
+
         .second {
             transform: translateX(-35%) translateY(-50%) rotate(180deg);
             opacity: 0.8;
