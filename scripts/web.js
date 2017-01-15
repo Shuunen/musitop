@@ -148,6 +148,7 @@ function onMetadata(metadata) {
                     el.onload = function () {
                         notify('info', 'cover image loaded');
                         var target = document.querySelectorAll('[data-cover="gradient"]');
+                        target[0].style = '';
                         if (target.length) {
                             Grade(target);
                             var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
