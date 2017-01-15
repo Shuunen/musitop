@@ -151,7 +151,7 @@ function onMetadata(metadata) {
                         target[0].style = '';
                         if (target.length) {
                             Grade(target);
-                            var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/);
+                            var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/g);
                             if (colors && colors.length === 2) {
                                 notify('Grade', 'got colors from cover');
                                 notify('info', colors);
