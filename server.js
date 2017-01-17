@@ -16,7 +16,6 @@ var port = 1404;
 
 // WEB
 var http = require('http');
-var themes = ['papayawhip:darkslategray', '#9DA5A2:#60CAAD', '#DAEBEB:#418b8d', '#DFEDF3:#525252', '#D3D5D6:#1B69A3', '#E2E0E0:#586172'];
 var svgPatterns = [];
 var svgPatternPath = 'patterns';
 fs.readdir(svgPatternPath, function (err, files) {
@@ -29,27 +28,6 @@ fs.readdir(svgPatternPath, function (err, files) {
     });
 });
 
-var numberBetween = function (min, max) {
-    return Math.floor((Math.random() * ((max - min) + 1)) + min);
-};
-
-var pick = function (items, doExtract) {
-    var index;
-    var indexMax;
-    var item;
-    if (!items || !items.length) {
-        notify('Error', 'called pick without items');
-        return false;
-    }
-    indexMax = items.length - 1;
-    index = indexMax === 0 ? 0 : numberBetween(0, indexMax);
-
-    // if extract, splice will get & remove item at index
-    // splice return an array, so we get the first one
-    item = doExtract ? items.splice(index, 1)[0] : items[index];
-    return item;
-};
-
 var sendDynamicValues = function (bForce) {
     if (bForce) {
         updatedData = true;
@@ -59,11 +37,8 @@ var sendDynamicValues = function (bForce) {
         return;
     }
     // notify('info', 'sending dynamic values to clients');
-    var theme = pick(themes).split(':');
-    io.emit('theme', {
-        background: theme[0],
-        color: theme[1],
-        pattern: pick(svgPatterns)
+    io.emit('options', {
+        audioClientSide: config.get('audioClientSide')
     });
     io.emit('metadata', metadata);
     updatedData = false;
@@ -80,6 +55,9 @@ var server = http.createServer(function (request, response) {
     if (url === '/') {
         contentType = 'text/html';
         url = 'layouts/v' + layoutVersion + '.html';
+    } else if (url.indexOf('.mp3') !== -1) {
+        url = song;
+        contentType = 'audio/mpeg';
     } else if (url.indexOf('.svg') !== -1) {
         contentType = 'image/svg+xml';
     } else if (url.indexOf('.png') !== -1) {
@@ -143,9 +121,7 @@ var onMusicIs = function (musicIs) {
         deleteSong();
     } else if (musicIs === 'next') {
         notify('Client', 'Next song please :)');
-        if (player) {
-            player.kill();
-        }
+        playNext();
     } else {
         notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
     }
@@ -194,6 +170,11 @@ var config = require('config-prompt')({
     keepPath: {
         type: 'string',
         required: true
+    },
+    audioClientSide: {
+        type: 'boolean',
+        default: true,
+        required: false
     },
     keepFeature: {
         type: 'boolean',
@@ -252,11 +233,13 @@ function fileName(filePath) {
 function playNext() {
     // by default, don't keep newly playing song
     keep = false;
-
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
     getMetadata();
-    playSong();
+    // if audio output is server side
+    if (!config.get('audioClientSide')) {
+        playSong();
+    }
     setTimeout(function () {
         notify('Remaining', playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
@@ -276,6 +259,7 @@ function getMetadata() {
         }
         metadata = meta;
         metadata.startTimestamp = startTimestamp;
+        metadata.stream = '/stream.mp3';
         readableStream.close();
     });
 }
@@ -345,6 +329,10 @@ function notify(action, message, type) {
 }
 
 function playSong() {
+
+    if (player) {
+        player.kill();
+    }
 
     if (isLinux) {
         player = childProcess.spawn('cvlc', [song, '--play-and-exit']);

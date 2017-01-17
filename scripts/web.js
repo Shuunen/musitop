@@ -1,9 +1,11 @@
 var socketDoor = null;
+var player = null;
 
 window.onload = function () {
     connectSocket();
     handleControls();
     handleProgressBar();
+    player = document.querySelector('audio');
 };
 
 var startTimestamp;
@@ -113,8 +115,8 @@ var connectSocket = function () {
     notify('Socket', 'client side connecting...');
     var socket = io('http://localhost:1404');
     socketDoor = socket;
-    socket.on('theme', onTheme);
     socket.on('metadata', onMetadata);
+    socket.on('options', onOptions);
     socket.on('music is', onMusicIs);
     socket.on('error', onError);
     socket.on('disconnect', onDisconnect);
@@ -125,6 +127,12 @@ var onConnection = function () {
     notify('Socket', 'client side connection init');
 };
 
+function onOptions(options) {
+    notify('Socket', 'received fresh options');
+    notify('info', options);
+    player.autoplay = options.audioClientSide;
+}
+
 function onMetadata(metadata) {
     notify('Socket', 'received fresh metadata infos');
     notify('info', metadata);
@@ -132,7 +140,12 @@ function onMetadata(metadata) {
     injectData(metadata.albumartist[0], '[data-artist]');
     injectData(metadata.title, '[data-title]');
     injectCover(metadata.picture[0]); // specific process for covers
+    injectAudio(metadata.stream);
 }
+
+var injectAudio = function (stream) {
+    player.src = stream;
+};
 
 var injectCover = function (cover) {
     var dataUrl = cover ? arrayBufferToDataUrl(cover.data) : 'icons/no-cover.svg';
@@ -202,16 +215,6 @@ var arrayBufferToDataUrl = function (arrayBuffer) {
     var urlCreator = window.URL || window.webkitURL;
     return urlCreator.createObjectURL(blob);
 };
-
-function onTheme(theme) {
-    notify('Socket', 'received new theme instructions');
-    notify('info', theme);
-    applyTheme('backgroundColor', theme.background, '[data-theme-background]');
-    applyTheme('color', theme.color, '[data-theme-color]');
-    applyTheme('borderColor', theme.color, '[data-theme-border-color]');
-    applyTheme('background', theme.pattern, '[data-theme-pattern]');
-    document.body.classList.add('loaded');
-}
 
 function applyTheme(property, value, selector) {
     var els = document.querySelectorAll(selector);
