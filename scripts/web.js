@@ -131,50 +131,58 @@ function onMetadata(metadata) {
     handleProgressBar(metadata);
     injectData(metadata.albumartist[0], '[data-artist]');
     injectData(metadata.title, '[data-title]');
-    // specific process for covers
-    var gettingColorAtLeastForOne = false;
-    var dataUrl = metadata.picture[0] ? arrayBufferToDataUrl(metadata.picture[0].data) : 'icons/no-cover.svg';
-    if (dataUrl) {
-        var els = document.querySelectorAll('[data-cover]');
-        for (var i = 0; i < els.length; i++) {
-            var el = els[i];
-            var type = el.getAttribute('data-cover');
-            if (type === 'background') {
-                el.style.backgroundImage = 'url(' + dataUrl + ')';
-            } else if (type === 'src') {
-                el.src = dataUrl;
-                if (!gettingColorAtLeastForOne) {
-                    gettingColorAtLeastForOne = true;
-                    el.onload = function () {
-                        notify('info', 'cover image loaded');
-                        var target = document.querySelectorAll('[data-cover="gradient"]');
-                        target[0].style = '';
-                        if (target.length) {
-                            Grade(target);
-                            var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/g);
-                            if (colors && colors.length === 2) {
-                                notify('Grade', 'got colors from cover');
-                                notify('info', colors);
-                                applyTheme('backgroundColor', colors[0], '[data-background-primary]');
-                                applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
-                                applyTheme('color', colors[0], '[data-color-primary]');
-                                applyTheme('color', colors[1], '[data-color-secondary]');
-                            } else {
-                                notify('error', 'did not retrieved primary & secondary colors from cover');
-                            }
-                        }
-                    };
-                }
-            }
-            el.classList.remove('loader');
-        }
-        if (!els) {
-            notify('warning', 'no picture to populate');
-        }
-    } else {
-        notify('warning', 'no cover embedded in music');
-    }
+    injectCover(metadata.picture[0]); // specific process for covers
 }
+
+var injectCover = function (cover) {
+    var dataUrl = cover ? arrayBufferToDataUrl(cover.data) : 'icons/no-cover.svg';
+    if (!dataUrl) {
+        notify('warning', 'no cover embedded in music');
+        return;
+    }
+    var gettingColorAtLeastForOne = false;
+    var els = document.querySelectorAll('[data-cover]');
+    for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        var type = el.getAttribute('data-cover');
+        if (type === 'background') {
+            el.style.backgroundImage = 'url(' + dataUrl + ')';
+        } else if (type === 'src') {
+            el.src = dataUrl;
+            if (!gettingColorAtLeastForOne) {
+                gettingColorAtLeastForOne = true;
+                getColorPaletteFromImage(el);
+            }
+        }
+        el.classList.remove('loader');
+    }
+    if (!els) {
+        notify('warning', 'no picture to populate');
+    }
+};
+
+var getColorPaletteFromImage = function (image) {
+    image.onload = function () {
+        notify('info', 'cover image loaded');
+        var target = document.querySelectorAll('[data-cover="gradient"]'); // why querySelectorAll
+        target[0].style = '';
+        if (!target.length) {
+            notify('warning', 'no target to apply Grade');
+            return;
+        }
+        Grade(target);
+        var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/g); // to use [0] ?
+        if (colors && colors.length === 2) {
+            notify('Grade', 'got colors from cover : "' + colors[0] + '" & "' + colors[1] + '"');
+            applyTheme('backgroundColor', colors[0], '[data-background-primary]');
+            applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
+            applyTheme('color', colors[0], '[data-color-primary]');
+            applyTheme('color', colors[1], '[data-color-secondary]');
+        } else {
+            notify('error', 'did not retrieved primary & secondary colors from cover');
+        }
+    };
+};
 
 var injectData = function (value, selector) {
     var els = document.querySelectorAll(selector);
