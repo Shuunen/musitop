@@ -5,6 +5,10 @@
         "es6": true,
         "node": true
     },
+    "globals": {
+        "io": false,
+        "Grade": false
+    },
     "extends": "eslint:recommended",
     "rules": {
         // enable additional rules
