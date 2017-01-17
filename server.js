@@ -12,7 +12,7 @@
 var fs = require('fs');
 var path = require('path');
 var musicMetadata = require('musicmetadata');
-var port = 404;
+var port = 1404;
 
 // WEB
 var http = require('http');
@@ -183,6 +183,8 @@ connectSocket();
  */
 var childProcess = require('child_process');
 var notifier = require('node-notifier');
+var os = require('os');
+var isLinux = (os.type() === 'Linux');
 var configFile = 'config.json';
 var config = require('config-prompt')({
     musicPath: {
@@ -343,10 +345,12 @@ function notify(action, message, type) {
 }
 
 function playSong() {
-    player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
-    player.stderr.on('data', function (stderr) {
-        notify('Stderr', stderr, 'error');
-    });
+
+    if (isLinux) {
+        player = childProcess.spawn('cvlc', [song, '--play-and-exit']);
+    } else {
+        player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
+    }
 
     player.on('close', function (code) {
         if (code === null || code === 0) {

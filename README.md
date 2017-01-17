@@ -21,7 +21,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 ## Thanks
 
-* 1by1 & Vlc : for their great music player
+* 1by1 & Vlc : for their great music players
 * Paomedia & Aha-Soft : for their pretty icons
 * Minimist : for easy argument parsing
 * Node-notifier : for easy desktop notification
@@ -36,9 +36,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 * handle case when no music left in input folder
 * handle case when no music left in playlist
-* send timestamp to client when music started to play, so the progress bar will be accurate
-* add extension based ignore list for router (eg .map files)
-* make musitop works under linux
+* handle case when song cannot be moved (eg. when destination already exists)
 * add links in thanks
 * add a gif demo usage
 * add desktop notifications like http://singhharkirat.com/notification-logger/
@@ -47,17 +45,17 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 ## FAQ
 
 ** What about a generic cross-platform audio player ? **
-It's a fu***ng utopia. 
+It's a fu***ng utopia.
 
 ** What did you mean about a "generic cross-platform audio player" ? **
-I mean a npm package that come with libraries that can play audio files 
-on Windows, Linux & Mac. In this way user does not need to install 
-any package before "npm install". 
+I mean a npm package that come with libraries that can play audio files
+on Windows, Linux & Mac. In this way user does not need to install
+any package before "npm install".
 
 ** What about including pre-compiled binaries in your repo ? **
 Yes it's not so bad if there are one or just a few files to copy.
 But it's not that simple to find. For example 1by1.exe is a one file
-player that fit in 180kb. Great. 
+player that fit in 180kb. Great.
 I did not find any equivalent binary to include for Linux. Help needed !
 
 ** Why not use installed software on the machine ? **

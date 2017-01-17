@@ -11,7 +11,7 @@
  */
 
 var net = require('net');
-var port = 404;
+var port = 1404;
 var ioClient = require('socket.io-client');
 var argv = require('minimist')(process.argv.slice(2));
 var musicIs = argv.musicIs || 'smooth';

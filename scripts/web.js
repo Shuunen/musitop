@@ -111,7 +111,7 @@ var onMusicIs = function (musicIs) {
 
 var connectSocket = function () {
     notify('Socket', 'client side connecting...');
-    var socket = io('http://localhost:404');
+    var socket = io('http://localhost:1404');
     socketDoor = socket;
     socket.on('theme', onTheme);
     socket.on('metadata', onMetadata);

@@ -18,6 +18,9 @@
 var electron = require('electron');
 var path = require('path');
 var childProcess = require('child_process');
+var os = require('os');
+var isLinux = (os.type() === 'Linux');
+var isWindows = (os.type() === 'Windows');
 var icons = {
     good: {
         send: 'good',
@@ -68,9 +71,14 @@ var addTrayIcon = function (icon) {
 
 // init tray icons
 electron.app.on('ready', function () {
-    // don't know why but this order display icons into this order : good, next, bad
-    addTrayIcon(icons.next);
-    addTrayIcon(icons.bad);
-    addTrayIcon(icons.good);
-    // -_-''
+    // timeouts enforce the order in which icons will be displayed in systray
+    setTimeout(function () {
+        addTrayIcon(icons.good);
+    }, 100);
+    setTimeout(function () {
+        addTrayIcon(icons.next);
+    }, 200);
+    setTimeout(function () {
+        addTrayIcon(icons.bad);
+    }, 300);
 });
