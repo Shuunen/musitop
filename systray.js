@@ -18,9 +18,9 @@
 var electron = require('electron');
 var path = require('path');
 var childProcess = require('child_process');
-var os = require('os');
-var isLinux = (os.type() === 'Linux');
-var isWindows = (os.type() === 'Windows');
+// var os = require('os');
+// var isLinux = (os.type() === 'Linux');
+// var isWindows = (os.type() === 'Windows');
 var icons = {
     good: {
         send: 'good',
