@@ -34,6 +34,9 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 ## TODO
 
+* handle no cover art
+* handle last music action
+* handle case when next track is no more on disk
 * handle case when no music left in input folder
 * handle case when no music left in playlist
 * handle case when song cannot be moved (eg. when destination already exists)

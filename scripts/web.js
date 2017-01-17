@@ -133,7 +133,7 @@ function onMetadata(metadata) {
     injectData(metadata.title, '[data-title]');
     // specific process for covers
     var gettingColorAtLeastForOne = false;
-    var dataUrl = metadata.picture[0] ? arrayBufferToDataUrl(metadata.picture[0].data) : null;
+    var dataUrl = metadata.picture[0] ? arrayBufferToDataUrl(metadata.picture[0].data) : 'icons/no-cover.svg';
     if (dataUrl) {
         var els = document.querySelectorAll('[data-cover]');
         for (var i = 0; i < els.length; i++) {
