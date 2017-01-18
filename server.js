@@ -73,8 +73,13 @@ var server = http.createServer(function (request, response) {
         if (url[0] === '/') {
             url = url.substr(1);
         }
-        var fileStat = fs.statSync(url);
-        if (fileStat.isFile()) {
+        var fileStat = null;
+        try {
+            fileStat = fs.statSync(url);
+        } catch (e) {
+            notify('Error', 'cannot read file : ' + url);
+        }
+        if (fileStat && fileStat.isFile()) {
             response.writeHead(code, {
                 'Content-Type': contentType
             });
