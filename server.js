@@ -33,7 +33,7 @@ var sendDynamicValues = function (bForce) {
         updatedData = true;
     }
     if (!updatedData) {
-        notify('info', 'no new data to send');
+        // notify('info', 'no new data to send');
         return;
     }
     // notify('info', 'sending dynamic values to clients');
@@ -110,7 +110,7 @@ server.listen(port, function () {
 
 // SOCKET
 var onDisconnect = function () {
-    notify('Socket', 'server side disconnected');
+    // notify('Socket', 'server side disconnected');
 };
 
 var onConnection = function () {
@@ -252,6 +252,7 @@ function playNext() {
 }
 
 function getMetadata() {
+    metadata = null;
     startTimestamp = Math.round(Date.now() / 1000);
     var readableStream = fs.createReadStream(song);
     musicMetadata(readableStream, {
@@ -259,11 +260,12 @@ function getMetadata() {
     }, function (err, meta) {
         if (err) {
             notify('Error', 'Fail at reading mp3 metadata for ' + song + ', see logs', 'error');
+        } else {
+            metadata = meta;
+            metadata.startTimestamp = startTimestamp;
+            metadata.stream = '/stream.mp3';
+            readableStream.close();
         }
-        metadata = meta;
-        metadata.startTimestamp = startTimestamp;
-        metadata.stream = '/stream.mp3';
-        readableStream.close();
     });
 }
 
