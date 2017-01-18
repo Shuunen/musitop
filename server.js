@@ -214,10 +214,9 @@ function playFolder() {
             throw new Error(err);
         }
         files.forEach(function (fileName) {
-            //noinspection JSCheckFunctionSignatures
             var filePath = path.join(musicPath, fileName);
             var fileStat = fs.statSync(filePath);
-            if (fileStat.isFile()) {
+            if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
                 playlist.push(filePath);
             }
         });
@@ -260,7 +259,6 @@ function getMetadata() {
     }, function (err, meta) {
         if (err) {
             notify('Error', 'Fail at reading mp3 metadata for ' + song + ', see logs', 'error');
-            throw new Error(err);
         }
         metadata = meta;
         metadata.startTimestamp = startTimestamp;
