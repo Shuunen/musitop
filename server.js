@@ -120,13 +120,17 @@ var onConnection = function () {
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', 'Keep this song :D');
-        keepSong();
+        keep = true;
     } else if (musicIs === 'bad') {
         notify('Client', 'Delete this song :|');
         deleteSong();
+        playNext('onMusicIs bad');
     } else if (musicIs === 'next') {
         notify('Client', 'Next song please :)');
-        playNext();
+        if (keep) {
+            moveSong();
+        }
+        playNext('onMusicIs next');
     } else {
         notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
     }
@@ -142,7 +146,7 @@ var io = require('socket.io')(server);
 var connectSocket = function () {
     notify('Socket', 'server connecting...');
     io.on('connection', function (socket) {
-        notify('Socket', 'server side connection detected');
+        // notify('Socket', 'server side connection detected');
         socket.on('music is', onMusicIs);
         socket.on('error', onError);
         socket.on('disconnect', onDisconnect);
@@ -200,6 +204,7 @@ var shuffle = require('shuffle-array');
 var playlist = [];
 var song = '';
 var player = null;
+var manualKill = false;
 var keep = false;
 var metadata = null;
 var startTimestamp = null;
@@ -224,7 +229,7 @@ function playFolder() {
         if (config.get('shuffleMusic')) {
             shuffle(playlist);
         }
-        playNext();
+        playNext('playFolder');
     });
 }
 
@@ -234,9 +239,8 @@ function fileName(filePath) {
     return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.');
 }
 
-function playNext() {
-    // by default, don't keep newly playing song
-    keep = false;
+function playNext(from) {
+    // notify('playNext', 'init' + (from ? ' from : ' + from : ''));
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
     getMetadata();
@@ -269,27 +273,24 @@ function getMetadata() {
     });
 }
 
-function keepSong() {
-    keep = true;
-}
-
 function moveSong() {
-
+    // notify('moveSong', 'init');
+    // because keep was true, we came here in moveSong
+    // first thing to do is to reset this toggle :)
+    keep = false;
+    // because the file is actually read/locked by player
+    // will move the file in an async way
     doAsync(function (lastSongPath) {
         var newLastSongPath = path.join(config.get('keepPath'), path.basename(lastSongPath));
-
         // notify('Info', 'will move it to : "' + newLastSongPath + '"');
         fs.rename(lastSongPath, newLastSongPath, function (err) {
             if (err) throw err;
             notify('Moved', fileName(lastSongPath));
         });
     });
-
-    playNext();
 }
 
 function deleteSong() {
-    keep = false;
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) {
@@ -300,10 +301,6 @@ function deleteSong() {
             }
         });
     });
-
-    if (player) {
-        player.kill();
-    }
 }
 
 function doAsync(callback) {
@@ -336,24 +333,35 @@ function notify(action, message, type) {
 function playSong() {
 
     if (player) {
+        // if any player we kill it, we don't want to have multiple players at the same time
+        manualKill = true;
         player.kill();
     }
 
     if (isLinux) {
+        // use cvlc on linux
         player = childProcess.spawn('cvlc', [song, '--play-and-exit']);
     } else {
+        // use 1by1 on win
         player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     }
 
+    // when user did not asked anything, player close by itself
     player.on('close', function (code) {
-        if (code === null || code === 0) {
-            if (keep) {
-                moveSong();
-            } else {
-                playNext();
-            }
+        // notify('Player', 'closed');
+        if (manualKill) {
+            // this avoid making move or play next if player was killed on purpose
+            manualKill = false;
         } else {
-            notify('Error', 'Player process exited with non-handled code "' + code + '"', 'error');
+            // here player just went until the end of the song & then exited
+            if (code === null || code === 0) {
+                if (keep) {
+                    moveSong();
+                }
+                playNext('player closed');
+            } else {
+                notify('Error', 'Player process exited with non-handled code "' + code + '"', 'error');
+            }
         }
     });
 }
