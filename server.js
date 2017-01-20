@@ -13,30 +13,17 @@ var fs = require('fs');
 var path = require('path');
 var musicMetadata = require('musicmetadata');
 var port = 1404;
-
-// WEB
 var http = require('http');
-var svgPatterns = [];
-var svgPatternPath = 'patterns';
-fs.readdir(svgPatternPath, function (err, files) {
-    if (err) {
-        notify('Error', 'Fail at reading patterns path, see logs', 'error');
-        throw new Error(err);
-    }
-    files.forEach(function (fileName) {
-        svgPatterns.push(svgPatternPath + '/' + fileName);
-    });
-});
 
 var sendDynamicValues = function (bForce) {
     if (bForce) {
         updatedData = true;
     }
     if (!updatedData) {
-        // notify('info', 'no new data to send');
+        // notify('Server', 'No new data to send');
         return;
     }
-    // notify('info', 'sending dynamic values to clients');
+    // notify('Server', 'Sending dynamic values to clients');
     io.emit('options', {
         audioClientSide: config.get('audioClientSide')
     });
@@ -70,20 +57,20 @@ var server = http.createServer(function (request, response) {
         code = 404;
     }
     if (code !== 404) {
-        if (url[0] === '/') {
+        if (url[0] === '/' && contentType.indexOf('audio') === -1) {
             url = url.substr(1);
         }
         var fileStat = null;
         try {
             fileStat = fs.statSync(url);
         } catch (e) {
-            notify('Error', 'cannot read file : ' + url);
+            notify('Server', 'Cannot read file : ' + url);
         }
         if (fileStat && fileStat.isFile()) {
             response.writeHead(code, {
                 'Content-Type': contentType
             });
-            // notify('Info', 'router serve file : ' + url);
+            // notify('Server', 'Router serve file : ' + url);
             var file = fs.readFileSync(url);
             response.end(file, 'binary');
             if (contentType === 'text/html') {
@@ -98,7 +85,7 @@ var server = http.createServer(function (request, response) {
             'Content-Type': 'text/plain'
         });
         if (url.indexOf('.map') === -1) {
-            notify('Error', 'router cannot serve file : ' + url);
+            notify('Server', 'Router cannot serve file : ' + url);
         }
         response.end('file or resource not found :\'(');
     }
@@ -114,7 +101,7 @@ var onDisconnect = function () {
 };
 
 var onConnection = function () {
-    notify('Socket', 'server side connection established');
+    notify('Socket', 'Server side connection established');
 };
 
 var onMusicIs = function (musicIs) {
@@ -132,21 +119,21 @@ var onMusicIs = function (musicIs) {
         }
         playNext('onMusicIs next');
     } else {
-        notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
+        notify('Server', 'Client said that music is "' + musicIs + '" ?!?', 'error');
     }
 };
 
-var onError = function (e) {
-    notify('Error', 'Client error, see logs', 'error');
-    notify('error', e);
+var onError = function (err) {
+    notify('Socket', 'Client had errors, check me', 'error');
+    throw new Error(err);
 };
 
 var updatedData = false;
 var io = require('socket.io')(server);
 var connectSocket = function () {
-    notify('Socket', 'server connecting...');
+    notify('Socket', 'Server connecting...');
     io.on('connection', function (socket) {
-        // notify('Socket', 'server side connection detected');
+        // notify('Socket', 'Server side connection detected');
         socket.on('music is', onMusicIs);
         socket.on('error', onError);
         socket.on('disconnect', onDisconnect);
@@ -204,6 +191,7 @@ var shuffle = require('shuffle-array');
 var playlist = [];
 var song = '';
 var player = null;
+var autoKill = false;
 var manualKill = false;
 var keep = false;
 var metadata = null;
@@ -211,11 +199,11 @@ var startTimestamp = null;
 
 function playFolder() {
     var musicPath = config.get('musicPath');
-    notify('Scanning', '"' + musicPath + '"' + ' for songs');
+    notify('Server', 'Scanning "' + musicPath + '"' + ' for songs');
     fs.readdir(musicPath, function (err, files) {
         if (err) {
             config.trash();
-            notify('Error', 'Fail at reading musicPath, see logs', 'error');
+            notify('Server', 'Failed at reading musicPath, check me', 'error');
             throw new Error(err);
         }
         files.forEach(function (fileName) {
@@ -240,7 +228,7 @@ function fileName(filePath) {
 }
 
 function playNext(from) {
-    // notify('playNext', 'init' + (from ? ' from : ' + from : ''));
+    // notify('Server', 'playNext init' + (from ? ' from : ' + from : ''));
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
     getMetadata();
@@ -249,8 +237,8 @@ function playNext(from) {
         playSong();
     }
     setTimeout(function () {
-        notify('Remaining', playlist.length + ' track(s)');
-        notify('Playing', fileName(song), 'info');
+        notify('Server', 'Remaining ' + playlist.length + ' track(s)');
+        notify('Server', 'Playing ' + fileName(song), 'info');
         sendDynamicValues(true);
     }, 1100);
 }
@@ -274,7 +262,7 @@ function getMetadata() {
 }
 
 function moveSong() {
-    // notify('moveSong', 'init');
+    // notify('Server', 'moveSong init');
     // because keep was true, we came here in moveSong
     // first thing to do is to reset this toggle :)
     keep = false;
@@ -282,10 +270,14 @@ function moveSong() {
     // will move the file in an async way
     doAsync(function (lastSongPath) {
         var newLastSongPath = path.join(config.get('keepPath'), path.basename(lastSongPath));
-        // notify('Info', 'will move it to : "' + newLastSongPath + '"');
+        // notify('Server', 'will move it to : "' + newLastSongPath + '"');
         fs.rename(lastSongPath, newLastSongPath, function (err) {
-            if (err) throw err;
-            notify('Moved', fileName(lastSongPath));
+            if (err) {
+                notify('Server', 'Move failed, see me');
+                throw new Error(err);
+            } else {
+                notify('Server', 'Moved ' + fileName(lastSongPath));
+            }
         });
     });
 }
@@ -294,10 +286,10 @@ function deleteSong() {
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) {
-                notify('Error', 'Delete failed, see logs');
-                notify('Error', err);
+                notify('Server', 'Delete failed, see me');
+                throw new Error(err);
             } else {
-                notify('Deleted', fileName(lastSongPath));
+                notify('Server', 'Deleted ' + fileName(lastSongPath));
             }
         });
     });
@@ -305,7 +297,7 @@ function deleteSong() {
 
 function doAsync(callback) {
     if (!callback) {
-        notify('Error', 'Do Async need a callback', 'error');
+        notify('Server', 'Do Async need a callback', 'error');
     } else {
         var lastSongPath = song + '';
         setTimeout(function () {
@@ -324,16 +316,17 @@ function notify(action, message, type) {
         });
     }
     // in order to align logs :p
-    while (action.length < 9) {
+    while (action.length < 6) {
         action += ' ';
     }
     console.log(action + ' : ' + message); // eslint-disable-line no-console
 }
 
 function playSong() {
-
-    if (player) {
+    notify('close', 'autoKill is ' + autoKill);
+    if (player && !autoKill) {
         // if any player we kill it, we don't want to have multiple players at the same time
+        notify('close', 'manualKill was ' + manualKill + ', now true');
         manualKill = true;
         player.kill();
     }
@@ -348,11 +341,18 @@ function playSong() {
 
     // when user did not asked anything, player close by itself
     player.on('close', function (code) {
-        // notify('Player', 'closed');
+        notify('close', 'manualKill is ' + manualKill);
         if (manualKill) {
+            notify('Server', 'Player closed, was manual kill');
             // this avoid making move or play next if player was killed on purpose
+            notify('close', 'manualKill was ' + manualKill + ', now false');
+            notify('close', 'autoKill was ' + autoKill + ', now false');
             manualKill = false;
+            autoKill = false;
         } else {
+            notify('Server', 'Player closed, was auto kill');
+            notify('close', 'autoKill was ' + autoKill + ', now true');
+            autoKill = true;
             // here player just went until the end of the song & then exited
             if (code === null || code === 0) {
                 if (keep) {
@@ -360,14 +360,14 @@ function playSong() {
                 }
                 playNext('player closed');
             } else {
-                notify('Error', 'Player process exited with non-handled code "' + code + '"', 'error');
+                notify('Server', 'Player process exited with non-handled code "' + code + '"', 'error');
             }
         }
     });
 }
 
 function getConfigFromUser(callback) {
-    notify('Conf', 'will ask user for conf then save it locally');
+    notify('Server', 'Will ask user for conf then save it locally');
     config.prompt({
         all: true,
         nodeEnv: false,
@@ -376,13 +376,13 @@ function getConfigFromUser(callback) {
 
         if (err) {
             config.trash();
-            notify('Error', 'Fail at reading config, see logs', 'error');
+            notify('Server', 'Failed at reading config, see logs', 'error');
             throw new Error(err);
         }
         // move conf file in config store to local folder
         // from : C:\Users\ME\.config\configstore\musitop.json
         // to   : .
-        // notify('Config path', config.path);
+        // notify('Server', 'Config path ' + config.path);
         fs.createReadStream(config.path).pipe(fs.createWriteStream(configFile));
 
         // if any callback, execute it
@@ -396,9 +396,9 @@ function getConfig(callback) {
     // get local config
     fs.readFile(configFile, function (err, configContent) {
         if (err) {
-            notify('Info', 'No local config found');
+            notify('Server', 'No local config found');
         } else {
-            notify('Info', 'Local config found, set found conf key/values into in-memory conf');
+            notify('Server', 'Local config found, set found conf key/values into in-memory conf');
             config.all = JSON.parse(configContent);
         }
         var configErrors = config.validate();
@@ -407,7 +407,7 @@ function getConfig(callback) {
         } else if (callback && typeof callback === 'function') {
             callback();
         } else {
-            notify('Error', 'no callback provided');
+            notify('Server', 'Error, no callback provided');
         }
     });
 }
