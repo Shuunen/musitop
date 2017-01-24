@@ -227,7 +227,7 @@ function fileName(filePath) {
     return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.');
 }
 
-function playNext(from) {
+function playNext() {
     // notify('Server', 'playNext init' + (from ? ' from : ' + from : ''));
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0];
@@ -276,7 +276,7 @@ function moveSong() {
                 notify('Server', 'Move failed, see me');
                 throw new Error(err);
             } else {
-                notify('Server', 'Moved ' + fileName(lastSongPath));
+                notify('Server', '> Moved ' + fileName(lastSongPath));
             }
         });
     });
@@ -289,7 +289,7 @@ function deleteSong() {
                 notify('Server', 'Delete failed, see me');
                 throw new Error(err);
             } else {
-                notify('Server', 'Deleted ' + fileName(lastSongPath));
+                notify('Server', '✕ Deleted ' + fileName(lastSongPath));
             }
         });
     });
