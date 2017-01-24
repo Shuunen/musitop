@@ -106,14 +106,14 @@ var onConnection = function () {
 
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
-        notify('Client', 'Keep this song :D');
+        notify('Client', '★ Keep this song :D');
         keep = true;
     } else if (musicIs === 'bad') {
-        notify('Client', 'Delete this song :|');
+        notify('Client', '✕ Delete this song :|');
         deleteSong();
         playNext('onMusicIs bad');
     } else if (musicIs === 'next') {
-        notify('Client', 'Next song please :)');
+        notify('Client', '» Next song please :)');
         if (keep) {
             moveSong();
         }
@@ -237,8 +237,8 @@ function playNext(from) {
         playSong();
     }
     setTimeout(function () {
-        notify('Server', 'Remaining ' + playlist.length + ' track(s)');
-        notify('Server', 'Playing ' + fileName(song), 'info');
+        notify('Server', '♫ Remaining ' + playlist.length + ' track(s)');
+        notify('Playing', fileName(song), 'info');
         sendDynamicValues(true);
     }, 1100);
 }
@@ -323,10 +323,10 @@ function notify(action, message, type) {
 }
 
 function playSong() {
-    notify('close', 'autoKill is ' + autoKill);
+    // notify('playSong', 'autoKill is ' + autoKill);
     if (player && !autoKill) {
         // if any player we kill it, we don't want to have multiple players at the same time
-        notify('close', 'manualKill was ' + manualKill + ', now true');
+        // notify('playSong', 'manualKill was ' + manualKill + ', now true');
         manualKill = true;
         player.kill();
     }
@@ -339,19 +339,23 @@ function playSong() {
         player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close']);
     }
 
+    // because new player started
+    // notify('playSong', 'autoKill was ' + autoKill + ', now false');
+    autoKill = false;
+
     // when user did not asked anything, player close by itself
     player.on('close', function (code) {
-        notify('close', 'manualKill is ' + manualKill);
+        // notify('close', 'manualKill is ' + manualKill);
         if (manualKill) {
-            notify('Server', 'Player closed, was manual kill');
+            // notify('Server', 'Player closed, was manual kill');
             // this avoid making move or play next if player was killed on purpose
-            notify('close', 'manualKill was ' + manualKill + ', now false');
-            notify('close', 'autoKill was ' + autoKill + ', now false');
+            // notify('close', 'manualKill was ' + manualKill + ', now false');
+            // notify('close', 'autoKill was ' + autoKill + ', now false');
             manualKill = false;
             autoKill = false;
         } else {
-            notify('Server', 'Player closed, was auto kill');
-            notify('close', 'autoKill was ' + autoKill + ', now true');
+            // notify('Server', 'Player closed, was auto kill');
+            // notify('close', 'autoKill was ' + autoKill + ', now true');
             autoKill = true;
             // here player just went until the end of the song & then exited
             if (code === null || code === 0) {
