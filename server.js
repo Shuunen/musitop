@@ -63,8 +63,8 @@ var server = http.createServer(function (request, response) {
         var fileStat = null;
         try {
             fileStat = fs.statSync(url);
-        } catch (e) {
-            notify('Server', 'Cannot read file : ' + url);
+        } catch (err) {
+            notify('Server', 'Cannot read file', 'error', url);
         }
         if (fileStat && fileStat.isFile()) {
             response.writeHead(code, {
@@ -119,13 +119,12 @@ var onMusicIs = function (musicIs) {
         }
         playNext('onMusicIs next');
     } else {
-        notify('Server', 'Client said that music is "' + musicIs + '" ?!?', 'error');
+        notify('Server', 'Client said that music is "' + musicIs + '" ?!?', 'info');
     }
 };
 
 var onError = function (err) {
-    notify('Socket', 'Client had errors, check me', 'error');
-    throw new Error(err);
+    notify('Socket', 'Client had errors', 'error', err);
 };
 
 var updatedData = false;
@@ -203,21 +202,23 @@ function playFolder() {
     fs.readdir(musicPath, function (err, files) {
         if (err) {
             config.trash();
-            notify('Server', 'Failed at reading musicPath, check me', 'error');
-            throw new Error(err);
-        }
-        files.forEach(function (fileName) {
-            var filePath = path.join(musicPath, fileName);
-            var fileStat = fs.statSync(filePath);
-            if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
-                playlist.push(filePath);
+            notify('Error', 'Failed at reading musicPath', 'error', err);
+        } else {
+            // inject files
+            files.forEach(function (fileName) {
+                var filePath = path.join(musicPath, fileName);
+                var fileStat = fs.statSync(filePath);
+                if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
+                    playlist.push(filePath);
+                }
+            });
+            // shuffle if necessary
+            if (config.get('shuffleMusic')) {
+                shuffle(playlist);
             }
-        });
-
-        if (config.get('shuffleMusic')) {
-            shuffle(playlist);
+            // start playing
+            playNext('playFolder');
         }
-        playNext('playFolder');
     });
 }
 
@@ -251,7 +252,7 @@ function getMetadata() {
         duration: true
     }, function (err, meta) {
         if (err) {
-            notify('Error', 'Fail at reading mp3 metadata for ' + song + ', see logs', 'error');
+            notify('Error', 'Fail at reading mp3 metadata', 'error', err);
         } else {
             metadata = meta;
             metadata.startTimestamp = startTimestamp;
@@ -286,8 +287,7 @@ function deleteSong() {
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) {
-                notify('Server', 'Delete failed, see me');
-                throw new Error(err);
+                notify('Error', 'Delete failed', 'error', err);
             } else {
                 notify('Server', '✕ Deleted ' + fileName(lastSongPath));
             }
@@ -297,7 +297,7 @@ function deleteSong() {
 
 function doAsync(callback) {
     if (!callback) {
-        notify('Server', 'Do Async need a callback', 'error');
+        notify('Error', 'Do Async need a callback', 'error');
     } else {
         var lastSongPath = song + '';
         setTimeout(function () {
@@ -306,7 +306,7 @@ function doAsync(callback) {
     }
 }
 
-function notify(action, message, type) {
+function notify(action, message, type, bonus) {
     if (type) {
         // notify client side
         notifier.notify({
@@ -314,12 +314,20 @@ function notify(action, message, type) {
             message: message,
             type: type
         });
+        type = null;
     }
     // in order to align logs :p
-    while (action.length < 6) {
-        action += ' ';
+    var actionAligned = action;
+    while (actionAligned.length < 6) {
+        actionAligned += ' ';
     }
-    console.log(action + ' : ' + message); // eslint-disable-line no-console
+    console.log(actionAligned + ' : ' + message); // eslint-disable-line no-console
+    if (bonus) {
+        console.log(bonus); // eslint-disable-line no-console
+    }
+    if (action.toLowerCase() === 'error') {
+        process.exit(0);
+    }
 }
 
 function playSong() {
@@ -380,8 +388,7 @@ function getConfigFromUser(callback) {
 
         if (err) {
             config.trash();
-            notify('Server', 'Failed at reading config, see logs', 'error');
-            throw new Error(err);
+            notify('Server', 'Failed at reading config, see logs', 'error', err);
         }
         // move conf file in config store to local folder
         // from : C:\Users\ME\.config\configstore\musitop.json
@@ -411,7 +418,7 @@ function getConfig(callback) {
         } else if (callback && typeof callback === 'function') {
             callback();
         } else {
-            notify('Server', 'Error, no callback provided');
+            notify('Error', 'Error, no callback provided', 'error');
         }
     });
 }
