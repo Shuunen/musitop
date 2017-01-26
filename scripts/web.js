@@ -1,11 +1,13 @@
 var socketDoor = null;
 var player = null;
+var playerIsPaused = false;
 
 window.onload = function () {
     connectSocket();
     handleControls();
     handleProgressBar();
     player = document.querySelector('audio');
+    handleKeyControls();
 };
 
 var startTimestamp;
@@ -48,6 +50,33 @@ var handleControls = function () {
         var ctrl = ctrls[i];
         ctrl.onclick = ctrl.onmouseenter = ctrl.onmouseleave = handleControlsEvent;
     }
+};
+
+var handleKeyControls = function () {
+    document.body.addEventListener('keyup', function (event) {
+        var musicIs = '';
+        if (event.key === 'ArrowUp') {
+            musicIs = 'good';
+        } else if (event.key === 'ArrowDown') {
+            musicIs = 'bad';
+        } else if (event.key === 'ArrowRight') {
+            musicIs = 'next';
+        } else if (event.key === 'ArrowLeft') {
+            // do player pause/resume
+            if (playerIsPaused) {
+                player.play();
+                playerIsPaused = false;
+            } else {
+                player.pause();
+                playerIsPaused = true;
+            }
+        } else {
+            notify('info', 'key "' + event.key + '" is not handled yet');
+        }
+        if (musicIs.length) {
+            socketDoor.emit('music is', musicIs);
+        }
+    });
 };
 
 var handleControlsEvent = function (event) {
