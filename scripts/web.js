@@ -54,14 +54,15 @@ var handleControls = function () {
 
 var handleKeyControls = function () {
     document.body.addEventListener('keyup', function (event) {
+        // notify('info', 'received keyup "' + event.key + '"');
         var musicIs = '';
-        if (event.key === 'ArrowUp') {
+        if (event.key === 'MediaTrackPrevious') { // <
             musicIs = 'good';
-        } else if (event.key === 'ArrowDown') {
+        } else if (event.key === 'MediaStop') { // [ ]
             musicIs = 'bad';
-        } else if (event.key === 'ArrowRight') {
+        } else if (event.key === 'MediaTrackNext') { // >
             musicIs = 'next';
-        } else if (event.key === 'ArrowLeft') {
+        } else if (event.key === 'MediaPlayPause') { // [>]
             // do player pause/resume
             if (playerIsPaused) {
                 player.play();
