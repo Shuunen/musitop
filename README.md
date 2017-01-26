@@ -10,6 +10,42 @@ Install npm dependencies and set your "input" music folder.
 Optional : if you want to move your favorite music, set the "keep" music folder.
 
 
+## Optional : add shortcut folder to your path
+
+Edit your bashrc :
+```
+gedit ~/.bashrc
+```
+Add Musitop :
+```
+MUSITOP=/home/ME/Projects/musitop/shortcuts
+PATH=$PATH:$MUSITOP
+
+export PATH
+```
+And source :
+```
+source ~/.bashrc
+```
+Now you can easilly control Musitop wherever you are :
+```
+musinext
+musigood
+musibad
+```
+
+## Optional : configure media bindings
+
+On Ubuntu, go to Keyboard > Custom shortcuts
+
+Click on the "+" to add a new binding
+
+Name it "Musitop Next" for example
+
+And assign this command "bash /home/path-to-musitop/shortcuts/musinext.sh"
+
+Now you can control Musitop with media bindings :)
+
 ## Use
 
 Open command line and npm start.
@@ -34,6 +70,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 ## TODO
 
+* handle pause server side to tell it to client
 * handle no cover art
 * handle last music action
 * handle case when next track is no more on disk
