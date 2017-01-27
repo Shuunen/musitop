@@ -6,8 +6,34 @@ window.onload = function () {
     connectSocket();
     handleControls();
     handleProgressBar();
-    player = document.querySelector('audio');
     handleKeyControls();
+};
+
+var handleClientPlayer = function () {
+
+    player = document.querySelector('audio');
+
+    player.autoplay = true;
+
+    player.addEventListener('ended', function () {
+        player.currentTime = 0;
+        notify('info', 'song ended, ask for next one');
+        socketDoor.emit('music is', 'next');
+    });
+
+};
+
+var pauseResumeClientPlayer = function () {
+    if (player) {
+        // do player pause/resume
+        if (playerIsPaused) {
+            player.play();
+            playerIsPaused = false;
+        } else {
+            player.pause();
+            playerIsPaused = true;
+        }
+    }
 };
 
 var startTimestamp;
@@ -63,14 +89,7 @@ var handleKeyControls = function () {
         } else if (event.key === 'MediaTrackNext') { // >
             musicIs = 'next';
         } else if (event.key === 'MediaPlayPause') { // [>]
-            // do player pause/resume
-            if (playerIsPaused) {
-                player.play();
-                playerIsPaused = false;
-            } else {
-                player.pause();
-                playerIsPaused = true;
-            }
+            pauseResumeClientPlayer();
         } else {
             notify('info', 'key "' + event.key + '" is not handled yet');
         }
@@ -151,6 +170,7 @@ var connectSocket = function () {
     socket.on('error', onError);
     socket.on('disconnect', onDisconnect);
     socket.on('connect', onConnection);
+    socket.on('pause', pauseResumeClientPlayer);
 };
 
 var onConnection = function () {
@@ -160,7 +180,9 @@ var onConnection = function () {
 function onOptions(options) {
     notify('Socket', 'received fresh options');
     notify('info', options);
-    player.autoplay = options.audioClientSide;
+    if (!player && options.audioClientSide) {
+        handleClientPlayer();
+    }
 }
 
 function onMetadata(metadata) {

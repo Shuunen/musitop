@@ -107,9 +107,11 @@ var onConnection = function () {
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', '★ Keep this song :D');
+        notify('Will keep', fileName(song), 'info');
         keep = true;
     } else if (musicIs === 'bad') {
         notify('Client', '✕ Delete this song :|');
+        notify('Deleting', fileName(song), 'info');
         deleteSong();
         playNext('onMusicIs bad');
     } else if (musicIs === 'next') {
@@ -118,6 +120,9 @@ var onMusicIs = function (musicIs) {
             moveSong();
         }
         playNext('onMusicIs next');
+    } else if (musicIs === 'pause') {
+        notify('Client', '|| Pause song please');
+        io.emit('pause', 'please :)');
     } else {
         notify('Server', 'Client said that music is "' + musicIs + '" ?!?', 'info');
     }
