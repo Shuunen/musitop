@@ -79,6 +79,7 @@ var handleControls = function () {
 var handleKeyControls = function () {
     document.body.addEventListener('keyup', function (event) {
         // notify('info', 'received keyup "' + event.key + '"');
+        socketDoor.emit('event', event.key);
         var musicIs = '';
         if (event.key === 'MediaTrackPrevious') { // <
             musicIs = 'good';

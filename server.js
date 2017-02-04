@@ -133,6 +133,10 @@ var onError = function (err) {
     notify('Socket', 'Client had errors', 'error', err);
 };
 
+var onEvent = function (e) {
+    notify('Event', e);
+};
+
 var updatedData = false;
 var io = require('socket.io')(server);
 var connectSocket = function () {
@@ -143,6 +147,7 @@ var connectSocket = function () {
         socket.on('error', onError);
         socket.on('disconnect', onDisconnect);
         socket.on('connect', onConnection);
+        socket.on('event', onEvent);
         sendDynamicValues();
     });
 };
