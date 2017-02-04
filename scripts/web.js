@@ -1,6 +1,6 @@
 var socketDoor = null;
 var player = null;
-var playerIsPaused = false;
+// var serverIp = 'localhost'; // will be replaced dynamically
 
 window.onload = function () {
     connectSocket();
@@ -26,12 +26,10 @@ var handleClientPlayer = function () {
 var pauseResumeClientPlayer = function () {
     if (player) {
         // do player pause/resume
-        if (playerIsPaused) {
+        if (player.paused) {
             player.play();
-            playerIsPaused = false;
         } else {
             player.pause();
-            playerIsPaused = true;
         }
     }
 };
@@ -104,6 +102,7 @@ var handleControlsEvent = function (event) {
     var musicIs = button.getAttribute('data-music-is') || '';
     if (musicIs.length) {
         if (event.type === 'click') {
+            player.play(); // allow auto playing songs
             socketDoor.emit('music is', musicIs);
             button.classList.add('clicked');
             setTimeout(function () {
@@ -162,7 +161,7 @@ var onMusicIs = function (musicIs) {
 
 var connectSocket = function () {
     notify('Socket', 'client side connecting...');
-    var socket = io('http://localhost:1404');
+    var socket = io('http://' + document.location.hostname + ':1404');
     socketDoor = socket;
     socket.on('metadata', onMetadata);
     socket.on('options', onOptions);
