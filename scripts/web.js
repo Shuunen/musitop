@@ -1,5 +1,6 @@
 var socketDoor = null;
 var player = null;
+var overlay = null;
 // var serverIp = 'localhost'; // will be replaced dynamically
 
 window.onload = function () {
@@ -21,6 +22,9 @@ var handleClientPlayer = function () {
         socketDoor.emit('music is', 'next');
     });
 
+    player.addEventListener('pause', handlePlayPause);
+    player.addEventListener('play', handlePlayPause);
+    player.addEventListener('playing', handlePlayPause);
 };
 
 var pauseResumeClientPlayer = function () {
@@ -28,8 +32,12 @@ var pauseResumeClientPlayer = function () {
         // do player pause/resume
         if (player.paused) {
             player.play();
+            player.autoplay = true;
+            notify('info', 'song  was paused, resuming...');
         } else {
             player.pause();
+            player.autoplay = false;
+            notify('info', 'song  was playing, do pause');
         }
     }
 };
@@ -69,6 +77,17 @@ var handleProgressBar = function (metadata) {
 };
 
 var handleControls = function () {
+    // set overlay once
+    overlay = document.querySelector('[data-status]');
+
+    var pauses = document.querySelectorAll('[data-do="pause"]');
+    for (var j = 0; j < pauses.length; j++) {
+        pauses[j].addEventListener('click', function () {
+            notify('info', 'clicked on pause/resume');
+            pauseResumeClientPlayer();
+        });
+    }
+
     var ctrls = document.querySelectorAll('[data-music-is]');
     for (var i = 0; i < ctrls.length; i++) {
         var ctrl = ctrls[i];
@@ -92,7 +111,8 @@ var handleKeyControls = function () {
         } else {
             notify('info', 'key "' + event.key + '" is not handled yet');
         }
-        if (musicIs.length) {
+        var isNotPause = event.key.toLowerCase().indexOf('pause') === -1;
+        if (musicIs.length && isNotPause) {
             socketDoor.emit('music is', musicIs);
         }
     });
@@ -103,7 +123,6 @@ var handleControlsEvent = function (event) {
     var musicIs = button.getAttribute('data-music-is') || '';
     if (musicIs.length) {
         if (event.type === 'click') {
-            player.play(); // allow auto playing songs
             socketDoor.emit('music is', musicIs);
             button.classList.add('clicked');
             setTimeout(function () {
@@ -193,7 +212,23 @@ function onMetadata(metadata) {
     injectData(metadata.title, '[data-title]');
     injectCover(metadata.picture[0]); // specific process for covers
     injectAudio(metadata.stream);
+    handlePlayPause();
 }
+
+var handlePlayPause = function () {
+    if (player) {
+        if (player.paused) {
+            overlay.classList.remove('hide');
+            overlay.setAttribute('data-status', 'paused');
+        } else {
+            overlay.setAttribute('data-status', 'playing');
+            setTimeout(function () {
+                overlay.classList.add('hide');
+            }, 500);
+        }
+        // notify('info', 'player paused ? ' + player.paused);
+    }
+};
 
 var injectAudio = function (stream) {
     player.src = stream;
