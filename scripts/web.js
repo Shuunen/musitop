@@ -12,6 +12,8 @@ var initVue = function () {
                 name: 'Musitop',
                 socket: null
             },
+            isMobile: (typeof window.orientation !== 'undefined'),
+            isLoading: true,
             overlay: {
                 status: 'paused'
             },
@@ -40,7 +42,7 @@ var initVue = function () {
                 this.song.title = metadata.title;
                 injectCover(metadata.picture[0]); // specific process for covers
                 this.player.src = metadata.stream;
-                this.updateOverlay();
+                this.isLoading = false;
             },
             onDisconnect: function () {
                 notify('Socket', 'client side disconnected');
@@ -57,7 +59,7 @@ var initVue = function () {
                 notify('info', options);
             },
             updateOverlay: function () {
-                if (this.player) {
+                if (this.player && !this.isLoading) {
                     if (this.player.paused) {
                         this.overlay.status = 'paused';
                     } else {
@@ -95,7 +97,10 @@ var initVue = function () {
                 this.socket.emit('music is', musicIs);
             },
             nextSong: function () {
+                this.isLoading = true;
+                // set player time to 0 for next song
                 if (this.player) {
+                    this.player.pause();
                     this.player.currentTime = 0;
                 }
                 this.socket.emit('music is', 'next');
