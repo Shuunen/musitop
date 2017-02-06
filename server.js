@@ -263,7 +263,7 @@ function getMetadata() {
         duration: true
     }, function (err, meta) {
         if (err) {
-            notify('Error', 'Fail at reading mp3 metadata', 'error', err);
+            notify('Error', 'Fail at reading mp3 metadata for song "' + song + '"', 'error', err);
         } else {
             metadata = meta;
             metadata.startTimestamp = startTimestamp;
