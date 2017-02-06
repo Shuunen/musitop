@@ -54,6 +54,8 @@ var server = http.createServer(function (request, response) {
         contentType = 'image/vnd.microsoft.icon';
     } else if (url.indexOf('.js') !== -1) {
         contentType = 'application/javascript';
+    } else if (url.indexOf('.css') !== -1) {
+        contentType = 'text/css';
     } else {
         code = 404;
     }
@@ -75,7 +77,7 @@ var server = http.createServer(function (request, response) {
             var file = fs.readFileSync(url);
             response.end(file, 'binary');
             if (contentType === 'text/html') {
-                updatedData = true;
+                updatedData = true; // TODO: maybe remove this to avoid resend data on html serve
             }
         } else {
             code = 404;
