@@ -22,7 +22,7 @@ var initVue = function () {
             }
         },
         methods: {
-            connectSocket: function () {
+            initSocket: function () {
                 notify('Socket', 'client side connecting...');
                 this.socket = io('http://' + document.location.hostname + ':1404');
                 this.socket.on('metadata', this.onMetadata);
@@ -65,7 +65,7 @@ var initVue = function () {
                     }
                 }
             },
-            initPlayerAudio: function () {
+            initPlayer: function () {
                 this.player = document.querySelector('audio');
                 this.player.autoplay = true;
                 this.player.addEventListener('ended', this.nextSong);
@@ -73,22 +73,23 @@ var initVue = function () {
                 this.player.addEventListener('play', this.updateOverlay);
                 this.player.addEventListener('playing', this.updateOverlay);
             },
-            initKeyboardControls: function () {
-                document.body.addEventListener('keyup', function (event) {
-                    // notify('info', 'received keyup "' + event.key + '"');
-                    this.socket.emit('event', event.key);
-                    if (event.key === 'MediaTrackPrevious') { // <
-                        this.musicIs('good');
-                    } else if (event.key === 'MediaStop') { // [ ]
-                        this.musicIs('bad');
-                    } else if (event.key === 'MediaTrackNext') { // >
-                        this.nextSong();
-                    } else if (event.key === 'MediaPlayPause') { // [>]
-                        this.pauseResume();
-                    } else {
-                        notify('info', 'key "' + event.key + '" is not handled yet');
-                    }
-                });
+            initKeyboard: function () {
+                document.body.addEventListener('keyup', this.handleKeyboard);
+            },
+            handleKeyboard: function (event) {
+                // notify('info', 'received keyup "' + event.key + '"');
+                this.socket.emit('event', event.key);
+                if (event.key === 'MediaTrackPrevious') { // <
+                    this.musicIs('good');
+                } else if (event.key === 'MediaStop') { // [ ]
+                    this.musicIs('bad');
+                } else if (event.key === 'MediaTrackNext') { // >
+                    this.nextSong();
+                } else if (event.key === 'MediaPlayPause') { // [>]
+                    this.pauseResume();
+                } else {
+                    notify('info', 'key "' + event.key + '" is not handled yet');
+                }
             },
             musicIs: function (musicIs) {
                 this.socket.emit('music is', musicIs);
@@ -114,10 +115,10 @@ var initVue = function () {
             }
         },
         mounted() {
-            notify('info', this.app.name + ' mounted');
-            this.connectSocket();
-            this.initPlayerAudio();
-            this.initKeyboardControls();
+            notify('info', this.app.name + ' init');
+            this.initSocket();
+            this.initPlayer();
+            this.initKeyboard();
         }
     });
 };
