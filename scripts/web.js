@@ -1,45 +1,125 @@
-var socketDoor = null;
-var player = null;
-var overlay = null;
-// var serverIp = 'localhost'; // will be replaced dynamically
-
 window.onload = function () {
-    connectSocket();
-    handleControls();
+    initVue();
     handleProgressBar();
-    handleKeyControls();
 };
 
-var handleClientPlayer = function () {
-
-    player = document.querySelector('audio');
-
-    player.autoplay = true;
-
-    player.addEventListener('ended', function () {
-        player.currentTime = 0;
-        notify('info', 'song ended, ask for next one');
-        socketDoor.emit('music is', 'next');
-    });
-
-    player.addEventListener('pause', handlePlayPause);
-    player.addEventListener('play', handlePlayPause);
-    player.addEventListener('playing', handlePlayPause);
-};
-
-var pauseResumeClientPlayer = function () {
-    if (player) {
-        // do player pause/resume
-        if (player.paused) {
-            player.play();
-            player.autoplay = true;
-            notify('info', 'song  was paused, resuming...');
-        } else {
-            player.pause();
-            player.autoplay = false;
-            notify('info', 'song  was playing, do pause');
+var initVue = function () {
+    notify('info', 'init vue');
+    new Vue({
+        el: '#app',
+        data: {
+            app: {
+                name: 'Musitop',
+                socket: null
+            },
+            overlay: {
+                status: 'paused'
+            },
+            player: null,
+            song: {
+                artist: 'Unknown artist',
+                title: 'Unknown title'
+            }
+        },
+        methods: {
+            connectSocket: function () {
+                notify('Socket', 'client side connecting...');
+                this.socket = io('http://' + document.location.hostname + ':1404');
+                this.socket.on('metadata', this.onMetadata);
+                this.socket.on('options', this.onOptions);
+                this.socket.on('error', this.onError);
+                this.socket.on('disconnect', this.onDisconnect);
+                this.socket.on('connect', this.onConnection);
+                this.socket.on('pause', this.pauseResume);
+            },
+            onMetadata: function (metadata) {
+                notify('Socket', 'received fresh metadata infos');
+                notify('info', metadata);
+                handleProgressBar(metadata);
+                this.song.artist = metadata.albumartist[0];
+                this.song.title = metadata.title;
+                injectCover(metadata.picture[0]); // specific process for covers
+                this.player.src = metadata.stream;
+                this.updateOverlay();
+            },
+            onDisconnect: function () {
+                notify('Socket', 'client side disconnected');
+            },
+            onError: function (e) {
+                notify('Error', 'Client error, see logs', 'error');
+                notify('error', e);
+            },
+            onConnection: function () {
+                notify('Socket', 'client side connection init');
+            },
+            onOptions: function (options) {
+                notify('Socket', 'received fresh options');
+                notify('info', options);
+            },
+            updateOverlay: function () {
+                if (this.player) {
+                    if (this.player.paused) {
+                        this.overlay.status = 'paused';
+                    } else {
+                        this.overlay.status = 'playing';
+                    }
+                }
+            },
+            initPlayerAudio: function () {
+                this.player = document.querySelector('audio');
+                this.player.autoplay = true;
+                this.player.addEventListener('ended', this.nextSong);
+                this.player.addEventListener('pause', this.updateOverlay);
+                this.player.addEventListener('play', this.updateOverlay);
+                this.player.addEventListener('playing', this.updateOverlay);
+            },
+            initKeyboardControls: function () {
+                document.body.addEventListener('keyup', function (event) {
+                    // notify('info', 'received keyup "' + event.key + '"');
+                    this.socket.emit('event', event.key);
+                    if (event.key === 'MediaTrackPrevious') { // <
+                        this.musicIs('good');
+                    } else if (event.key === 'MediaStop') { // [ ]
+                        this.musicIs('bad');
+                    } else if (event.key === 'MediaTrackNext') { // >
+                        this.nextSong();
+                    } else if (event.key === 'MediaPlayPause') { // [>]
+                        this.pauseResume();
+                    } else {
+                        notify('info', 'key "' + event.key + '" is not handled yet');
+                    }
+                });
+            },
+            musicIs: function (musicIs) {
+                this.socket.emit('music is', musicIs);
+            },
+            nextSong: function () {
+                if (this.player) {
+                    this.player.currentTime = 0;
+                }
+                this.socket.emit('music is', 'next');
+            },
+            pauseResume: function () {
+                if (this.player) {
+                    if (this.player.paused) {
+                        this.player.play();
+                        this.player.autoplay = true;
+                        notify('info', 'song  was paused, resuming...');
+                    } else {
+                        this.player.pause();
+                        this.player.autoplay = false;
+                        notify('info', 'song  was playing, do pause');
+                    }
+                }
+            }
+        },
+        mounted() {
+            notify('info', this.app.name + ' mounted');
+            this.connectSocket();
+            this.initPlayerAudio();
+            this.initKeyboardControls();
         }
-    }
+    });
 };
 
 var startTimestamp;
@@ -76,71 +156,6 @@ var handleProgressBar = function (metadata) {
     }
 };
 
-var handleControls = function () {
-    // set overlay once
-    overlay = document.querySelector('[data-status]');
-
-    var pauses = document.querySelectorAll('[data-do="pause"]');
-    for (var j = 0; j < pauses.length; j++) {
-        pauses[j].addEventListener('click', function () {
-            notify('info', 'clicked on pause/resume');
-            pauseResumeClientPlayer();
-        });
-    }
-
-    var ctrls = document.querySelectorAll('[data-music-is]');
-    for (var i = 0; i < ctrls.length; i++) {
-        var ctrl = ctrls[i];
-        ctrl.onclick = ctrl.onmouseenter = ctrl.onmouseleave = handleControlsEvent;
-    }
-};
-
-var handleKeyControls = function () {
-    document.body.addEventListener('keyup', function (event) {
-        // notify('info', 'received keyup "' + event.key + '"');
-        socketDoor.emit('event', event.key);
-        var musicIs = '';
-        if (event.key === 'MediaTrackPrevious') { // <
-            musicIs = 'good';
-        } else if (event.key === 'MediaStop') { // [ ]
-            musicIs = 'bad';
-        } else if (event.key === 'MediaTrackNext') { // >
-            musicIs = 'next';
-        } else if (event.key === 'MediaPlayPause') { // [>]
-            pauseResumeClientPlayer();
-        } else {
-            notify('info', 'key "' + event.key + '" is not handled yet');
-        }
-        var isNotPause = event.key.toLowerCase().indexOf('pause') === -1;
-        if (musicIs.length && isNotPause) {
-            socketDoor.emit('music is', musicIs);
-        }
-    });
-};
-
-var handleControlsEvent = function (event) {
-    var button = event.currentTarget;
-    var musicIs = button.getAttribute('data-music-is') || '';
-    if (musicIs.length) {
-        if (event.type === 'click') {
-            socketDoor.emit('music is', musicIs);
-            button.classList.add('clicked');
-            setTimeout(function () {
-                button.classList.remove('clicked');
-            }, 2000);
-        } else if (event.type === 'mouseenter' || event.type === 'mouseleave') {
-            var el = document.querySelector('[data-control-hover]');
-            if (el) {
-                el.setAttribute('data-control-hover', (event.type === 'mouseenter' ? musicIs : ''));
-            }
-        } else {
-            notify('Info', 'catched event "' + event.type + '" on button but not handled yet');
-        }
-    } else {
-        notify('Error', 'Cannot say how music is :(', 'error');
-    }
-};
-
 var notify = function (action, message, type) {
     /* eslint-disable no-console */
     if (type) {
@@ -156,82 +171,6 @@ var notify = function (action, message, type) {
         console.log(action + ' : ' + message);
     }
     /* eslint-enable no-console */
-};
-
-var onDisconnect = function () {
-    notify('Socket', 'client side disconnected');
-};
-
-var onError = function (e) {
-    notify('Error', 'Client error, see logs', 'error');
-    notify('error', e);
-};
-
-var onMusicIs = function (musicIs) {
-    if (musicIs === 'good') {
-        notify('Client', 'Keep this song :D');
-    } else if (musicIs === 'bad') {
-        notify('Client', 'Delete this song :|');
-    } else if (musicIs === 'next') {
-        notify('Client', 'Next song please :)');
-    } else {
-        notify('Error', 'Client said that music is "' + musicIs + '" ?!?', 'error');
-    }
-};
-
-var connectSocket = function () {
-    notify('Socket', 'client side connecting...');
-    var socket = io('http://' + document.location.hostname + ':1404');
-    socketDoor = socket;
-    socket.on('metadata', onMetadata);
-    socket.on('options', onOptions);
-    socket.on('music is', onMusicIs);
-    socket.on('error', onError);
-    socket.on('disconnect', onDisconnect);
-    socket.on('connect', onConnection);
-    socket.on('pause', pauseResumeClientPlayer);
-};
-
-var onConnection = function () {
-    notify('Socket', 'client side connection init');
-};
-
-function onOptions(options) {
-    notify('Socket', 'received fresh options');
-    notify('info', options);
-    if (!player && options.audioClientSide) {
-        handleClientPlayer();
-    }
-}
-
-function onMetadata(metadata) {
-    notify('Socket', 'received fresh metadata infos');
-    notify('info', metadata);
-    handleProgressBar(metadata);
-    injectData(metadata.albumartist[0], '[data-artist]');
-    injectData(metadata.title, '[data-title]');
-    injectCover(metadata.picture[0]); // specific process for covers
-    injectAudio(metadata.stream);
-    handlePlayPause();
-}
-
-var handlePlayPause = function () {
-    if (player) {
-        if (player.paused) {
-            overlay.classList.remove('hide');
-            overlay.setAttribute('data-status', 'paused');
-        } else {
-            overlay.setAttribute('data-status', 'playing');
-            setTimeout(function () {
-                overlay.classList.add('hide');
-            }, 500);
-        }
-        // notify('info', 'player paused ? ' + player.paused);
-    }
-};
-
-var injectAudio = function (stream) {
-    player.src = stream;
 };
 
 var injectCover = function (cover) {
@@ -282,15 +221,6 @@ var getColorPaletteFromImage = function (image) {
             notify('error', 'did not retrieved primary & secondary colors from cover');
         }
     };
-};
-
-var injectData = function (value, selector) {
-    var els = document.querySelectorAll(selector);
-    for (var i = 0; i < els.length; i++) {
-        var el = els[i];
-        el.innerText = value;
-        el.classList.remove('loader');
-    }
 };
 
 var arrayBufferToDataUrl = function (arrayBuffer) {

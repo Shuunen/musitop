@@ -9,6 +9,7 @@
     <script src="vendors/socket-io-slim_171.js"></script>
     <script src="vendors/underscore_183.js"></script>
     <script src="vendors/grade_101.js"></script>
+    <script src="vendors/vue_211.js"></script>
     <script src="scripts/web.js"></script>
     <link rel="icon" type="image/png" href='icons/Paomedia/headphone.png' />
     <link href="https://fonts.googleapis.com/css?family=Rock+Salt|Satisfy" rel="stylesheet">
@@ -31,7 +32,7 @@
                 transform: translate3d(5px, 0, 0);
             }
         }
-        
+
         @keyframes subtle-shake {
             from,
             to {
@@ -50,13 +51,16 @@
                 transform: translate3d(5px, 0, 0);
             }
         }
-        
+
         html,
         body {
             height: 100%;
+            width: 100%;
+            margin: 0;
+            overflow: hidden;
         }
-        
-        body {
+
+        #app {
             font-family: 'Satisfy', sans-serif;
             font-size: 20px;
             text-align: center;
@@ -64,12 +68,11 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            overflow: hidden;
             align-items: center;
+            height: 100%;
             box-shadow: inset 2px 2px 40px #333;
-            margin: 0;
         }
-        
+
         .gradient-overlay {
             position: absolute;
             z-index: 20;
@@ -79,11 +82,11 @@
             height: 100%;
             opacity: 0.5;
         }
-        
+
         .gradient-overlay img {
             display: none;
         }
-        
+
         .play-overlay {
             position: absolute;
             z-index: 100;
@@ -92,22 +95,12 @@
             width: 100%;
             height: 100%;
             display: flex;
-            opacity: 0;
-            transition: opacity .4s;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             background: rgba(0, 0, 0, 0.8);
         }
-        
-        .play-overlay.hide {
-            display: none;
-        }
-        
-        .play-overlay[data-status="paused"] {
-            opacity: 1;
-        }
-        
+
         .play-overlay .icons {
             position: relative;
             top: -30px;
@@ -117,17 +110,17 @@
             overflow: hidden;
             display: flex;
         }
-        
+
         .play-overlay .icons:hover div:first-child {
             margin-left: -100%;
         }
-        
+
         .play-overlay .icon {
             height: 100%;
             width: 100%;
             flex-shrink: 0;
         }
-        
+
         .player {
             display: flex;
             flex-direction: column;
@@ -152,11 +145,11 @@
             color: #39c131;
         }
         */
-        
+
         [data-control-hover="bad"] {
             color: #d45050;
         }
-        
+
         .cover-wrap {
             position: absolute;
             top: 0;
@@ -167,13 +160,13 @@
             overflow: hidden;
             border-radius: 20px;
         }
-        
+
         .cover {
             height: 100%;
             width: 100%;
             object-fit: cover;
         }
-        
+
         .cover-blur {
             left: -40px;
             top: -40px;
@@ -185,7 +178,7 @@
             box-shadow: inset 2px 2px 40px #333;
             z-index: 0;
         }
-        
+
         .inside-shadow {
             box-shadow: inset 40px 40px 220px #333;
             z-index: 20;
@@ -196,22 +189,28 @@
             height: 100%;
             pointer-events: none;
         }
-        
-        .player [data-artist] {
+
+        .player .artist {
             margin-top: auto;
             font-size: 30px;
             margin-bottom: 4px;
         }
-        
-        .player [data-title],
-        .player [data-artist] {
+
+        .player .title,
+        .player .artist {
             padding: 10px 0 0 30px;
             margin-bottom: -15px;
             margin-left: -30px;
             text-shadow: 1px 1px 1px black, 0 0 4px white;
             z-index: 40;
         }
-        
+
+        .player > .icon-pause {
+            margin-left: auto;
+            position: relative;
+            top: -35px;
+        }
+
         .bottom-top-gradient {
             position: absolute;
             height: 160px;
@@ -225,7 +224,7 @@
             -webkit-filter: blur(10px);
             filter: blur(10px);
         }
-        
+
         .player-border {
             position: absolute;
             height: 100%;
@@ -236,7 +235,7 @@
             z-index: 30;
             border-radius: 20px;
         }
-        
+
         .progress-bar-wrapper {
             position: absolute;
             bottom: -10px;
@@ -245,7 +244,7 @@
             left: 0;
             overflow: hidden;
         }
-        
+
         .progress-bar {
             position: relative;
             height: 6px;
@@ -257,7 +256,7 @@
             box-shadow: 0 0 15px 0px;
             overflow: hidden;
         }
-        
+
         .progress-bar-inner {
             background: currentColor;
             width: 30%;
@@ -265,7 +264,7 @@
             box-shadow: 1px 1px 32px black;
             transition: width .4s;
         }
-        
+
         footer {
             position: absolute;
             bottom: 0;
@@ -276,7 +275,7 @@
             border-radius: 100% 0 0 0;
             box-shadow: 0px 0px 10px 1px rgba(51, 51, 51, 0.5), 0px 12px 70px rgba(51, 51, 51, 0.5);
         }
-        
+
         footer h1 {
             font-family: 'Rock Salt', sans-serif;
             letter-spacing: 1px;
@@ -288,7 +287,7 @@
             top: 7vh;
             left: -9%;
         }
-        
+
         .icon {
             height: 35px;
             width: 35px;
@@ -302,23 +301,23 @@
             animation-duration: 1s;
             animation-fill-mode: both;
         }
-        
+
         .icon:hover {
             -webkit-filter: blur(0px) invert(100%) drop-shadow(2px 2px 2px black);
             filter: blur(0px) invert(100%) drop-shadow(2px 2px 2px black);
         }
-        
+
         .icon-like {
             background-image: url("icons/Anastasya-Bolshakova/like.svg");
         }
-        
+
         .icon-dislike {
             background-image: url("icons/Icons-Mind/Unlike-2.svg");
             position: absolute;
             bottom: 25px;
             right: 30px;
         }
-        
+
         .icon-next {
             background-image: url("icons/Anastasya-Bolshakova/right.svg");
             position: absolute;
@@ -329,19 +328,19 @@
             -webkit-filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
             filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
         }
-        
+
         .icon-next:hover {
             animation-name: subtle-shake;
         }
-        
+
         .icon-pause {
             background-image: url("icons/Anastasya-Bolshakova/pause.svg");
         }
-        
+
         .icon-play {
             background-image: url("icons/Anastasya-Bolshakova/run.svg");
         }
-        
+
         .triangle {
             -webkit-clip-path: url(#cp);
             clip-path: url(#cp);
@@ -353,77 +352,72 @@
             top: 25%;
             left: 42%;
         }
-        
+
         .first {
             transform: translateX(-65%) translateY(-50%) rotate(180deg);
         }
-        
+
         .second {
             transform: translateX(-35%) translateY(-50%) rotate(180deg);
             opacity: 0.8;
         }
-        
-        .icon[data-do="pause"] {
-            margin-left: auto;
-            position: relative;
-            top: -35px;
-        }
-        
+
         audio {
             opacity: 0;
         }
-
     </style>
 </head>
 
 <body>
-    <div class="gradient-overlay" data-cover="gradient">
-        <img data-cover="src">
-    </div>
-    <div class="play-overlay" data-status="paused">
-        <div class="icons" data-do="pause">
-            <div class="icon icon-pause"></div>
-            <div class="icon icon-play"></div>
+    <div id="app">
+        <div class="gradient-overlay" data-cover="gradient">
+            <img data-cover="src">
         </div>
-    </div>
-    <img class="loader cover-blur" data-cover="src" />
-    <div class="player" data-control-hover>
-        <div data-music-is="good" class="icon icon-like"></div>
-        <div data-do="pause" class="icon icon-pause"></div>
-        <strong data-artist>Tycho</strong>
-        <div data-title>Crystal brake</div>
-        <div class="cover-wrap">
-            <img class="loader cover" data-cover="src" alt="song cover" />
-        </div>
-        <div data-music-is="next" class="icon icon-next"></div>
-        <div data-music-is="bad" class="icon icon-dislike"></div>
-        <div class="bottom-top-gradient"></div>
-        <div class="player-border"></div>
-        <div class="progress-bar-wrapper">
-            <div class="progress-bar">
-                <div class="progress-bar-inner"></div>
+        <div class="play-overlay" v-show="overlay.status === 'paused'">
+            <div class="icons" v-on:click="pauseResume">
+                <div class="icon icon-pause"></div>
+                <div class="icon icon-play"></div>
             </div>
         </div>
+        <img class="loader cover-blur" data-cover="src" />
+        <div class="player" data-control-hover>
+            <div v-on:click="musicIs('good')" class="icon icon-like"></div>
+            <div v-on:click="pauseResume" class="icon icon-pause"></div>
+            <strong class="artist">{{ song.artist }}</strong>
+            <div class="title">{{ song.title }}</div>
+            <div class="cover-wrap">
+                <img class="loader cover" data-cover="src" alt="song cover" />
+            </div>
+            <div v-on:click="nextSong" class="icon icon-next"></div>
+            <div v-on:click="musicIs('bad')" class="icon icon-dislike"></div>
+            <div class="bottom-top-gradient"></div>
+            <div class="player-border"></div>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar">
+                    <div class="progress-bar-inner"></div>
+                </div>
+            </div>
+        </div>
+        <audio controls>
+            <source type="audio/mpeg"> Your browser does not support the audio element.
+        </audio>
+        <div class="inside-shadow"></div>
+        <footer>
+            <h1 data-color-secondary>{{ app.name }}</h1>
+            <!-- Thanks "Reverse clip path with blend modes" by Zach Saucier -->
+            <!-- Start - http://codepen.io/Zeaklous/pen/mVEwje -->
+            <svg width='0' height='0'>
+                <defs>
+                    <clipPath id="cp" clipPathUnits="objectBoundingBox">
+                        <path d="M0.500, 0.945 L0.994, 0.090 L0.006, 0.090 L0.500, 0.945 L0.500, 0.650 L0.262, 0.238 L0.738, 0.237 L0.500, 0.650z"></path>
+                    </clipPath>
+                </defs>
+            </svg>
+            <div class="triangle first" data-cover="background" data-background-secondary></div>
+            <div class="triangle second" data-cover="background" data-background-primary></div>
+            <!-- End - http://codepen.io/Zeaklous/pen/mVEwje -->
+        </footer>
     </div>
-    <audio controls>
-        <source type="audio/mpeg"> Your browser does not support the audio element.
-    </audio>
-    <div class="inside-shadow"></div>
-    <footer>
-        <h1 data-color-secondary>Musitop</h1>
-        <!-- Thanks "Reverse clip path with blend modes" by Zach Saucier -->
-        <!-- Start - http://codepen.io/Zeaklous/pen/mVEwje -->
-        <svg width='0' height='0'>
-            <defs>
-                <clipPath id="cp" clipPathUnits="objectBoundingBox">
-                    <path d="M0.500, 0.945 L0.994, 0.090 L0.006, 0.090 L0.500, 0.945 L0.500, 0.650 L0.262, 0.238 L0.738, 0.237 L0.500, 0.650z"></path>
-                </clipPath>
-            </defs>
-        </svg>
-        <div class="triangle first" data-cover="background" data-background-secondary></div>
-        <div class="triangle second" data-cover="background" data-background-primary></div>
-        <!-- End - http://codepen.io/Zeaklous/pen/mVEwje -->
-    </footer>
 </body>
 
 </html>
