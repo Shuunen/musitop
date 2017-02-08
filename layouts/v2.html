@@ -10,8 +10,10 @@
     <script src="vendors/underscore_183.js"></script>
     <script src="vendors/grade_101.js"></script>
     <script src="vendors/vue_211.js"></script>
+    <script src="vendors/notyf_110.js"></script>
     <script src="scripts/web.js"></script>
     <link href="vendors/csspin-skeleton.css" rel="stylesheet" type="text/css">
+    <link href="vendors/notyf_110.css" rel="stylesheet" type="text/css">
     <link rel="icon" type="image/png" href='icons/Paomedia/headphone.png' />
     <link href="https://fonts.googleapis.com/css?family=Rock+Salt|Satisfy" rel="stylesheet">
     <style>
@@ -375,6 +377,18 @@
             z-index: 20;
             width: 40%;
             max-width: 400px;
+        }
+
+        .notyf {
+            z-index: 50;
+            font-family: sans-serif;
+            width: auto;
+        }
+
+        .notyf__toast.notyf--alert,
+        .notyf__icon--alert:after,
+        .notyf__icon--alert:before {
+            background: steelblue;
         }
     </style>
 </head>

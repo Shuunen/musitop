@@ -3,6 +3,8 @@ window.onload = function () {
     handleProgressBar();
 };
 
+var notifier = null;
+
 var initVue = function () {
     notify('info', 'init vue');
     new Vue({
@@ -17,6 +19,7 @@ var initVue = function () {
             overlay: {
                 status: 'paused'
             },
+            notifier: null,
             player: null,
             song: {
                 artist: 'Unknown artist',
@@ -48,9 +51,9 @@ var initVue = function () {
             onMusicWas: function (musicWas) {
                 notify('Client', 'Server said that music was "' + musicWas + '"');
                 if (musicWas === 'good') {
-                    notify('Will keep', this.song.title, 'success');
+                    notify('Client', 'Will keep this song', 'success');
                 } else if (musicWas === 'bad') {
-                    notify('Will delete', this.song.title, 'info');
+                    notify('Client', 'Deleting this song...', 'info');
                 } else if (musicWas === 'next') {
                     notify('Client', 'Next song was asked');
                     this.isLoading = true;
@@ -93,6 +96,12 @@ var initVue = function () {
             },
             initKeyboard: function () {
                 document.body.addEventListener('keyup', this.handleKeyboard);
+            },
+            initNotifier: function () {
+                // create an instance of Notyf
+                this.notifier = notifier = new Notyf({
+                    delay: 4000
+                });
             },
             handleKeyboard: function (event) {
                 // notify('info', 'received keyup "' + event.key + '"');
@@ -140,6 +149,7 @@ var initVue = function () {
             this.initSocket();
             this.initPlayer();
             this.initKeyboard();
+            this.initNotifier();
         }
     });
 };
@@ -181,7 +191,13 @@ var handleProgressBar = function (metadata) {
 var notify = function (action, message, type) {
     /* eslint-disable no-console */
     if (type) {
-        console.log('notify client side with a toaster type "' + type + '"');
+        if (type === 'success') {
+            notifier.confirm(message);
+        } else if (type === 'info') {
+            notifier.alert(message);
+        } else {
+            console.error('cannot use notifier with type "' + type + '"');
+        }
     }
     if (console[action]) {
         console[action](message);
