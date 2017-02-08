@@ -374,8 +374,32 @@
             bottom: 0;
             z-index: 20;
             width: 40%;
+            max-width: 400px;
         }
 
+        #logo .triangle-1,
+        #logo .triangle-2 {
+            stroke: currentColor;
+            fill-opacity: 0;
+        }
+
+        #logo .triangle-1 {
+            opacity: .7;
+        }
+
+        #logo .triangle-2 {
+            opacity: .4;
+        }
+
+        #logo .triangle-1-background,
+        #logo .triangle-2-background {
+            opacity: .1;
+        }
+
+        #logo .text {
+            opacity: .7;
+            fill: currentColor;
+        }
     </style>
 </head>
 
@@ -423,7 +447,11 @@
         </audio>
         <div class="inside-shadow"></div>
         <svg id="logo" version="1.1" viewBox="0 135 590 365" preserveAspectRatio="xMinYMin meet">
-            <use xlink:href="icons/logo.svg#logo"></use>
+            <use class="triangle-1" xlink:href="icons/logo.svg#triangle-1" data-color-secondary></use>
+            <use class="triangle-2" xlink:href="icons/logo.svg#triangle-2" data-color-primary></use>
+            <use class="triangle-1-background" xlink:href="icons/logo.svg#triangle-1-background"></use>
+            <use class="triangle-2-background" xlink:href="icons/logo.svg#triangle-2-background"></use>
+            <use class="text" xlink:href="icons/logo.svg#text" data-color-primary></use>
         </svg>
     </div>
 </body>
