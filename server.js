@@ -112,17 +112,20 @@ var onMusicIs = function (musicIs) {
         notify('Client', '★ Keep this song :D');
         notify('Will keep', fileName(song), 'info');
         keep = true;
+        io.emit('music was', musicIs);
     } else if (musicIs === 'bad') {
         notify('Client', '✕ Delete this song :|');
         notify('Deleting', fileName(song), 'info');
         deleteSong();
         playNext('onMusicIs bad');
+        io.emit('music was', musicIs);
     } else if (musicIs === 'next') {
         notify('Client', '» Next song please :)');
         if (keep) {
             moveSong();
         }
         playNext('onMusicIs next');
+        io.emit('music was', musicIs);
     } else if (musicIs === 'pause') {
         notify('Client', '|| Pause song please');
         io.emit('pause', 'please :)');

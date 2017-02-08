@@ -28,6 +28,7 @@ var initVue = function () {
                 notify('Socket', 'client side connecting...');
                 this.socket = io('http://' + document.location.hostname + ':1404');
                 this.socket.on('metadata', this.onMetadata);
+                this.socket.on('music was', this.onMusicWas);
                 this.socket.on('options', this.onOptions);
                 this.socket.on('error', this.onError);
                 this.socket.on('disconnect', this.onDisconnect);
@@ -43,6 +44,21 @@ var initVue = function () {
                 injectCover(metadata.picture[0]); // specific process for covers
                 this.player.src = metadata.stream;
                 this.isLoading = false;
+            },
+            onMusicWas: function (musicWas) {
+                notify('Client', 'Server said that music was "' + musicWas + '"');
+                if (musicWas === 'good') {
+                    notify('Will keep', this.song.title, 'success');
+                } else if (musicWas === 'bad') {
+                    notify('Will delete', this.song.title, 'info');
+                } else if (musicWas === 'next') {
+                    notify('Client', 'Next song was asked');
+                    this.isLoading = true;
+                } else if (musicWas === 'pause') {
+                    notify('Client', '|| Pause song please');
+                } else {
+                    notify('Client', 'Server said that music was "' + musicWas + '" ?!?', 'info');
+                }
             },
             onDisconnect: function () {
                 notify('Socket', 'client side disconnected');
