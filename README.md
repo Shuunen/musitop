@@ -70,9 +70,17 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 ## TODO
 
-* handle pause server side to tell it to client
-* handle no cover art
-* handle last music action
+* avoid global functions in web.js
+* create vue component if needed
+* handle case when MediaNext (for example) is pressed on the web client but will also trigger system
+* handle case when server shut down, avoid letting client playing
+* improve mobile experience
+* use only opacity & transform transitions with "will-use" & translate 3D tweaks
+* handle last music action, like a dropdown that will act on n-1 song : was good, was bad
+* add pause icon in systray
+* handle music pause & play server side, server can be able to stream file content at a specific moment after long pause
+* add options modal to let user choose : audio output [client|none|server], playing songs from [good|test] folder
+* if audio output is server, client pause should reflect
 * handle case when next track is no more on disk
 * handle case when no music left in input folder
 * handle case when no music left in playlist
