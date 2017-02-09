@@ -16,9 +16,8 @@ var initVue = function () {
             },
             isMobile: (typeof window.orientation !== 'undefined'),
             isLoading: true,
-            overlay: {
-                status: 'paused'
-            },
+            isPaused: true,
+            isPlaying: true,
             notifier: null,
             player: null,
             song: {
@@ -77,22 +76,19 @@ var initVue = function () {
                 notify('Socket', 'received fresh options');
                 notify('info', options);
             },
-            updateOverlay: function () {
-                if (this.player && !this.isLoading) {
-                    if (this.player.paused) {
-                        this.overlay.status = 'paused';
-                    } else {
-                        this.overlay.status = 'playing';
-                    }
+            updateStatus: function () {
+                if (this.player) {
+                    this.isPaused = this.player.paused;
+                    this.isPlaying = !this.player.paused;
                 }
             },
             initPlayer: function () {
                 this.player = document.querySelector('audio');
                 this.player.autoplay = true;
                 this.player.addEventListener('ended', this.nextSong);
-                this.player.addEventListener('pause', this.updateOverlay);
-                this.player.addEventListener('play', this.updateOverlay);
-                this.player.addEventListener('playing', this.updateOverlay);
+                this.player.addEventListener('pause', this.updateStatus);
+                this.player.addEventListener('play', this.updateStatus);
+                this.player.addEventListener('playing', this.updateStatus);
             },
             initKeyboard: function () {
                 document.body.addEventListener('keyup', this.handleKeyboard);

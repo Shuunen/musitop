@@ -71,7 +71,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 ## TODO
 
 * avoid global functions in web.js
-* create vue component if needed
+* create vue components if needed
 * handle case when MediaNext (for example) is pressed on the web client but will also trigger system
 * handle case when server shut down, avoid letting client playing
 * improve mobile experience

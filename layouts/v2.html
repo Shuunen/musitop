@@ -154,6 +154,10 @@
             border-radius: 20px;
         }
 
+        .cover-wrap.paused {
+            filter: grayscale(1) blur(10px);
+        }
+
         .cover {
             height: 110%;
             width: 110%;
@@ -232,6 +236,12 @@
 
         .player .player-center>div {
             position: absolute;
+        }
+
+        .player .player-center>.icon {
+            filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
+            height: 100%;
+            width: 100%;
         }
 
         .desktop .bottom-top-gradient {
@@ -329,14 +339,6 @@
 
         .icon-next {
             background-image: url("icons/Anastasya-Bolshakova/right.svg");
-            -webkit-filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
-            filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
-            height: 100%;
-            width: 100%;
-        }
-
-        .desktop .icon-next:hover {
-            animation-name: subtle-shake;
         }
 
         .icon-pause {
@@ -398,35 +400,28 @@
         <div class="gradient-overlay" data-cover="gradient">
             <img data-cover="src">
         </div>
-        <div class="play-overlay" v-show="overlay.status === 'paused'">
-            <div class="icons" v-on:click="pauseResume">
-                <div class="icon icon-pause"></div>
-                <div class="icon icon-play"></div>
-            </div>
-        </div>
         <img class="loader cover-blur" data-cover="src" />
         <div class="player">
-            <div class="cover-wrap">
+            <div class="cover-wrap" v-bind:class="{ paused: isPaused }">
                 <img class="loader cover" data-cover="src" alt="song cover" />
             </div>
-            <div class="player-top">
+            <div class="player-top" v-show="isPlaying && !isLoading">
                 <div id="is-good" v-on:click="musicIs('good')" class="icon icon-like"></div>
                 <div id="do-pause" v-on:click="pauseResume" class="icon icon-pause"></div>
             </div>
             <div class="player-center">
-                <transition name="fade">
-                    <div v-show="!isLoading" v-on:click="nextSong" class="icon icon-next"></div>
-                </transition>
+                <div v-show="isPlaying && !isLoading" v-on:click="nextSong" class="icon icon-next"></div>
+                <div v-show="isPaused && !isLoading" v-on:click="pauseResume" class="icon icon-play"></div>
                 <div v-show="isLoading" class="cp-spinner cp-skeleton"></div>
             </div>
-            <div class="player-bottom">
+            <div class="player-bottom" v-show="isPlaying && !isLoading">
                 <strong id="artist">{{ song.artist }}</strong>
                 <div id="title">{{ song.title }}</div>
                 <div id="is-bad" v-on:click="musicIs('bad')" class="icon icon-dislike"></div>
             </div>
             <div class="bottom-top-gradient"></div>
             <div class="player-border"></div>
-            <div class="progress-bar-wrapper">
+            <div class="progress-bar-wrapper" v-show="isPlaying && !isLoading">
                 <div class="progress-bar">
                     <div class="progress-bar-inner"></div>
                 </div>
