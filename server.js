@@ -36,13 +36,12 @@ var server = http.createServer(function (request, response) {
 
     var code = 200;
     var contentType = '';
-    var url = request.url;
-    var match = url.match(/^\/(v)?(\d)?/);
-    var layoutVersion = (match && match[2]) ? match[2] : '2';
+    var baseDir = 'web';
+    var url = baseDir + request.url;
 
-    if (url === '/') {
+    if (url === 'web/') {
         contentType = 'text/html';
-        url = 'layouts/v' + layoutVersion + '.html';
+        url += 'index.html';
     } else if (url.indexOf('.mp3') !== -1) {
         url = song;
         contentType = 'audio/mpeg';

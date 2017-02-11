@@ -6,16 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <meta name="description" content="" />
-    <script src="vendors/socket-io-slim_171.js"></script>
-    <script src="vendors/underscore_183.js"></script>
-    <script src="vendors/grade_101.js"></script>
-    <script src="vendors/vue_211.js"></script>
-    <script src="vendors/notyf_110.js"></script>
-    <script src="scripts/web.js"></script>
     <link href="vendors/csspin-skeleton.css" rel="stylesheet" type="text/css">
     <link href="vendors/notyf_110.css" rel="stylesheet" type="text/css">
     <link rel="icon" type="image/png" href='icons/Paomedia/headphone.png' />
-    <link href="https://fonts.googleapis.com/css?family=Rock+Salt|Satisfy" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Satisfy" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
     <style>
         @-webkit-keyframes subtle-shake {
             from,
@@ -399,7 +394,7 @@
 <body>
     <div id="app" v-bind:class="isMobile ? 'mobile':'desktop'">
         <div class="gradient-overlay" data-cover="gradient">
-            <img data-cover="src">
+            <img data-cover="src" alt="song cover for background">
         </div>
         <img class="loader cover-blur" data-cover="src" />
         <div class="player">
@@ -441,6 +436,13 @@
             <use class="text text-end" xlink:href="icons/logo.svg#text-end" data-color-secondary data-stroke-primary></use>
         </svg>
     </div>
+    <!-- scripts -->
+    <script src="vendors/socket-io-slim_171.js"></script>
+    <script src="vendors/underscore_183.js"></script>
+    <script src="vendors/grade_101.js"></script>
+    <script src="vendors/vue_211.js"></script>
+    <script src="vendors/notyf_110.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

@@ -163,7 +163,7 @@ var handleProgressBar = function (metadata) {
         var progressBar = document.querySelector('.progress-bar-inner');
         setInterval(function () {
             if (startTimestamp && secondTotal) {
-                actualTimestamp = Math.round(Date.now() / 1000);
+                actualTimestamp = Math.round(performance.now() / 1000);
                 secondLeft = startTimestamp - actualTimestamp;
                 var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
                 // notify('info', 'percent done : ' + percentDone + '%');

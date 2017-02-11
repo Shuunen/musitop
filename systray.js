@@ -25,10 +25,10 @@ var icons = {
     good: {
         send: 'good',
         instance: null,
-        icon: path.join(__dirname, 'icons/Aha-Soft/Thumbs up.png'),
+        icon: path.join(__dirname, 'web/icons/Aha-Soft/Thumbs up.png'),
         tooltip: 'Keep this',
         balloon: {
-            icon: path.join(__dirname, 'icons/Paomedia/sign-check.png'),
+            icon: path.join(__dirname, 'web/icons/Paomedia/sign-check.png'),
             title: 'Song marked to keep',
             content: 'Will be moved to keep folder'
         }
@@ -36,16 +36,16 @@ var icons = {
     next: {
         send: 'next',
         instance: null,
-        icon: path.join(__dirname, 'icons/Aha-Soft/Last.png'),
+        icon: path.join(__dirname, 'web/icons/Aha-Soft/Last.png'),
         tooltip: 'Next track'
     },
     bad: {
         send: 'bad',
         instance: null,
-        icon: path.join(__dirname, 'icons/Aha-Soft/Thumbs down.png'),
+        icon: path.join(__dirname, 'web/icons/Aha-Soft/Thumbs down.png'),
         tooltip: 'Delete this',
         balloon: {
-            icon: path.join(__dirname, 'icons/Paomedia/sign-error.png'),
+            icon: path.join(__dirname, 'web/icons/Paomedia/sign-error.png'),
             title: 'Song marked to delete',
             content: 'Will be deleted'
         }
