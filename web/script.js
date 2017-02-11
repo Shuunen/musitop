@@ -28,7 +28,7 @@ var initVue = function () {
         methods: {
             initSocket: function () {
                 notify('Socket', 'client side connecting...');
-                this.socket = io('http://' + document.location.hostname + ':1404');
+                this.socket = io('http://' + document.location.hostname + ':1604');
                 this.socket.on('metadata', this.onMetadata);
                 this.socket.on('music was', this.onMusicWas);
                 this.socket.on('options', this.onOptions);
@@ -44,7 +44,12 @@ var initVue = function () {
                 this.song.artist = metadata.albumartist[0];
                 this.song.title = metadata.title;
                 injectCover(metadata.picture[0]); // specific process for covers
-                this.player.src = metadata.stream;
+                this.player.src = metadata.stream + '?t=' + new Date().getTime();
+                var shouldStartAt = Math.round(new Date().getTime() / 1000) - metadata.startTimestamp;
+                // if should start song at 1 or 3 seconds, it's stupid
+                shouldStartAt = shouldStartAt <= 5 ? 0 : shouldStartAt;
+                // notify('info', 'song shouldStartAt : ' + shouldStartAt + ' seconds');
+                this.player.currentTime = shouldStartAt;
                 this.isLoading = false;
             },
             onMusicWas: function (musicWas) {
@@ -163,7 +168,7 @@ var handleProgressBar = function (metadata) {
         var progressBar = document.querySelector('.progress-bar-inner');
         setInterval(function () {
             if (startTimestamp && secondTotal) {
-                actualTimestamp = Math.round(performance.now() / 1000);
+                actualTimestamp = Math.round(new Date().getTime() / 1000);
                 secondLeft = startTimestamp - actualTimestamp;
                 var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
                 // notify('info', 'percent done : ' + percentDone + '%');
