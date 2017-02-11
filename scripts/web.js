@@ -251,6 +251,8 @@ var getColorPaletteFromImage = function (image) {
             applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
             applyTheme('color', colors[0], '[data-color-primary]');
             applyTheme('color', colors[1], '[data-color-secondary]');
+            applyTheme('stroke', colors[0], '[data-stroke-primary]');
+            applyTheme('stroke', colors[1], '[data-stroke-secondary]');
         } else {
             notify('error', 'did not retrieved primary & secondary colors from cover');
         }
