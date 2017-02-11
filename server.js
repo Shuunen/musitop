@@ -13,8 +13,35 @@ var fs = require('fs');
 var path = require('path');
 var musicMetadata = require('musicmetadata');
 var port = 1404;
-var http = require('http');
-// var ip = require('ip').address();
+var socketPort = 1604;
+var express = require('express');
+var app = express();
+var ip = require('ip').address();
+
+app.use('/', express.static('web'));
+
+app.get('/init.js', function (req, res) {
+    updatedData = true;
+    res.send('console.log(\'Hello You :)\')');
+});
+
+app.get('/stream.mp3', function (req, res) {
+    /*
+    var stat = fs.statSync(song);
+    res.set({
+        'Accept-Ranges': 'bytes',
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': stat.size
+    });
+    var readStream = fs.createReadStream(song);
+    readStream.pipe(res);
+    */
+    res.sendFile(song);
+});
+
+app.listen(port, function () {
+    notify('Server', 'Musitop server started on http://' + ip + ':' + port);
+});
 
 var sendDynamicValues = function (bForce) {
     if (bForce) {
@@ -31,71 +58,6 @@ var sendDynamicValues = function (bForce) {
     io.emit('metadata', metadata);
     updatedData = false;
 };
-
-var server = http.createServer(function (request, response) {
-
-    var code = 200;
-    var contentType = '';
-    var baseDir = 'web';
-    var url = baseDir + request.url;
-
-    if (url === 'web/') {
-        contentType = 'text/html';
-        url += 'index.html';
-    } else if (url.indexOf('.mp3') !== -1) {
-        url = song;
-        contentType = 'audio/mpeg';
-    } else if (url.indexOf('.svg') !== -1) {
-        contentType = 'image/svg+xml';
-    } else if (url.indexOf('.png') !== -1) {
-        contentType = 'image/png';
-    } else if (url.indexOf('.ico') !== -1) {
-        contentType = 'image/vnd.microsoft.icon';
-    } else if (url.indexOf('.js') !== -1) {
-        contentType = 'application/javascript';
-    } else if (url.indexOf('.css') !== -1) {
-        contentType = 'text/css';
-    } else {
-        code = 404;
-    }
-    if (code !== 404) {
-        if (url[0] === '/' && contentType.indexOf('audio') === -1) {
-            url = url.substr(1);
-        }
-        var fileStat = null;
-        try {
-            fileStat = fs.statSync(url);
-        } catch (err) {
-            notify('Server', 'Cannot read file', 'error', url);
-        }
-        if (fileStat && fileStat.isFile()) {
-            response.writeHead(code, {
-                'Content-Type': contentType
-            });
-            // notify('Server', 'Router serve file : ' + url);
-            var file = fs.readFileSync(url);
-            response.end(file, 'binary');
-            if (contentType === 'text/html') {
-                updatedData = true; // TODO: maybe remove this to avoid resend data on html serve
-            }
-        } else {
-            code = 404;
-        }
-    }
-    if (code === 404) {
-        response.writeHead(code, {
-            'Content-Type': 'text/plain'
-        });
-        if (url.indexOf('.map') === -1) {
-            notify('Server', 'Router cannot serve file : ' + url);
-        }
-        response.end('file or resource not found :\'(');
-    }
-});
-
-server.listen(port, function () {
-    notify('Server', 'Musitop server started on http://localhost:' + port);
-});
 
 // SOCKET
 var onDisconnect = function () {
@@ -142,7 +104,7 @@ var onEvent = function (e) {
 };
 
 var updatedData = false;
-var io = require('socket.io')(server);
+var io = require('socket.io')(socketPort);
 var connectSocket = function () {
     notify('Socket', 'Server connecting...');
     io.on('connection', function (socket) {
