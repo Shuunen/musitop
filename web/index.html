@@ -200,6 +200,11 @@
             left: 30px;
             text-shadow: 1px 1px 1px black, 0 0 4px white;
             z-index: 40;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            width: calc(100% - 30px * 2);
+            overflow: hidden;
+            text-align: left;
         }
 
         .player #is-good {
@@ -346,6 +351,9 @@
 
         audio {
             display: none;
+            /* position: absolute;
+            top: 0;
+            z-index: 100;*/
         }
 
         .fade-enter-active,
@@ -443,6 +451,7 @@
     <script src="vendors/vue_211.js"></script>
     <script src="vendors/notyf_110.js"></script>
     <script src="script.js"></script>
+    <script src="init.js"></script>
 </body>
 
 </html>
