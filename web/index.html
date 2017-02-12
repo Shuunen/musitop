@@ -92,6 +92,8 @@
             min-width: 250px;
             width: 85vw;
             height: 85vw;
+            min-width: 280px;
+            min-height: 280px;
             max-height: 350px;
             border-radius: 20px;
             color: whitesmoke;
@@ -157,12 +159,13 @@
 
         .player .bottom.artist {
             font-size: 30px;
-            bottom: 8vw;
-            text-indent: 2px;
+            bottom: 40px;
+            text-indent: 5px;
         }
 
-        .player .title {
+        .player .bottom.title {
             text-indent: 4px;
+            bottom: 15px;
         }
 
         .player .title,
@@ -171,7 +174,7 @@
             z-index: 40;
             white-space: nowrap;
             text-overflow: ellipsis;
-            width: calc(100% - 4vw * 2 - 35px);
+            width: calc(100% - 20px * 2 - 35px);
             overflow: hidden;
             text-align: left;
         }
@@ -182,19 +185,19 @@
         }
 
         .player .top {
-            top: 4vw;
+            top: 20px;
         }
 
         .player .right {
-            right: 4vw;
+            right: 20px;
         }
 
         .player .bottom {
-            bottom: 4vw;
+            bottom: 20px;
         }
 
         .player .left {
-            left: 4vw;
+            left: 20px;
         }
 
         .player .player-center {
@@ -219,15 +222,16 @@
             filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
         }
 
-        .desktop .bottom-top-gradient {
+        .player-inner-gradient {
             position: absolute;
-            height: 160px;
+            height: 100%;
             width: 100%;
-            bottom: -10px;
+            bottom: 0;
             left: 0;
             z-index: 30;
-            background-image: -webkit-gradient(linear, 7% 100%, 14% 5%, from(rgba(0, 0, 0, 0.8)), color-stop(0.2, rgb(0, 0, 0)), to(rgba(0, 0, 0, 0)));
-            filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: inset 0px 10px 120px 0 #222, inset 0px -40px 150px 10px #222;
+            pointer-events: none;
         }
 
         .player-border {
@@ -236,9 +240,10 @@
             width: 100%;
             top: 0;
             left: 0;
-            box-shadow: inset 2px 2px 12px whitesmoke;
-            z-index: 30;
+            box-shadow: inset 1px 3px 8px white;
+            z-index: 40;
             border-radius: 20px;
+            pointer-events: none;
         }
 
         .progress-bar-wrapper {
@@ -411,7 +416,7 @@
                 <div class="title bottom left">{{ song.title }}</div>
                 <div class="icon icon-dislike bottom right" v-on:click="musicIs('bad')"></div>
             </div>
-            <div class="bottom-top-gradient"></div>
+            <div class="player-inner-gradient"></div>
             <div class="player-border"></div>
             <div class="progress-bar-wrapper">
                 <div class="progress-bar color-primary">
