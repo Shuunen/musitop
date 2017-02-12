@@ -1,6 +1,5 @@
 window.onload = function () {
     initVue();
-    handleProgressBar();
 };
 
 var notifier = null;
@@ -14,15 +13,22 @@ var initVue = function () {
                 name: 'Musitop',
                 socket: null
             },
-            isMobile: (typeof window.orientation !== 'undefined'),
+            isMobile: (typeof window.orientation !== 'undefined') || true,
             isLoading: true,
             isPaused: true,
-            isPlaying: true,
+            isPlaying: false,
             notifier: null,
+            progressBarStyle: {
+                transitionDuration: '0s',
+                transform: 'translateX(-100%)'
+            },
             player: null,
             song: {
                 artist: 'Unknown artist',
-                title: 'Unknown title'
+                title: 'Unknown title',
+                duration: 0,
+                shouldStartAt: 0,
+                startTimestamp: 0
             }
         },
         methods: {
@@ -40,17 +46,19 @@ var initVue = function () {
             onMetadata: function (metadata) {
                 notify('Socket', 'received fresh metadata infos');
                 notify('info', metadata);
-                handleProgressBar(metadata);
                 this.song.artist = metadata.albumartist[0];
                 this.song.title = metadata.title;
+                this.song.duration = Math.round(metadata.duration);
+                this.song.startTimestamp = metadata.startTimestamp;
                 injectCover(metadata.picture[0]); // specific process for covers
+                this.resetProgressBar();
                 this.player.src = metadata.stream + '?t=' + new Date().getTime();
                 var shouldStartAt = Math.round(new Date().getTime() / 1000) - metadata.startTimestamp;
                 // if should start song at 1 or 3 seconds, it's stupid
                 shouldStartAt = shouldStartAt <= 5 ? 0 : shouldStartAt;
                 // notify('info', 'song shouldStartAt : ' + shouldStartAt + ' seconds');
                 this.player.currentTime = shouldStartAt;
-                this.isLoading = false;
+                this.song.shouldStartAt = shouldStartAt;
             },
             onMusicWas: function (musicWas) {
                 notify('Client', 'Server said that music was "' + musicWas + '"');
@@ -60,7 +68,9 @@ var initVue = function () {
                     notify('Client', 'Deleting this song...', 'info');
                 } else if (musicWas === 'next') {
                     notify('Client', 'Next song was asked');
-                    this.isLoading = true;
+                    setTimeout(() => {
+                        this.isLoading = true;
+                    }, 200);
                 } else if (musicWas === 'pause') {
                     notify('Client', '|| Pause song please');
                 } else {
@@ -81,11 +91,39 @@ var initVue = function () {
                 notify('Socket', 'received fresh options');
                 notify('info', options);
             },
-            updateStatus: function () {
+            updateStatus: function (e) {
                 if (this.player) {
-                    this.isPaused = this.player.paused;
-                    this.isPlaying = !this.player.paused;
+                    // notify('Client', e.type, 'info');
+                    if (e.type === 'canplay') {
+                        this.isLoading = false;
+                        this.updateProgressBar();
+                    } else if (!this.isLoading) {
+                        this.isPaused = this.player.paused;
+                        this.isPlaying = !this.player.paused;
+                    }
                 }
+            },
+            resetProgressBar: function () {
+                this.progressBarStyle.transitionDuration = '0s';
+                this.progressBarStyle.transform = 'translateX(-100%)';
+            },
+            updateProgressBar: function () {
+                // notify('shouldStartAt', this.song.shouldStartAt);
+                var percentDoneAtInit = Math.round(this.song.shouldStartAt / this.song.duration * 10000) / 100;
+                // notify('percentDoneAtInit', percentDoneAtInit);
+                var secondsLeft = Math.round(this.song.duration - this.song.shouldStartAt);
+                // notify('secondsLeft', secondsLeft);
+                this.progressBarStyle.transitionDuration = '0s';
+                setTimeout(() => {
+                    this.progressBarStyle.transitionDuration = secondsLeft + 's';
+                }, 300);
+                this.progressBarStyle.transform = 'translateX(-' + (100 - percentDoneAtInit) + '%)';
+                setTimeout(() => {
+                    this.progressBarStyle.transform = 'translateX(0%)';
+                }, 900);
+            },
+            getTimestamp: function () {
+                return Math.round(new Date().getTime() / 1000);
             },
             initPlayer: function () {
                 this.player = document.querySelector('audio');
@@ -93,7 +131,7 @@ var initVue = function () {
                 this.player.addEventListener('ended', this.nextSong);
                 this.player.addEventListener('pause', this.updateStatus);
                 this.player.addEventListener('play', this.updateStatus);
-                this.player.addEventListener('playing', this.updateStatus);
+                this.player.addEventListener('canplay', this.updateStatus);
             },
             initKeyboard: function () {
                 document.body.addEventListener('keyup', this.handleKeyboard);
@@ -153,40 +191,6 @@ var initVue = function () {
             this.initNotifier();
         }
     });
-};
-
-var startTimestamp;
-var secondTotal;
-var handleProgressBar = function (metadata) {
-    // reset loop data
-    startTimestamp = null;
-    secondTotal = 0;
-    // init loop
-    if (!metadata) {
-        var secondLeft = 0;
-        var actualTimestamp = null;
-        var progressBar = document.querySelector('.progress-bar-inner');
-        setInterval(function () {
-            if (startTimestamp && secondTotal) {
-                actualTimestamp = Math.round(new Date().getTime() / 1000);
-                secondLeft = startTimestamp - actualTimestamp;
-                var percentDone = Math.round(secondLeft / secondTotal * -10000) / 100;
-                // notify('info', 'percent done : ' + percentDone + '%');
-                progressBar.style.width = percentDone + '%';
-            }
-        }, 1000);
-    }
-    // update loop
-    else {
-        if (!metadata.duration) {
-            notify('warn', 'duration not specified (' + metadata.duration + ')');
-        } else if (!metadata.startTimestamp) {
-            notify('warn', 'startTimestamp not specified (' + metadata.startTimestamp + ')');
-        } else {
-            startTimestamp = metadata.startTimestamp;
-            secondTotal = Math.round(metadata.duration);
-        }
-    }
 };
 
 var notify = function (action, message, type) {
