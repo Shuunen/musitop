@@ -44,6 +44,11 @@ var initVue = function () {
                 this.socket.on('pause', this.pauseResume);
             },
             onMetadata: function (metadata) {
+                // avoid bothering this client with other clients data refresh
+                if (metadata.startTimestamp === this.song.startTimestamp) {
+                    notify('Socket', 'received same metadata infos');
+                    return;
+                }
                 notify('Socket', 'received fresh metadata infos');
                 notify('info', metadata);
                 this.song.artist = metadata.albumartist[0];
