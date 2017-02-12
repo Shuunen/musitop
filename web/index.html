@@ -155,21 +155,18 @@
             pointer-events: none;
         }
 
-        .player #artist {
-            bottom: 40px;
+        .player .bottom.artist {
             font-size: 30px;
+            bottom: 8vw;
             text-indent: 2px;
         }
 
-        .player #title {
-            bottom: 20px;
+        .player .title {
             text-indent: 4px;
         }
 
-        .player #title,
-        .player #artist {
-            position: absolute;
-            left: 4vw;
+        .player .title,
+        .player .artist {
             text-shadow: 1px 1px 1px black, 0 0 4px white;
             z-index: 40;
             white-space: nowrap;
@@ -179,22 +176,25 @@
             text-align: left;
         }
 
-        .player #is-good {
+        .player .top,
+        .player .bottom {
             position: absolute;
-            top: 4vw;
-            left: 4vw;
         }
 
-        .player #is-bad {
-            position: absolute;
+        .player .top {
+            top: 4vw;
+        }
+
+        .player .right {
+            right: 4vw;
+        }
+
+        .player .bottom {
             bottom: 4vw;
-            right: 4vw;
         }
 
-        .player #do-pause {
-            position: absolute;
-            top: 4vw;
-            right: 4vw;
+        .player .left {
+            left: 4vw;
         }
 
         .player .player-center {
@@ -283,8 +283,8 @@
         }
 
         .icon {
-            height: 35px;
-            width: 35px;
+            height: 40px;
+            width: 40px;
             z-index: 40;
             background-size: contain;
             background-repeat: no-repeat;
@@ -389,32 +389,32 @@
 
 <body>
     <div id="app" v-bind:class="isMobile ? 'mobile':'desktop'">
-        <div class="gradient-overlay" data-cover="gradient">
-            <img data-cover="src" alt="song cover for background">
+        <div class="gradient-overlay">
+            <img v-bind:src="song.cover" alt="song cover for background">
         </div>
-        <img class="loader cover-blur" data-cover="src" />
+        <img class="loader cover-blur" v-bind:src="song.cover" />
         <div class="player">
-            <div class="cover-wrap" v-bind:class="{ blur: isLoading }">
-                <img class="loader cover" data-cover="src" alt="song cover" />
+            <div class="cover-wrap" v-bind:class="{ blur: isLoading || (options.audioClientSide && !isPlaying && !isLoading) }">
+                <img class="loader cover" v-bind:src="song.cover" alt="song cover" />
             </div>
-            <div class="player-top" v-show="isPlaying && !isLoading">
-                <div id="is-good" v-on:click="musicIs('good')" class="icon icon-like"></div>
-                <div id="do-pause" v-on:click="pauseResume" class="icon icon-pause"></div>
+            <div class="player-top">
+                <div class="icon icon-like top left" v-on:click="musicIs('good')"></div>
+                <div class="icon icon-pause top right" v-on:click="pauseResume" v-show="options.audioClientSide && (isPlaying && !isLoading)"></div>
+                <div class="icon icon-play top right" v-show="isPaused && !isLoading" v-on:click="pauseResume"></div>
             </div>
             <div class="player-center">
-                <div v-show="isPlaying && !isLoading" v-on:click="nextSong" class="icon icon-next"></div>
-                <div v-show="isPaused && !isLoading" v-on:click="pauseResume" class="icon icon-play"></div>
+                <div v-show="!isLoading" v-on:click="nextSong" class="icon icon-next"></div>
                 <div v-show="isLoading" class="cp-spinner cp-skeleton"></div>
             </div>
-            <div class="player-bottom" v-show="isPlaying && !isLoading">
-                <strong id="artist">{{ song.artist }}</strong>
-                <div id="title">{{ song.title }}</div>
-                <div id="is-bad" v-on:click="musicIs('bad')" class="icon icon-dislike"></div>
+            <div class="player-bottom">
+                <strong class="artist bottom left">{{ song.artist }}</strong>
+                <div class="title bottom left">{{ song.title }}</div>
+                <div class="icon icon-dislike bottom right" v-on:click="musicIs('bad')"></div>
             </div>
             <div class="bottom-top-gradient"></div>
             <div class="player-border"></div>
             <div class="progress-bar-wrapper">
-                <div class="progress-bar" data-color-primary>
+                <div class="progress-bar color-primary">
                     <div class="progress-bar-inner" v-bind:style="progressBarStyle"></div>
                 </div>
             </div>
@@ -427,11 +427,14 @@
         <svg id="logo" version="1.1" viewBox="0 135 590 365" preserveAspectRatio="xMinYMin meet">
             <use class="background triangle-2-background" xlink:href="icons/logo.svg#triangle-2-background"></use>
             <use class="background triangle-1-background" xlink:href="icons/logo.svg#triangle-1-background"></use>
-            <use class="triangle triangle-1" xlink:href="icons/logo.svg#triangle-1" data-color-secondary></use>
-            <use class="triangle triangle-2" xlink:href="icons/logo.svg#triangle-2" data-color-primary></use>
-            <use class="text text-start" xlink:href="icons/logo.svg#text-start" data-color-primary data-stroke-secondary></use>
-            <use class="text text-end" xlink:href="icons/logo.svg#text-end" data-color-secondary data-stroke-primary></use>
+            <use class="triangle triangle-1 color-secondary" xlink:href="icons/logo.svg#triangle-1"></use>
+            <use class="triangle triangle-2 color-primary" xlink:href="icons/logo.svg#triangle-2"></use>
+            <use class="text text-start color-primary stroke-secondary" xlink:href="icons/logo.svg#text-start"></use>
+            <use class="text text-end color-secondary stroke-primary" xlink:href="icons/logo.svg#text-end"></use>
         </svg>
+        <!-- dynamic styles -->
+        <pre>{{ dynamicStyles }}</pre>
+        <div v-html="dynamicStyles"></div>
     </div>
     <!-- scripts -->
     <script src="vendors/socket-io-slim_171.js"></script>

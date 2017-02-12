@@ -13,7 +13,7 @@ var initVue = function () {
                 name: 'Musitop',
                 socket: null
             },
-            isMobile: (typeof window.orientation !== 'undefined') || true,
+            isMobile: (typeof window.orientation !== 'undefined'),
             isLoading: true,
             isPaused: true,
             isPlaying: false,
@@ -29,6 +29,16 @@ var initVue = function () {
                 duration: 0,
                 shouldStartAt: 0,
                 startTimestamp: 0
+            },
+            dynamicStyles: '',
+            colors: {
+                primary: 'grey',
+                secondary: 'whitesmoke'
+            },
+            options: {
+                audioClientSide: false,
+                audioServerSide: false,
+                canUpdate: true
             }
         },
         methods: {
@@ -55,15 +65,10 @@ var initVue = function () {
                 this.song.title = metadata.title;
                 this.song.duration = Math.round(metadata.duration);
                 this.song.startTimestamp = metadata.startTimestamp;
-                injectCover(metadata.picture[0]); // specific process for covers
+                this.song.stream = metadata.stream + '?t=' + metadata.startTimestamp;
+                this.updateCover(metadata.picture[0]); // specific process for covers
                 this.resetProgressBar();
-                this.player.src = metadata.stream + '?t=' + new Date().getTime();
-                var shouldStartAt = Math.round(new Date().getTime() / 1000) - metadata.startTimestamp;
-                // if should start song at 1 or 3 seconds, it's stupid
-                shouldStartAt = shouldStartAt <= 5 ? 0 : shouldStartAt;
-                // notify('info', 'song shouldStartAt : ' + shouldStartAt + ' seconds');
-                this.player.currentTime = shouldStartAt;
-                this.song.shouldStartAt = shouldStartAt;
+                this.updatePlayer();
             },
             onMusicWas: function (musicWas) {
                 notify('Client', 'Server said that music was "' + musicWas + '"');
@@ -93,11 +98,73 @@ var initVue = function () {
                 notify('Socket', 'client side connection init');
             },
             onOptions: function (options) {
+                if (!this.options.canUpdate) {
+                    return;
+                }
                 notify('Socket', 'received fresh options');
                 notify('info', options);
+                this.options.audioClientSide = options.audioClientSide;
+                this.options.audioServerSide = !options.audioClientSide;
+            },
+            updatePlayer: function () {
+                var shouldStartAt = Math.round(new Date().getTime() / 1000) - this.song.startTimestamp;
+                shouldStartAt = shouldStartAt <= 5 ? 0 : shouldStartAt; // if should start song at 1 or 3 seconds, it's stupid
+                this.song.shouldStartAt = shouldStartAt;
+                // notify('info', 'song shouldStartAt : ' + shouldStartAt + ' seconds');
+                if (this.options.audioClientSide) {
+                    if (this.player.src != this.song.stream) {
+                        this.player.src = this.song.stream;
+                    }
+                    this.player.currentTime = this.song.shouldStartAt;
+                } else {
+                    this.isLoading = false;
+                    this.updateProgressBar();
+                }
+            },
+            getDataUrlFromArrayBuffer: function (arrayBuffer) {
+                // Obtain a blob: URL for the image data.
+                var arrayBufferView = new Uint8Array(arrayBuffer);
+                var blob = new Blob([arrayBufferView], {
+                    type: 'image/jpeg'
+                });
+                var urlCreator = window.URL || window.webkitURL;
+                return urlCreator.createObjectURL(blob);
+            },
+            updateCover: function (cover) {
+                var dataUrl = cover ? this.getDataUrlFromArrayBuffer(cover.data) : 'icons/no-cover.svg';
+                this.song.cover = dataUrl;
+                this.getColorPaletteFromCover();
+            },
+            getColorPaletteFromCover: function () {
+                this.dynamicStyles = '';
+                var img = document.querySelector('.gradient-overlay img');
+                img.onload = () => {
+                    notify('info', 'cover image loaded');
+                    var target = document.querySelectorAll('.gradient-overlay'); // why querySelectorAll
+                    target[0].style = '';
+                    if (!target.length) {
+                        notify('warning', 'no target to apply Grade');
+                        return;
+                    }
+                    Grade(target);
+                    var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/g); // to use [0] ?
+                    if (!colors || colors.length !== 2) {
+                        notify('warning', 'no colors retrieved from Grade');
+                        return;
+                    }
+                    notify('Grade', 'got colors from cover : "' + colors[0] + '" & "' + colors[1] + '"');
+                    this.colors.primary = colors[0];
+                    this.colors.secondary = colors[1];
+                    this.dynamicStyles = '<style>';
+                    this.dynamicStyles += '.color-primary { color: ' + this.colors.primary + '}';
+                    this.dynamicStyles += '.color-secondary { color: ' + this.colors.secondary + '}';
+                    this.dynamicStyles += '.stroke-primary { stroke: ' + this.colors.primary + '}';
+                    this.dynamicStyles += '.stroke-secondary { stroke: ' + this.colors.secondary + '}';
+                    this.dynamicStyles += '</style>';
+                };
             },
             updateStatus: function (e) {
-                if (this.player) {
+                if (this.options.audioClientSide) {
                     // notify('Client', e.type, 'info');
                     if (e.type === 'canplay') {
                         this.isLoading = false;
@@ -106,6 +173,11 @@ var initVue = function () {
                         this.isPaused = this.player.paused;
                         this.isPlaying = !this.player.paused;
                     }
+                } else if (this.options.audioServerSide) {
+                    this.isLoading = false;
+                    this.updateProgressBar();
+                } else {
+                    notify('Error', 'non handled case in updateStatus', 'error');
                 }
             },
             resetProgressBar: function () {
@@ -131,6 +203,9 @@ var initVue = function () {
                 return Math.round(new Date().getTime() / 1000);
             },
             initPlayer: function () {
+                if (this.options.audioServerSide) {
+                    return;
+                }
                 this.player = document.querySelector('audio');
                 this.player.autoplay = true;
                 this.player.addEventListener('ended', this.nextSong);
@@ -168,15 +243,16 @@ var initVue = function () {
             nextSong: function () {
                 this.isLoading = true;
                 // set player time to 0 for next song
-                if (this.player) {
+                if (this.options.audioClientSide) {
                     this.player.pause();
                     this.player.currentTime = 0;
                 }
                 this.socket.emit('music is', 'next');
             },
             pauseResume: function () {
-                if (this.player) {
+                if (this.options.audioClientSide) {
                     if (this.player.paused) {
+                        this.updatePlayer();
                         this.player.play();
                         this.player.autoplay = true;
                         notify('info', 'song  was paused, resuming...');
@@ -185,6 +261,14 @@ var initVue = function () {
                         this.player.autoplay = false;
                         notify('info', 'song  was playing, do pause');
                     }
+                } else if (this.options.audioServerSide) {
+                    this.options.audioServerSide = false;
+                    this.options.audioClientSide = true;
+                    this.options.canUpdate = false;
+                    this.initPlayer();
+                    this.updatePlayer();
+                } else {
+                    notify('Error', 'non handled case in pauseResume', 'error');
                 }
             }
         },
@@ -220,77 +304,3 @@ var notify = function (action, message, type) {
     }
     /* eslint-enable no-console */
 };
-
-var injectCover = function (cover) {
-    var dataUrl = cover ? arrayBufferToDataUrl(cover.data) : 'icons/no-cover.svg';
-    if (!dataUrl) {
-        notify('warning', 'no cover embedded in music');
-        return;
-    }
-    var gettingColorAtLeastForOne = false;
-    var els = document.querySelectorAll('[data-cover]');
-    for (var i = 0; i < els.length; i++) {
-        var el = els[i];
-        var type = el.getAttribute('data-cover');
-        if (type === 'background') {
-            el.style.backgroundImage = 'url(' + dataUrl + ')';
-        } else if (type === 'src') {
-            el.src = dataUrl;
-            if (!gettingColorAtLeastForOne) {
-                gettingColorAtLeastForOne = true;
-                getColorPaletteFromImage(el);
-            }
-        }
-        el.classList.remove('loader');
-    }
-    if (!els) {
-        notify('warning', 'no picture to populate');
-    }
-};
-
-var getColorPaletteFromImage = function (image) {
-    image.onload = function () {
-        notify('info', 'cover image loaded');
-        var target = document.querySelectorAll('[data-cover="gradient"]'); // why querySelectorAll
-        target[0].style = '';
-        if (!target.length) {
-            notify('warning', 'no target to apply Grade');
-            return;
-        }
-        Grade(target);
-        var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/g); // to use [0] ?
-        if (colors && colors.length === 2) {
-            notify('Grade', 'got colors from cover : "' + colors[0] + '" & "' + colors[1] + '"');
-            applyTheme('backgroundColor', colors[0], '[data-background-primary]');
-            applyTheme('backgroundColor', colors[1], '[data-background-secondary]');
-            applyTheme('color', colors[0], '[data-color-primary]');
-            applyTheme('color', colors[1], '[data-color-secondary]');
-            applyTheme('stroke', colors[0], '[data-stroke-primary]');
-            applyTheme('stroke', colors[1], '[data-stroke-secondary]');
-        } else {
-            notify('error', 'did not retrieved primary & secondary colors from cover');
-        }
-    };
-};
-
-var arrayBufferToDataUrl = function (arrayBuffer) {
-    // Obtain a blob: URL for the image data.
-    var arrayBufferView = new Uint8Array(arrayBuffer);
-    var blob = new Blob([arrayBufferView], {
-        type: 'image/jpeg'
-    });
-    var urlCreator = window.URL || window.webkitURL;
-    return urlCreator.createObjectURL(blob);
-};
-
-function applyTheme(property, value, selector) {
-    var els = document.querySelectorAll(selector);
-    for (var i = 0; i < els.length; i++) {
-        var el = els[i];
-        if (property === 'background') {
-            el[property] = value;
-        } else {
-            el.style[property] = value;
-        }
-    }
-}
