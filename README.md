@@ -72,6 +72,16 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 ## TODO
 
 * implement simple notification system instead of notyf vendor
+* use a Service Worker
+* can we use another method than "/init.js" to say hello to server ?
+* is underscore still required ?
+* that responds with a 200 when offline
+* server should use HTTPS
+* server should redirects HTTP traffic to HTTPS
+* server should use HTTP/2
+* manifest should contains background_color, theme_color & icons at least 192px
+* add <meta name="theme-color"> tag
+* try to re-use img tag (actually 3 <img> with v-bind:src)
 * create vue components if needed
 * handle case when MediaNext (for example) is pressed on the web client but will also trigger system
 * handle case when server shut down, avoid letting client playing or loading
