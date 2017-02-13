@@ -6,50 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <meta name="description" content="" />
-    <link href="vendors/csspin-skeleton.css" rel="stylesheet" type="text/css">
     <link href="vendors/notyf_110.css" rel="stylesheet" type="text/css">
     <link rel="icon" type="image/png" href='icons/Paomedia/headphone.png' />
     <link href="https://fonts.googleapis.com/css?family=Satisfy" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <style>
-        @-webkit-keyframes subtle-shake {
-            from,
-            to {
-                -webkit-transform: translate3d(0, 0, 0);
-                transform: translate3d(0, 0, 0);
-            }
-            10%,
-            50%,
-            90% {
-                -webkit-transform: translate3d(-5px, 0, 0);
-                transform: translate3d(-5px, 0, 0);
-            }
-            30%,
-            70% {
-                -webkit-transform: translate3d(5px, 0, 0);
-                transform: translate3d(5px, 0, 0);
-            }
-        }
-
-        @keyframes subtle-shake {
-            from,
-            to {
-                -webkit-transform: translate3d(0, 0, 0);
-                transform: translate3d(0, 0, 0);
-            }
-            10%,
-            50%,
-            90% {
-                -webkit-transform: translate3d(-5px, 0, 0);
-                transform: translate3d(-5px, 0, 0);
-            }
-            30%,
-            70% {
-                -webkit-transform: translate3d(5px, 0, 0);
-                transform: translate3d(5px, 0, 0);
-            }
-        }
-
         html,
         body {
             height: 100%;
@@ -100,7 +61,6 @@
             top: -30px;
             position: relative;
             align-items: flex-start;
-            /*box-sizing: border-box;*/
             box-shadow: 0px 0px 20px 1px #333, 0px 12px 1px #333;
             z-index: 20;
         }
@@ -317,14 +277,35 @@
             will-change: opacity;
         }
 
-        .cp-spinner {
+        .spinner {
             z-index: 100;
-        }
-
-        .cp-skeleton {
-            border-top: solid 6px whitesmoke;
+            position: relative;
             top: calc(50% - 24px);
             left: calc(50% - 24px);
+            animation: spinner-animate 1s linear infinite;
+            width: 48px;
+            height: 48px;
+            display: inline-block;
+            box-sizing: border-box;
+            border-radius: 50%;
+            border-top: solid 6px transparent;
+            border-right: solid 6px transparent;
+            border-bottom: solid 6px transparent;
+            border-left: solid 6px currentColor;
+        }
+
+        @keyframes spinner-animate {
+            0% {
+                transform: rotate(0);
+                opacity: 1
+            }
+            50% {
+                opacity: .7
+            }
+            100% {
+                transform: rotate(360deg);
+                opacity: 1
+            }
         }
 
         #logo {
@@ -366,7 +347,7 @@
         <div class="gradient-overlay">
             <img v-bind:src="song.cover" alt="song cover for background">
         </div>
-        <img class="loader cover-blur" v-bind:src="song.cover" />
+        <img class="loader cover-blur" v-bind:src="song.cover" alt="song cover" />
         <div class="player">
             <div class="cover-wrap" v-bind:class="{ blur: isLoading || (options.audioClientSide && !isPlaying && !isLoading) }">
                 <img class="loader cover" v-bind:src="song.cover" alt="song cover" />
@@ -386,7 +367,7 @@
                 <svg v-show="!isLoading" v-on:click="nextSong" class="icon" viewBox="0 0 128 128">
                     <use xlink:href="icons/icons.svg#right"></use>
                 </svg>
-                <div v-show="isLoading" class="cp-spinner cp-skeleton"></div>
+                <div v-show="isLoading" class="spinner"></div>
             </div>
             <div class="player-bottom">
                 <strong class="artist bottom left">{{ song.artist }}</strong>
