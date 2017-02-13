@@ -219,7 +219,7 @@
         }
 
         .desktop .player .player-center>.icon {
-            filter: blur(0px) invert(100%) drop-shadow(1px 2px 6px #333);
+            filter: invert(100%) drop-shadow(1px 2px 6px #333);
         }
 
         .player-inner-gradient {
@@ -293,8 +293,7 @@
             z-index: 40;
             background-size: contain;
             background-repeat: no-repeat;
-            -webkit-filter: blur(0px) invert(100%) drop-shadow(5px 5px 3px #666);
-            filter: blur(0px) invert(100%) drop-shadow(5px 5px 3px #666);
+            filter: invert(100%) drop-shadow(5px 5px 3px #666);
             outline: none;
         }
 
@@ -305,7 +304,7 @@
         }
 
         .desktop .icon:hover {
-            filter: blur(0px) invert(100%) drop-shadow(2px 2px 2px black);
+            filter: invert(100%) drop-shadow(2px 2px 2px black);
         }
 
         .icon-like {
@@ -388,7 +387,6 @@
             color: black;
             text-align: left;
         }
-
     </style>
 </head>
 
@@ -413,6 +411,8 @@
             </div>
             <div class="player-bottom">
                 <strong class="artist bottom left">{{ song.artist }}</strong>
+                <!-- space to help when copying artist & title -->
+                <span> </span>
                 <div class="title bottom left">{{ song.title }}</div>
                 <div class="icon icon-dislike bottom right" v-on:click="musicIs('bad')"></div>
             </div>
