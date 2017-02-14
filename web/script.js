@@ -1,11 +1,21 @@
 window.onload = function () {
-    initVue();
-};
 
-var notifier = null;
+    Vue.component('toast', {
+        props: ['toast'],
+        template: '<div class="toast" v-bind:class="toast.type"><strong>{{ toast.title }}</strong><p>{{ toast.message }}</p></div>',
+        mounted() {
+            setTimeout(() => {
+                this.$el.classList.toggle('visible');
+                setTimeout(() => {
+                    this.$el.classList.toggle('visible');
+                    setTimeout(() => {
+                        this.$el.remove();
+                    }, 1000);
+                }, this.toast.delay);
+            }, 100);
+        }
+    });
 
-var initVue = function () {
-    notify('info', 'init vue');
     new Vue({
         el: '#app',
         data: {
@@ -35,6 +45,7 @@ var initVue = function () {
                 primary: 'grey',
                 secondary: 'whitesmoke'
             },
+            toasts: [],
             options: {
                 audioClientSide: false,
                 audioServerSide: false,
@@ -43,7 +54,7 @@ var initVue = function () {
         },
         methods: {
             initSocket: function () {
-                notify('Socket', 'client side connecting...');
+                this.notify('Socket', 'client side connecting...');
                 this.socket = io('http://' + document.location.hostname + ':1604');
                 this.socket.on('metadata', this.onMetadata);
                 this.socket.on('music was', this.onMusicWas);
@@ -56,11 +67,11 @@ var initVue = function () {
             onMetadata: function (metadata) {
                 // avoid bothering this client with other clients data refresh
                 if (metadata.startTimestamp === this.song.startTimestamp) {
-                    notify('Socket', 'received same metadata infos');
+                    this.notify('Socket', 'received same metadata infos');
                     return;
                 }
-                notify('Socket', 'received fresh metadata infos');
-                notify('info', metadata);
+                this.notify('Socket', 'received fresh metadata infos');
+                this.notify('info', metadata);
                 this.song.artist = metadata.albumartist[0];
                 this.song.title = metadata.title;
                 this.song.duration = Math.round(metadata.duration);
@@ -71,38 +82,38 @@ var initVue = function () {
                 this.updatePlayer();
             },
             onMusicWas: function (musicWas) {
-                notify('Client', 'Server said that music was "' + musicWas + '"');
+                this.notify('Client', 'Server said that music was "' + musicWas + '"');
                 if (musicWas === 'good') {
-                    notify('Client', 'Will keep this song', 'success');
+                    this.notify('Will keep', this.song.artist + ' - ' + this.song.title, 'success');
                 } else if (musicWas === 'bad') {
-                    notify('Client', 'Deleting this song...', 'info');
+                    this.notify('Deleting', this.song.artist + ' - ' + this.song.title, 'alert');
                 } else if (musicWas === 'next') {
-                    notify('Client', 'Next song was asked');
+                    this.notify('Skip', 'Loading next song...', 'info');
                     setTimeout(() => {
                         this.isLoading = true;
-                    }, 200);
+                    }, 100);
                 } else if (musicWas === 'pause') {
-                    notify('Client', '|| Pause song please');
+                    this.notify('Pause', 'Was asked by server', 'info');
                 } else {
-                    notify('Client', 'Server said that music was "' + musicWas + '" ?!?', 'info');
+                    this.notify('Client', 'Server said that music was "' + musicWas + '" ?!?', 'info');
                 }
             },
             onDisconnect: function () {
-                notify('Socket', 'client side disconnected');
+                this.notify('Socket', 'client side disconnected');
             },
             onError: function (e) {
-                notify('Error', 'Client error, see logs', 'error');
-                notify('error', e);
+                this.notify('Error', 'Client error, see logs', 'error');
+                this.notify('error', e);
             },
             onConnection: function () {
-                notify('Socket', 'client side connection init');
+                this.notify('Socket', 'client side connection init');
             },
             onOptions: function (options) {
                 if (!this.options.canUpdate) {
                     return;
                 }
-                notify('Socket', 'received fresh options');
-                notify('info', options);
+                this.notify('Socket', 'received fresh options');
+                this.notify('info', options);
                 this.options.audioClientSide = options.audioClientSide;
                 this.options.audioServerSide = !options.audioClientSide;
             },
@@ -110,7 +121,7 @@ var initVue = function () {
                 var shouldStartAt = Math.round(new Date().getTime() / 1000) - this.song.startTimestamp;
                 shouldStartAt = shouldStartAt <= 5 ? 0 : shouldStartAt; // if should start song at 1 or 3 seconds, it's stupid
                 this.song.shouldStartAt = shouldStartAt;
-                // notify('info', 'song shouldStartAt : ' + shouldStartAt + ' seconds');
+                // this.notify('info', 'song shouldStartAt : ' + shouldStartAt + ' seconds');
                 if (this.options.audioClientSide) {
                     if (this.player.src != this.song.stream) {
                         this.player.src = this.song.stream;
@@ -139,20 +150,20 @@ var initVue = function () {
                 this.dynamicStyles = '';
                 var img = document.querySelector('.gradient-overlay img');
                 img.onload = () => {
-                    notify('info', 'cover image loaded');
+                    this.notify('info', 'cover image loaded');
                     var target = document.querySelectorAll('.gradient-overlay'); // why querySelectorAll
                     target[0].style = '';
                     if (!target.length) {
-                        notify('warning', 'no target to apply Grade');
+                        this.notify('warning', 'no target to apply Grade');
                         return;
                     }
                     Grade(target);
                     var colors = target[0].style.backgroundImage.match(/(rgb\([\d]+,\s[\d]+,\s[\d]+\))/g); // to use [0] ?
                     if (!colors || colors.length !== 2) {
-                        notify('warning', 'no colors retrieved from Grade');
+                        this.notify('warning', 'no colors retrieved from Grade');
                         return;
                     }
-                    notify('Grade', 'got colors from cover : "' + colors[0] + '" & "' + colors[1] + '"');
+                    this.notify('Grade', 'got colors from cover : "' + colors[0] + '" & "' + colors[1] + '"');
                     this.colors.primary = colors[0];
                     this.colors.secondary = colors[1];
                     this.dynamicStyles = '<style>';
@@ -165,7 +176,7 @@ var initVue = function () {
             },
             updateStatus: function (e) {
                 if (this.options.audioClientSide) {
-                    // notify('Client', e.type, 'info');
+                    // this.notify('Client', e.type, 'info');
                     if (e.type === 'canplay') {
                         this.isLoading = false;
                         this.updateProgressBar();
@@ -177,7 +188,7 @@ var initVue = function () {
                     this.isLoading = false;
                     this.updateProgressBar();
                 } else {
-                    notify('Error', 'non handled case in updateStatus', 'error');
+                    this.notify('Error', 'non handled case in updateStatus', 'error');
                 }
             },
             resetProgressBar: function () {
@@ -185,11 +196,11 @@ var initVue = function () {
                 this.progressBarStyle.transform = 'translateX(-100%)';
             },
             updateProgressBar: function () {
-                // notify('shouldStartAt', this.song.shouldStartAt);
+                // this.notify('shouldStartAt', this.song.shouldStartAt);
                 var percentDoneAtInit = Math.round(this.song.shouldStartAt / this.song.duration * 10000) / 100;
-                // notify('percentDoneAtInit', percentDoneAtInit);
+                // this.notify('percentDoneAtInit', percentDoneAtInit);
                 var secondsLeft = Math.round(this.song.duration - this.song.shouldStartAt);
-                // notify('secondsLeft', secondsLeft);
+                // this.notify('secondsLeft', secondsLeft);
                 this.progressBarStyle.transitionDuration = '0s';
                 setTimeout(() => {
                     this.progressBarStyle.transitionDuration = secondsLeft + 's';
@@ -216,14 +227,8 @@ var initVue = function () {
             initKeyboard: function () {
                 document.body.addEventListener('keyup', this.handleKeyboard);
             },
-            initNotifier: function () {
-                // create an instance of Notyf
-                this.notifier = notifier = new Notyf({
-                    delay: 4000
-                });
-            },
             handleKeyboard: function (event) {
-                // notify('info', 'received keyup "' + event.key + '"');
+                // this.notify('info', 'received keyup "' + event.key + '"');
                 this.socket.emit('event', event.key);
                 if (event.key === 'MediaTrackPrevious') { // <
                     this.musicIs('good');
@@ -234,7 +239,7 @@ var initVue = function () {
                 } else if (event.key === 'MediaPlayPause') { // [>]
                     this.pauseResume();
                 } else {
-                    notify('info', 'key "' + event.key + '" is not handled yet');
+                    this.notify('info', 'key "' + event.key + '" is not handled yet');
                 }
             },
             musicIs: function (musicIs) {
@@ -255,11 +260,11 @@ var initVue = function () {
                         this.updatePlayer();
                         this.player.play();
                         this.player.autoplay = true;
-                        notify('info', 'song  was paused, resuming...');
+                        this.notify('info', 'song  was paused, resuming...');
                     } else {
                         this.player.pause();
                         this.player.autoplay = false;
-                        notify('info', 'song  was playing, do pause');
+                        this.notify('info', 'song  was playing, do pause');
                     }
                 } else if (this.options.audioServerSide) {
                     this.options.audioServerSide = false;
@@ -268,39 +273,44 @@ var initVue = function () {
                     this.initPlayer();
                     this.updatePlayer();
                 } else {
-                    notify('Error', 'non handled case in pauseResume', 'error');
+                    this.notify('Error', 'non handled case in pauseResume', 'error');
                 }
+            },
+            notify: function (action, message, type) {
+                /* eslint-disable no-console */
+                if (type) {
+                    if (['success', 'info', 'alert'].indexOf(type) !== -1) {
+                        this.toast(type, action, message);
+                    } else {
+                        this.toast('alert', 'Error', 'cannot toast type "' + type + '"');
+                        console.error('cannot toast type "' + type + '"');
+                    }
+                }
+                if (console[action]) {
+                    console[action](message);
+                } else {
+                    // in order to align logs :p
+                    while (action.length < 9) {
+                        action += ' ';
+                    }
+                    console.log(action + ' : ' + message);
+                }
+                /* eslint-enable no-console */
+            },
+            toast: function (type, title, message, delay) {
+                this.toasts.push({
+                    type: type,
+                    title: title,
+                    message: message,
+                    delay: (delay || 4000)
+                });
             }
         },
         mounted() {
-            notify('info', this.app.name + ' init');
+            this.notify('info', this.app.name + ' init');
             this.initSocket();
             this.initPlayer();
             this.initKeyboard();
-            this.initNotifier();
         }
     });
-};
-
-var notify = function (action, message, type) {
-    /* eslint-disable no-console */
-    if (type) {
-        if (type === 'success') {
-            notifier.confirm(message);
-        } else if (type === 'info') {
-            notifier.alert(message);
-        } else {
-            console.error('cannot use notifier with type "' + type + '"');
-        }
-    }
-    if (console[action]) {
-        console[action](message);
-    } else {
-        // in order to align logs :p
-        while (action.length < 9) {
-            action += ' ';
-        }
-        console.log(action + ' : ' + message);
-    }
-    /* eslint-enable no-console */
 };
