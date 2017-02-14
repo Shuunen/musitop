@@ -55,26 +55,36 @@ Musitop will play music files found in input folder.
 If you like or dislike, click on the appropriate icons, Musitop will delete bad music and move good music into "keep" folder.
 
 
-## Thanks
+## Huge thanks
 
-* 1by1 & Vlc : for their great music players
-* Paomedia & Aha-Soft : for their pretty icons
-* Minimist : for easy argument parsing
-* Node-notifier : for easy desktop notification
-* Shuffle-array : for easy array shuffling
+* 1by1 : for their [great & lightweight music player](http://mpesch3.de1.cc/1by1.html)
+* Aha-Soft : for [pretty icons](https://www.iconfinder.com/aha-soft)
+* Anastasya-Bolshakova : for [pretty icons](https://www.iconfinder.com/nastu_bol)
 * Artists : for creating amazing music
-* Electron : for their great app
-* Csspin : for [loader inspiration](https://github.com/webkul/csspin)
 * Config-prompt : for their [configuration lib](https://github.com/ironSource/node-config-prompt)
-* Hero patterns : for their [nice & simple resources](http://www.heropatterns.com/)
+* Csspin : for [loader inspiration](https://github.com/webkul/csspin)
+* Electron : for their [app & idea](http://electron.atom.io/)
+* Express : for their [easy & powerful node server framework](http://expressjs.com/)
+* Es-lint : for [keeping the code clean](http://eslint.org/)
+* Google Lighthouse : for giving good insights about [web app optimization](https://developers.google.com/web/tools/lighthouse/)
+* Grade : for the [color extraction lib](https://github.com/benhowdle89/grade)
+* Icons-Mind : for [pretty icons](https://www.iconfinder.com/iconsmind)
+* Jason Csizmadi : for [design inspiration](https://dribbble.com/shots/1012466-Tyco-Music-player)
+* Minimist : for [easy argument parsing](https://github.com/substack/minimist)
+* Music-Metadata : for giving an [easy way to read metadata from mp3 files](https://github.com/leetreveil/musicmetadata)
+* Node-notifier : for [handy desktop notification](https://github.com/mikaelbr/node-notifier)
+* Paomedia : for [pretty icons](https://www.iconfinder.com/paomedia)
+* Shuffle-array : for [easy array shuffling](https://github.com/pazguille/shuffle-array)
+* Socket IO : for their [web socket lib that's great to use](http://socket.io/) <3
+* SvgOmg : for their [amazing web app to optimize svg](https://jakearchibald.github.io/svgomg/) <3
+* Vlc : for their [great music player](http://www.videolan.org/vlc/)
+* VueJs : for their [amazing javascript framework](https://vuejs.org/) <3
 
 
-## TODO
+## Still to do
 
-* implement simple notification system instead of notyf vendor
 * use a Service Worker
 * can we use another method than "/init.js" to say hello to server ?
-* is underscore still required ?
 * that responds with a 200 when offline
 * server should use HTTPS
 * server should redirects HTTP traffic to HTTPS
@@ -93,33 +103,5 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 * handle case when no music left in input folder
 * handle case when no music left in playlist
 * handle case when song cannot be moved (eg. when destination already exists)
-* add links in thanks
 * add a gif demo usage
 * add desktop notifications like http://singhharkirat.com/notification-logger/
-
-
-## FAQ
-
-** What about a generic cross-platform audio player ? **
-It's a fu***ng utopia.
-
-** What did you mean about a "generic cross-platform audio player" ? **
-I mean a npm package that come with libraries that can play audio files
-on Windows, Linux & Mac. In this way user does not need to install
-any package before "npm install".
-
-** What about including pre-compiled binaries in your repo ? **
-Yes it's not so bad if there are one or just a few files to copy.
-But it's not that simple to find. For example 1by1.exe is a one file
-player that fit in 180kb. Great.
-I did not find any equivalent binary to include for Linux. Help needed !
-
-** Why not use installed software on the machine ? **
-On Linux yes it's pretty cool & easy, for example we just have to test if
-"mplayer" or "vlc" is here and use them, but in Windows, when use install
-Vlc, depending on Windows version & user choice Vlc is not located every
-time in the same place, so it's far way boring & complicated compared to
-a "npm install myLib" where myLib is simply downloaded & usable in seconds.
-
-** The package "speaker"/"lame"/"lib123" should do the work no ? **
-It does not works with Node 6.x.
