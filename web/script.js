@@ -310,6 +310,19 @@ window.onload = function () {
                     message: message,
                     delay: (delay || 4000)
                 });
+            },
+            initServiceWorker: function () {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('service-worker.js').then((registration) => {
+                        // Registration was successful
+                        this.notify('Info', 'ServiceWorker registration successful with scope');
+                        console.log(registration.scope); // eslint-disable-line no-console
+                    }).catch((err) => {
+                        // registration failed :(
+                        this.notify('Error', 'ServiceWorker registration failed');
+                        console.error(err); // eslint-disable-line no-console
+                    });
+                }
             }
         },
         mounted() {
@@ -317,6 +330,7 @@ window.onload = function () {
             this.initSocket();
             this.initPlayer();
             this.initKeyboard();
+            this.initServiceWorker();
         }
     });
 };
