@@ -385,6 +385,7 @@
             color: black;
             text-align: left;
         }
+
     </style>
 </head>
 
@@ -399,18 +400,18 @@
                 <img class="loader cover" v-bind:src="song.cover" alt="song cover" />
             </div>
             <div class="player-top">
-                <svg class="icon top left" v-on:click="musicIs('good')" viewBox="0 0 128 128">
+                <svg class="icon top left" v-on:click="musicIs('good')" viewbox="0 0 128 128">
                     <use xlink:href="icons/icons.svg#like"></use>
                 </svg>
-                <svg class="icon top right" v-show="isPaused && !isLoading" v-on:click="pauseResume" viewBox="0 0 128 128">
+                <svg class="icon top right" v-show="isPaused && !isLoading" v-on:click="pauseResume" viewbox="0 0 128 128">
                     <use xlink:href="icons/icons.svg#run"></use>
                 </svg>
-                <svg class="icon top right" v-on:click="pauseResume" v-show="options.audioClientSide && (isPlaying && !isLoading)" viewBox="0 0 128 128">
+                <svg class="icon top right" v-on:click="pauseResume" v-show="options.audioClientSide && (isPlaying && !isLoading)" viewbox="0 0 128 128">
                     <use xlink:href="icons/icons.svg#pause"></use>
                 </svg>
             </div>
             <div class="player-center">
-                <svg v-show="!isLoading" v-on:click="nextSong" class="icon" viewBox="0 0 128 128">
+                <svg v-show="!isLoading" v-on:click="nextSong" class="icon" viewbox="0 0 128 128">
                     <use xlink:href="icons/icons.svg#right"></use>
                 </svg>
                 <div v-show="isLoading" class="spinner"></div>
@@ -420,7 +421,7 @@
                 <!-- space to help when copying artist & title -->
                 <span> </span>
                 <div class="title bottom left">{{ song.title }}</div>
-                <svg class="icon icon-dislike bottom right" v-on:click="musicIs('bad')" viewBox="0 0 24 24">
+                <svg class="icon icon-dislike bottom right" v-on:click="musicIs('bad')" viewbox="0 0 24 24">
                     <use xlink:href="icons/icons.svg#unlike-2"></use>
                 </svg>
             </div>
@@ -437,7 +438,7 @@
             <source type="audio/mpeg"> Your browser does not support the audio element.
         </audio>
         <div class="inside-shadow"></div>
-        <svg id="logo" version="1.1" viewBox="0 135 590 365" preserveAspectRatio="xMinYMin meet">
+        <svg id="logo" version="1.1" viewbox="0 135 590 365" preserveaspectratio="xMinYMin meet">
             <use class="background triangle-2-background" xlink:href="icons/logo.svg#triangle-2-background"></use>
             <use class="background triangle-1-background" xlink:href="icons/logo.svg#triangle-1-background"></use>
             <use class="triangle triangle-1 color-secondary" xlink:href="icons/logo.svg#triangle-1"></use>
