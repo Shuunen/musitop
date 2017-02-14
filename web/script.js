@@ -49,6 +49,12 @@ window.onload = function () {
             options: {
                 audioClientSide: false,
                 audioServerSide: false,
+                keyboardTriggers: {
+                    good: ['MediaTrackPrevious', 'ArrowUp'],
+                    bad: ['MediaStop'],
+                    next: ['MediaTrackNext', 'ArrowRight'],
+                    pause: [' ', 'MediaPlayPause']
+                },
                 canUpdate: true
             }
         },
@@ -230,13 +236,13 @@ window.onload = function () {
             handleKeyboard: function (event) {
                 // this.notify('info', 'received keyup "' + event.key + '"');
                 this.socket.emit('event', event.key);
-                if (event.key === 'MediaTrackPrevious') { // <
+                if (this.options.keyboardTriggers.good.indexOf(event.key) !== -1) { // <
                     this.musicIs('good');
-                } else if (event.key === 'MediaStop') { // [ ]
+                } else if (this.options.keyboardTriggers.bad.indexOf(event.key) !== -1) { // [ ]
                     this.musicIs('bad');
-                } else if (event.key === 'MediaTrackNext') { // >
+                } else if (this.options.keyboardTriggers.next.indexOf(event.key) !== -1) { // >
                     this.nextSong();
-                } else if (event.key === 'MediaPlayPause') { // [>]
+                } else if (this.options.keyboardTriggers.pause.indexOf(event.key) !== -1) { // [>]
                     this.pauseResume();
                 } else {
                     this.notify('info', 'key "' + event.key + '" is not handled yet');
