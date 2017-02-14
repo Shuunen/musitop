@@ -28,22 +28,6 @@ app.listen(port, function () {
     notify('Server', 'Musitop server started on http://' + ip + ':' + port);
 });
 
-var sendDynamicValues = function (bForce) {
-    if (bForce) {
-        updatedData = true;
-    }
-    if (!updatedData) {
-        // notify('Server', 'No new data to send');
-        return;
-    }
-    // notify('Server', 'Sending dynamic values to clients');
-    io.emit('options', {
-        audioClientSide: config.get('audioClientSide')
-    });
-    io.emit('metadata', metadata);
-    updatedData = false;
-};
-
 // SOCKET
 var onDisconnect = function () {
     // notify('Socket', 'server side disconnected');
@@ -88,7 +72,6 @@ var onEvent = function (e) {
     notify('Event', e);
 };
 
-var updatedData = false;
 var io = require('socket.io')(socketPort);
 var connectSocket = function () {
     notify('Socket', 'Server connecting...');
@@ -99,7 +82,10 @@ var connectSocket = function () {
         socket.on('disconnect', onDisconnect);
         socket.on('connect', onConnection);
         socket.on('event', onEvent);
-        sendDynamicValues(true);
+        io.emit('options', {
+            audioClientSide: config.get('audioClientSide')
+        });
+        io.emit('metadata', metadata);
     });
 };
 
@@ -202,7 +188,7 @@ function playNext() {
     setTimeout(function () {
         notify('Server', '♫ Remaining ' + playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
-        sendDynamicValues(true);
+        io.emit('metadata', metadata);
     }, 1100);
 }
 
