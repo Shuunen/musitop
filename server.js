@@ -20,22 +20,7 @@ var ip = require('ip').address();
 
 app.use('/', express.static('web'));
 
-app.get('/init.js', function (req, res) {
-    updatedData = true;
-    res.send('console.log(\'Hello You :)\')');
-});
-
 app.get('/stream.mp3', function (req, res) {
-    /*
-    var stat = fs.statSync(song);
-    res.set({
-        'Accept-Ranges': 'bytes',
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': stat.size
-    });
-    var readStream = fs.createReadStream(song);
-    readStream.pipe(res);
-    */
     res.sendFile(song);
 });
 
@@ -114,7 +99,7 @@ var connectSocket = function () {
         socket.on('disconnect', onDisconnect);
         socket.on('connect', onConnection);
         socket.on('event', onEvent);
-        sendDynamicValues();
+        sendDynamicValues(true);
     });
 };
 

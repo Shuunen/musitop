@@ -433,7 +433,6 @@
                 </div>
             </div>
         </div>
-        <pre>isPlaying ? {{ isPlaying }}<br>isLoading ? {{ isLoading }}<br>isPaused ? {{ isPaused }}<br></pre>
         <audio controls>
             <source type="audio/mpeg"> Your browser does not support the audio element.
         </audio>
@@ -450,7 +449,6 @@
             <toast v-for="(toast, index) in toasts" v-bind:toast="toast"></toast>
         </div>
         <!-- dynamic styles -->
-        <pre>{{ dynamicStyles }}</pre>
         <div v-html="dynamicStyles"></div>
     </div>
     <!-- scripts -->
@@ -458,7 +456,6 @@
     <script src="vendors/grade_101.js" async></script>
     <script src="vendors/vue_211.js"></script>
     <script src="script.js"></script>
-    <script src="init.js"></script>
 </body>
 
 </html>
