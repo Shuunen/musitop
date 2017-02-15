@@ -14,31 +14,49 @@ var path = require('path');
 var musicMetadata = require('musicmetadata');
 var port = 1404;
 var express = require('express');
-var https = require('https');
+var http2 = require('spdy');
+var logger = require('morgan');
 var app = express();
 var ip = require('ip').address();
 var options = {
     key: fs.readFileSync('./certs/server.key'),
     cert: fs.readFileSync('./certs/server.crt')
 };
-var server = https.createServer(options, app);
+var server = http2.createServer(options, app).listen(port, (error) => {
+    if (error) {
+        notify('Error', error);
+    } else {
+        notify('Server', 'Musitop server started on https://' + ip + ':' + port);
+    }
+});
 var io = require('socket.io')(server);
 
+// app.use(logger('dev'));
+
 app.use('/', express.static('web'));
+
+app.get('/pushy', (req, res) => {
+    var stream = res.push('/main.js', {
+        status: 200, // optional
+        method: 'GET', // optional
+        request: {
+            accept: '*/*'
+        },
+        response: {
+            'content-type': 'application/javascript'
+        }
+    });
+    stream.on('error', function (e) {
+        notify('warn', e);
+    });
+    stream.end('alert("hello from push stream!");');
+    res.end('<script src="/main.js"></script>');
+});
 
 app.get('/stream.mp3', function (req, res) {
     res.sendFile(song);
 });
-/*
-app.listen(port, function () {
-    notify('Server', 'Musitop server started on https://' + ip + ':' + port);
-});
-*/
-server.listen(port, function () {
-    notify('Server', 'Musitop server started on https://' + ip + ':' + port);
-});
 
-// SOCKET
 var onDisconnect = function () {
     // notify('Socket', 'server side disconnected');
 };
