@@ -18,8 +18,8 @@ var https = require('https');
 var app = express();
 var ip = require('ip').address();
 var options = {
-    key: fs.readFileSync('./certs/file.pem'),
-    cert: fs.readFileSync('./certs/file.crt')
+    key: fs.readFileSync('./certs/server.key'),
+    cert: fs.readFileSync('./certs/server.crt')
 };
 var server = https.createServer(options, app);
 var io = require('socket.io')(server);

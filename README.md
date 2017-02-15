@@ -46,6 +46,15 @@ And assign this command "bash /home/path-to-musitop/shortcuts/musinext.sh"
 
 Now you can control Musitop with media bindings :)
 
+## Optional : get rid of https errors
+On linux :
+```
+sudo apt install libnss3-tools
+certutil -d sql:$HOME/.pki/nssdb -A -t P -n "Musitop" -i /home/path-to-musitop/certs/server.crt
+```
+Then restart Chrome and it should be good :)
+[Source](http://superuser.com/questions/104146/add-permanent-ssl-certificate-exception-in-chrome-linux/)
+
 ## Use
 
 Open command line and npm start.
