@@ -13,17 +13,29 @@ var fs = require('fs');
 var path = require('path');
 var musicMetadata = require('musicmetadata');
 var port = 1404;
-var socketPort = 1604;
 var express = require('express');
+var https = require('https');
 var app = express();
 var ip = require('ip').address();
+var options = {
+    key: fs.readFileSync('./certs/file.pem'),
+    cert: fs.readFileSync('./certs/file.crt')
+};
+var server = https.createServer(options, app);
+var io = require('socket.io')(server);
+
+app.use('/', express.static('web'));
 
 app.get('/stream.mp3', function (req, res) {
     res.sendFile(song);
 });
-
+/*
 app.listen(port, function () {
-    notify('Server', 'Musitop server started on http://' + ip + ':' + port);
+    notify('Server', 'Musitop server started on https://' + ip + ':' + port);
+});
+*/
+server.listen(port, function () {
+    notify('Server', 'Musitop server started on https://' + ip + ':' + port);
 });
 
 // SOCKET
@@ -70,7 +82,7 @@ var onEvent = function (e) {
     notify('Event', e);
 };
 
-var io = require('socket.io')(socketPort);
+// var io = require('socket.io')(socketPort);
 var connectSocket = function () {
     notify('Socket', 'Server connecting...');
     io.on('connection', function (socket) {
