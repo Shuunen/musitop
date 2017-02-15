@@ -15,7 +15,7 @@ var port = 1404;
 var ioClient = require('socket.io-client');
 var argv = require('minimist')(process.argv.slice(2));
 var musicIs = argv.musicIs || 'smooth';
-var socket = ioClient.connect('http://localhost:' + port);
+var socket = ioClient.connect('https://localhost:' + port);
 
 socket.on('connect', function () {
     console.log('Client connected');
