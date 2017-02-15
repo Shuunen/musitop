@@ -15,11 +15,8 @@ var musicMetadata = require('musicmetadata');
 var port = 1404;
 var socketPort = 1604;
 var express = require('express');
-var https = require('https');
 var app = express();
 var ip = require('ip').address();
-
-app.use('/', express.static('web'));
 
 app.get('/stream.mp3', function (req, res) {
     res.sendFile(song);
