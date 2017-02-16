@@ -33,8 +33,6 @@ var io = require('socket.io')(server);
 
 // app.use(logger('dev'));
 
-app.use('/', express.static('web'));
-
 app.get('/pushy', (req, res) => {
     var stream = res.push('/main.js', {
         status: 200, // optional
@@ -141,6 +139,11 @@ var config = require('config-prompt')({
     keepPath: {
         type: 'string',
         required: true
+    },
+    clientPath: {
+        type: 'string',
+        required: false,
+        default: 'web'
     },
     audioClientSide: {
         type: 'boolean',
@@ -392,6 +395,10 @@ function getConfig(callback) {
         if (err || configErrors.length) {
             getConfigFromUser(callback);
         } else if (callback && typeof callback === 'function') {
+            // will expose musitop client if defined or just the web directory
+            var staticPath = config.get('clientPath');
+            notify('Info', 'will serve "' + staticPath + '"');
+            app.use('/', express.static(staticPath));
             callback();
         } else {
             notify('Error', 'Error, no callback provided', 'error');
