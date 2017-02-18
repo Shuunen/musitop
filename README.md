@@ -62,6 +62,11 @@ Then restart Chrome and it should be good :)
 
 [Source](http://superuser.com/questions/104146/add-permanent-ssl-certificate-exception-in-chrome-linux/)
 
+On Android (did not worked for me) :
+Copy the "musitop\certs\server.crt" to your device.
+Then go to Settings -> Security -> Credential storage -> Install from SD card 
+Locate & choose the certificate
+
 ## Use
 
 Open command line and npm start.
