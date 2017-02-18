@@ -165,6 +165,10 @@ var config = require('config-prompt')({
     shuffleMusic: {
         type: 'boolean',
         default: true
+    },
+    desktopNotifications: {
+        type: 'boolean',
+        default: true
     }
 });
 var shuffle = require('shuffle-array');
@@ -288,14 +292,13 @@ function doAsync(callback) {
 }
 
 function notify(action, message, type, bonus) {
-    if (type) {
+    if (type && config.get('desktopNotifications')) {
         // notify client side
         notifier.notify({
             title: action,
             message: message,
             type: type
         });
-        type = null;
     }
     // in order to align logs :p
     var actionAligned = action;
