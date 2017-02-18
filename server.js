@@ -15,7 +15,6 @@ var musicMetadata = require('musicmetadata');
 var port = 1404;
 var express = require('express');
 var http2 = require('spdy');
-var logger = require('morgan');
 var app = express();
 var ip = require('ip').address();
 var options = {
@@ -33,6 +32,7 @@ var server = http2.createServer(options, app).listen(port, (error) => {
 });
 var io = require('socket.io')(server);
 
+// var logger = require('morgan');
 // app.use(logger('dev'));
 
 app.get('/pushy', (req, res) => {

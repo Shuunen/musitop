@@ -10,7 +10,6 @@
  *    ______________________________________________
  */
 
-var net = require('net');
 var port = 1404;
 var ioClient = require('socket.io-client');
 var argv = require('minimist')(process.argv.slice(2));
@@ -18,16 +17,16 @@ var musicIs = argv.musicIs || 'smooth';
 var socket = ioClient.connect('https://localhost:' + port);
 
 socket.on('connect', function () {
-    console.log('Client connected');
+    console.log('Client connected'); // eslint-disable-line no-console
     socket.emit('music is', musicIs);
     socket.emit('debug', JSON.stringify(argv));
     socket.disconnect();
 });
 
 socket.on('disconnect', function () {
-    console.log('Client disconnected');
+    console.log('Client disconnected'); // eslint-disable-line no-console
 });
 
 socket.on('error', function (e) {
-    console.log('Client error', e);
+    console.log('Client error', e); // eslint-disable-line no-console
 });
