@@ -396,7 +396,7 @@ function getConfig(callback) {
             getConfigFromUser(callback);
         } else if (callback && typeof callback === 'function') {
             // will expose musitop client if defined or just the web directory
-            var staticPath = config.get('clientPath');
+            var staticPath = config.get('clientPath') || 'web';
             notify('Info', 'will serve "' + staticPath + '"');
             app.use('/', express.static(staticPath));
             callback();
