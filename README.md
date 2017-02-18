@@ -53,6 +53,13 @@ sudo apt install libnss3-tools
 certutil -d sql:$HOME/.pki/nssdb -A -t P -n "Musitop" -i /home/path-to-musitop/certs/server.crt
 ```
 Then restart Chrome and it should be good :)
+
+On windows :
+Go to Chrome settings -> Advanced -> Https/Ssl -> Import
+Locate & choose "musitop\certs\server.crt"
+Choose "Place all certificates in the following store" and browse for "Trusted Root Certification Authorities." 
+Then restart Chrome and it should be good :)
+
 [Source](http://superuser.com/questions/104146/add-permanent-ssl-certificate-exception-in-chrome-linux/)
 
 ## Use

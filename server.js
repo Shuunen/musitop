@@ -26,7 +26,9 @@ var server = http2.createServer(options, app).listen(port, (error) => {
     if (error) {
         notify('Error', error);
     } else {
-        notify('Server', 'Musitop server started on https://' + ip + ':' + port);
+        notify('Server', 'Musitop server started');
+        notify('Server', 'https://localhost:' + port);
+        notify('Server', 'https://' + ip + ':' + port);
     }
 });
 var io = require('socket.io')(server);
