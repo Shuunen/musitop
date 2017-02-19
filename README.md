@@ -47,6 +47,11 @@ And assign this command "bash /home/path-to-musitop/shortcuts/musinext.sh"
 Now you can control Musitop with media bindings :)
 
 ## Optional : get rid of https errors
+Generate a new certificate :
+```
+openssl req -subj "/CN=musitop.io" -new -newkey rsa:2048 -sha256 -days 365 -nodes -x509 -keyout server.key -out server.crt
+```
+
 On linux :
 ```
 sudo apt install libnss3-tools
@@ -66,6 +71,11 @@ On Android (did not worked for me) :
 Copy the "musitop\certs\server.crt" to your device.
 Then go to Settings -> Security -> Credential storage -> Install from SD card 
 Locate & choose the certificate
+
+Create an entrie in hosts file with :
+```
+127.0.0.1   musitop.io
+```
 
 ## Use
 
