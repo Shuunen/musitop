@@ -12,25 +12,36 @@
 var fs = require('fs');
 var path = require('path');
 var musicMetadata = require('musicmetadata');
-var port = 1404;
+var httpPort = 1404;
+var httpsPort = 1444;
 var express = require('express');
-var http2 = require('spdy');
+var https = require('spdy');
+var http = require('http');
 var app = express();
 var ip = require('ip').address();
 var options = {
     key: fs.readFileSync('./certs/server.key'),
     cert: fs.readFileSync('./certs/server.crt')
 };
-var server = http2.createServer(options, app).listen(port, (error) => {
+var httpsServer = https.createServer(options, app).listen(httpsPort, (error) => {
     if (error) {
         notify('Error', error);
     } else {
         notify('Server', 'Musitop server started');
-        notify('Server', 'https://localhost:' + port);
-        notify('Server', 'https://' + ip + ':' + port);
+        notify('Server', 'https://localhost:' + httpsPort);
+        notify('Server', 'https://' + ip + ':' + httpsPort);
     }
 });
-var io = require('socket.io')(server);
+http.createServer(app).listen(httpPort, (error) => {
+    if (error) {
+        notify('Error', error);
+    } else {
+        notify('Server', 'Musitop server started');
+        notify('Server', 'http://localhost:' + httpPort);
+        notify('Server', 'http://' + ip + ':' + httpPort);
+    }
+});
+var io = require('socket.io')(httpsServer);
 
 // var logger = require('morgan');
 // app.use(logger('dev'));
