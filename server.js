@@ -197,7 +197,6 @@ var autoKill = false;
 var manualKill = false;
 var keep = false;
 var metadata = null;
-var startTimestamp = null;
 
 function playFolder() {
     var musicPath = config.get('musicPath');
@@ -249,7 +248,6 @@ function playNext() {
 
 function getMetadata() {
     metadata = null;
-    startTimestamp = Math.round(Date.now() / 1000);
     var readableStream = fs.createReadStream(song);
     musicMetadata(readableStream, {
         duration: true
@@ -258,7 +256,7 @@ function getMetadata() {
             notify('Error', 'Fail at reading mp3 metadata for song "' + song + '"', 'error', err);
         } else {
             metadata = meta;
-            metadata.startTimestamp = startTimestamp;
+            metadata.uid = Math.round(Date.now() / 1000);
             metadata.stream = '/stream.mp3';
             readableStream.close();
         }
