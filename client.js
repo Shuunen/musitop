@@ -10,11 +10,11 @@
  *    ______________________________________________
  */
 
-var httpsPort = 1444;
+var httpPort = 1404;
 var ioClient = require('socket.io-client');
 var argv = require('minimist')(process.argv.slice(2));
 var musicIs = argv.musicIs || 'smooth';
-var socket = ioClient.connect('https://localhost:' + httpsPort);
+var socket = ioClient.connect('http://localhost:' + httpPort);
 
 socket.on('connect', function () {
     console.log('Client connected'); // eslint-disable-line no-console

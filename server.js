@@ -23,6 +23,15 @@ var options = {
     key: fs.readFileSync('./certs/server.key'),
     cert: fs.readFileSync('./certs/server.crt')
 };
+var httpServer = http.createServer(app).listen(httpPort, (error) => {
+    if (error) {
+        notify('Error', error);
+    } else {
+        notify('Server', 'Musitop server started');
+        notify('Server', 'http://localhost:' + httpPort);
+        notify('Server', 'http://' + ip + ':' + httpPort);
+    }
+});
 var httpsServer = https.createServer(options, app).listen(httpsPort, (error) => {
     if (error) {
         notify('Error', error);
@@ -32,16 +41,12 @@ var httpsServer = https.createServer(options, app).listen(httpsPort, (error) => 
         notify('Server', 'https://' + ip + ':' + httpsPort);
     }
 });
-http.createServer(app).listen(httpPort, (error) => {
-    if (error) {
-        notify('Error', error);
-    } else {
-        notify('Server', 'Musitop server started');
-        notify('Server', 'http://localhost:' + httpPort);
-        notify('Server', 'http://' + ip + ':' + httpPort);
-    }
-});
-var io = require('socket.io')(httpsServer);
+var httpIo = require('socket.io')(httpServer);
+var httpsIo = require('socket.io')(httpsServer);
+var ioEmit = function (channel, data) {
+    httpIo.emit(channel, data);
+    httpsIo.emit(channel, data);
+};
 
 // var logger = require('morgan');
 // app.use(logger('dev'));
@@ -81,23 +86,23 @@ var onMusicIs = function (musicIs) {
         notify('Client', '★ Keep this song :D');
         notify('Will keep', fileName(song), 'info');
         keep = true;
-        io.emit('music was', musicIs);
+        ioEmit('music was', musicIs);
     } else if (musicIs === 'bad') {
         notify('Client', '✕ Delete this song :|');
         notify('Deleting', fileName(song), 'info');
         deleteSong();
         playNext('onMusicIs bad');
-        io.emit('music was', musicIs);
+        ioEmit('music was', musicIs);
     } else if (musicIs === 'next') {
         notify('Client', '» Next song please :)');
         if (keep) {
             moveSong();
         }
         playNext('onMusicIs next');
-        io.emit('music was', musicIs);
+        ioEmit('music was', musicIs);
     } else if (musicIs === 'pause') {
         notify('Client', '|| Pause song please');
-        io.emit('pause', 'please :)');
+        ioEmit('pause', 'please :)');
     } else {
         notify('Server', 'Client said that music is "' + musicIs + '" ?!?', 'info');
     }
@@ -111,21 +116,23 @@ var onEvent = function (e) {
     notify('Event', e);
 };
 
-// var io = require('socket.io')(socketPort);
+var handleConnection = function (socket) {
+    // notify('Socket', 'Server side connection detected');
+    socket.on('music is', onMusicIs);
+    socket.on('error', onError);
+    socket.on('disconnect', onDisconnect);
+    socket.on('connect', onConnection);
+    socket.on('event', onEvent);
+    ioEmit('options', {
+        audioClientSide: config.get('audioClientSide')
+    });
+    ioEmit('metadata', metadata);
+};
+
 var connectSocket = function () {
     notify('Socket', 'Server connecting...');
-    io.on('connection', function (socket) {
-        // notify('Socket', 'Server side connection detected');
-        socket.on('music is', onMusicIs);
-        socket.on('error', onError);
-        socket.on('disconnect', onDisconnect);
-        socket.on('connect', onConnection);
-        socket.on('event', onEvent);
-        io.emit('options', {
-            audioClientSide: config.get('audioClientSide')
-        });
-        io.emit('metadata', metadata);
-    });
+    httpIo.on('connection', handleConnection);
+    httpsIo.on('connection', handleConnection);
 };
 
 connectSocket();
@@ -236,7 +243,7 @@ function playNext() {
     setTimeout(function () {
         notify('Server', '♫ Remaining ' + playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
-        io.emit('metadata', metadata);
+        ioEmit('metadata', metadata);
     }, 1100);
 }
 
