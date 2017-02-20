@@ -308,7 +308,7 @@ function doAsync(callback) {
 }
 
 function notify(action, message, type, bonus) {
-    if (type && config.get('desktopNotifications')) {
+    if (type && config.get('desktopNotifications') !== false) {
         // notify client side
         notifier.notify({
             title: action,
