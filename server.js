@@ -73,6 +73,13 @@ app.get('/stream.mp3', function (req, res) {
     res.sendFile(song);
 });
 
+app.get('/update', function (req, res) {
+    res.json({
+        state: 'success'
+    });
+    // res.status(500).json({ error: 'message' });
+});
+
 var onDisconnect = function () {
     // notify('Socket', 'server side disconnected');
 };
