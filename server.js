@@ -11,6 +11,8 @@
  */
 var fs = require('fs');
 var path = require('path');
+var git = require('simple-git')(__dirname);
+var childProcess = require('child_process');
 var musicMetadata = require('musicmetadata');
 var httpPort = 1404;
 var httpsPort = 1444;
@@ -73,11 +75,24 @@ app.get('/stream.mp3', function (req, res) {
     res.sendFile(song);
 });
 
-app.get('/update', function (req, res) {
-    res.json({
-        state: 'success'
+app.get('/server/version', function (req, res) {
+    var pkg = JSON.parse(fs.readFileSync('./package.json'));
+    res.status(200).json({
+        version: pkg.version
     });
-    // res.status(500).json({ error: 'message' });
+});
+
+app.get('/server/update', function (req, res) {
+    git.pull(function (err, update) {
+        if (err) {
+            res.status(200).json({ error: err });
+        } else if (update && update.summary.changes) {
+            res.status(200).json({ changes: update.summary.changes });
+            childProcess.exec('npm run restart');
+        } else {
+            res.status(200).json({ changes: 'none' });
+        }
+    });
 });
 
 var onDisconnect = function () {
@@ -153,7 +168,6 @@ connectSocket();
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
-var childProcess = require('child_process');
 var notifier = require('node-notifier');
 var os = require('os');
 var isLinux = (os.type() === 'Linux');
