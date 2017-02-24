@@ -11,7 +11,6 @@
  */
 var fs = require('fs');
 var path = require('path');
-var git = require('simple-git')(__dirname);
 var childProcess = require('child_process');
 var musicMetadata = require('musicmetadata');
 var httpPort = 1404;
@@ -83,16 +82,36 @@ app.get('/server/version', function (req, res) {
 });
 
 app.get('/server/update', function (req, res) {
-    git.pull(function (err, update) {
+    require('simple-git')(__dirname).pull(function (err, update) {
+        var ret = { target: 'server' };
         if (err) {
-            res.status(200).json({ error: err });
+            ret.error = err;
         } else if (update && update.summary.changes) {
-            res.status(200).json({ changes: update.summary.changes });
-            childProcess.exec('npm run restart');
+            ret.changes = update.summary.changes;
         } else {
-            res.status(200).json({ changes: 'none' });
+            ret.changes = 'none';
         }
+        res.status(200).json(ret);
     });
+});
+
+app.get('/client/update', function (req, res) {
+    var path = config.get('clientPath');
+    if (path === 'web') {
+        res.status(200).json({ error: 'there is no web client defined in server config' });
+    } else {
+        require('simple-git')(path).pull(function (err, update) {
+            var ret = { target: 'client' };
+            if (err) {
+                ret.error = err;
+            } else if (update && update.summary.changes) {
+                ret.changes = update.summary.changes;
+            } else {
+                ret.changes = 'none';
+            }
+            res.status(200).json(ret);
+        });
+    }
 });
 
 var onDisconnect = function () {
