@@ -18,7 +18,7 @@ gedit ~/.bashrc
 ```
 Add Musitop :
 ```
-MUSITOP=/home/ME/Projects/musitop/shortcuts
+MUSITOP=/path-to-musitop/shortcuts
 PATH=$PATH:$MUSITOP
 
 export PATH
