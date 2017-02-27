@@ -4,6 +4,7 @@
   "description": "Musitop delete music you dont like",
   "main": "server.js",
   "dependencies": {
+    "colorable": "^1.0.5",
     "config-prompt": "^1.1.0",
     "electron": "^1.4.14",
     "eslint": "^3.13.1",

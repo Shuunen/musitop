@@ -19,6 +19,7 @@ var express = require('express');
 var https = require('spdy');
 var http = require('http');
 var app = express();
+var colorable = require('colorable');
 var ip = require('ip').address();
 var options = {
     key: fs.readFileSync('./certs/server.key'),
@@ -72,6 +73,28 @@ app.get('/pushy', (req, res) => {
 
 app.get('/stream.mp3', function (req, res) {
     res.sendFile(song);
+});
+
+app.get('/cover.jpg', function (req, res) {
+    var data = metadata.picture[0];
+    if (data) {
+        res.type(data.format);
+        res.end(new Buffer(data.data, 'binary'));
+    } else {
+        res.sendFile(__dirname + '/icons/no-cover.svg');
+    }
+});
+
+app.get('/colors/:primary/:secondary', function (req, res) {
+
+    var colors = {
+        primary: req.params.primary,
+        secondary: req.params.secondary
+    };
+
+    var result = colorable(colors, { compact: true, threshold: 0 });
+
+    res.status(200).json(result);
 });
 
 app.get('/server/version', function (req, res) {
