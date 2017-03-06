@@ -20,7 +20,11 @@ var https = require('spdy');
 var http = require('http');
 var app = express();
 var colorable = require('colorable');
-var lwip = require('lwip');
+var sharp = require('sharp');
+var coverPath = __dirname + '/web/cover.jpg';
+var coverMissingPath = __dirname + '/web/no-cover.jpg';
+var coverBlurryPath = __dirname + '/web/cover-blurry.jpg';
+var coverMissingBlurryPath = __dirname + '/web/no-cover-blurry.jpg';
 var ip = require('ip').address();
 var options = {
     key: fs.readFileSync('./certs/server.key'),
@@ -77,43 +81,11 @@ app.get('/stream.mp3', function (req, res) {
 });
 
 app.get('/cover.jpg', function (req, res) {
-    var data = metadata.picture[0];
-    if (data) {
-        res.type(data.format);
-        res.end(new Buffer(data.data, 'binary'));
-    } else {
-        res.sendFile(__dirname + '/icons/no-cover.svg');
-    }
+    res.sendFile(coverPath);
 });
 
-
-var coverBlurryPath = __dirname + '/web/cover-blurry.jpg';
-
 app.get('/cover-blurry.jpg', function (req, res) {
-    var data = metadata.picture[0];
-    if (data) {
-        fs.stat(coverBlurryPath, function (err, stats) {
-            if (err || stats) {
-                notify('Cover', 'type:"' + data.format + '"');
-                lwip.open(new Buffer(data.data, 'binary'), data.format, function (err, image) {
-                    if (err) {
-                        notify('Error', err);
-                    }
-                    image.batch().blur(1).writeFile(coverBlurryPath, 'jpg', { quality: 90 }, function (err) {
-                        if (err) {
-                            notify('Error', err);
-                        } else {
-                            res.sendFile(coverBlurryPath);
-                        }
-                    });
-                });
-            } else {
-                res.sendFile(coverBlurryPath);
-            }
-        });
-    } else {
-        res.sendFile(__dirname + '/icons/no-cover.svg');
-    }
+    res.sendFile(coverBlurryPath);
 });
 
 app.get('/colors/:primary/:secondary', function (req, res) {
@@ -353,8 +325,30 @@ function getMetadata() {
             metadata.uid = Math.round(Date.now() / 1000);
             metadata.stream = '/stream.mp3';
             readableStream.close();
+            generateCovers();
         }
     });
+}
+
+function generateCovers() {
+    var data = metadata.picture[0];
+    if (data) {
+        sharp(new Buffer(data.data, 'binary'))
+            .toFile(coverPath, (err) => {
+                if (err) {
+                    notify('Error', err);
+                }
+            })
+            .blur(10)
+            .toFile(coverBlurryPath, (err) => {
+                if (err) {
+                    notify('Error', err);
+                }
+            });
+    } else {
+        fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath));
+        fs.createReadStream(coverMissingBlurryPath).pipe(fs.createWriteStream(coverBlurryPath));
+    }
 }
 
 function moveSong() {

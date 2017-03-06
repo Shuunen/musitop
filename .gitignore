@@ -39,3 +39,7 @@ jspm_packages
 lib/1by1/1by1.ini
 .idea/dictionaries/ROMAINRA.xml
 config.json
+
+# musitop
+web/cover.jpg
+web/cover-blurry.jpg
