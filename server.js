@@ -20,6 +20,7 @@ var https = require('spdy');
 var http = require('http');
 var app = express();
 var colorable = require('colorable');
+var lwip = require('lwip');
 var ip = require('ip').address();
 var options = {
     key: fs.readFileSync('./certs/server.key'),
@@ -80,6 +81,36 @@ app.get('/cover.jpg', function (req, res) {
     if (data) {
         res.type(data.format);
         res.end(new Buffer(data.data, 'binary'));
+    } else {
+        res.sendFile(__dirname + '/icons/no-cover.svg');
+    }
+});
+
+
+var coverBlurryPath = __dirname + '/web/cover-blurry.jpg';
+
+app.get('/cover-blurry.jpg', function (req, res) {
+    var data = metadata.picture[0];
+    if (data) {
+        fs.stat(coverBlurryPath, function (err, stats) {
+            if (err || stats) {
+                notify('Cover', 'type:"' + data.format + '"');
+                lwip.open(new Buffer(data.data, 'binary'), data.format, function (err, image) {
+                    if (err) {
+                        notify('Error', err);
+                    }
+                    image.batch().blur(1).writeFile(coverBlurryPath, 'jpg', { quality: 90 }, function (err) {
+                        if (err) {
+                            notify('Error', err);
+                        } else {
+                            res.sendFile(coverBlurryPath);
+                        }
+                    });
+                });
+            } else {
+                res.sendFile(coverBlurryPath);
+            }
+        });
     } else {
         res.sendFile(__dirname + '/icons/no-cover.svg');
     }
