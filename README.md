@@ -22,7 +22,7 @@ Refer to below section : *use Musitop web client over https*
 
 ## Optional : use the web client locally
 
-This solution allows you to host your own musitop web client and to choose to use http or https. 
+This solution allows you to host your own musitop web client and to choose to use http or https.
 
 Prefer this solution for example if you don't want to install https certificates.
 
@@ -30,7 +30,7 @@ Clone the client from https://github.com/Shuunen/musitop-client :
 ```
 git clone https://github.com/Shuunen/musitop-client.git
 ```
-And set the path to client in your server config : 
+And set the path to client in your server config :
 ```
  "clientPath": "/path/to/musitop-client",
  ```
@@ -95,14 +95,14 @@ Then restart Chrome and it should be good :)
 On windows :
 Go to Chrome settings -> Advanced -> Https/Ssl -> Import
 Locate & choose "musitop\certs\server.crt"
-Choose "Place all certificates in the following store" and browse for "Trusted Root Certification Authorities." 
+Choose "Place all certificates in the following store" and browse for "Trusted Root Certification Authorities."
 Then restart Chrome and it should be good :)
 
 [Source](http://superuser.com/questions/104146/add-permanent-ssl-certificate-exception-in-chrome-linux/)
 
 On Android (did not worked for me) :
 Copy the "musitop\certs\server.crt" to your device.
-Then go to Settings -> Security -> Credential storage -> Install from SD card 
+Then go to Settings -> Security -> Credential storage -> Install from SD card
 Locate & choose the certificate
 
 Create an entrie in hosts file with :
