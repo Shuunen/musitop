@@ -30,6 +30,7 @@ var options = {
     key: fs.readFileSync('./certs/server.key'),
     cert: fs.readFileSync('./certs/server.crt')
 };
+var vibrant = require('node-vibrant');
 var httpServer = http.createServer(app).listen(httpPort, (error) => {
     if (error) {
         notify('Error', error);
@@ -51,6 +52,7 @@ var httpsServer = https.createServer(options, app).listen(httpsPort, (error) => 
 var httpIo = require('socket.io')(httpServer);
 var httpsIo = require('socket.io')(httpsServer);
 var ioEmit = function (channel, data) {
+    // notify('Socket', 'send data on "' + channel + '"');
     httpIo.emit(channel, data);
     httpsIo.emit(channel, data);
 };
@@ -193,6 +195,7 @@ var handleConnection = function (socket) {
     ioEmit('options', {
         audioClientSide: config.get('audioClientSide')
     });
+    ioEmit('palette', palette);
     ioEmit('metadata', metadata);
 };
 
@@ -263,6 +266,7 @@ var autoKill = false;
 var manualKill = false;
 var keep = false;
 var metadata = null;
+var palette = null;
 
 function playFolder() {
     var musicPath = config.get('musicPath');
@@ -340,6 +344,11 @@ function generateCovers() {
             .toFile(coverPath, (err) => {
                 if (err) {
                     notify('Error', err);
+                } else {
+                    vibrant.from(coverPath).getPalette((err, swatches) => {
+                        palette = swatches;
+                        ioEmit('palette', palette);
+                    });
                 }
             });
         sharp(buffer)
