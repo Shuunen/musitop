@@ -333,12 +333,16 @@ function getMetadata() {
 function generateCovers() {
     var data = metadata.picture[0];
     if (data) {
-        sharp(new Buffer(data.data, 'binary'))
+        var buffer = new Buffer(data.data, 'binary');
+        sharp(buffer)
+            .resize(550, 350)
+            .crop(sharp.gravity.center)
             .toFile(coverPath, (err) => {
                 if (err) {
                     notify('Error', err);
                 }
-            })
+            });
+        sharp(buffer)
             .blur(10)
             .toFile(coverBlurryPath, (err) => {
                 if (err) {
