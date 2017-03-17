@@ -97,7 +97,10 @@ app.get('/colors/:primary/:secondary', function (req, res) {
         secondary: req.params.secondary
     };
 
-    var result = colorable(colors, { compact: true, threshold: 0 });
+    var result = colorable(colors, {
+        compact: true,
+        threshold: 0
+    });
 
     res.status(200).json(result);
 });
@@ -111,7 +114,9 @@ app.get('/server/version', function (req, res) {
 
 app.get('/server/update', function (req, res) {
     require('simple-git')(__dirname).pull(function (err, update) {
-        var ret = { target: 'server' };
+        var ret = {
+            target: 'server'
+        };
         if (err) {
             ret.error = err;
         } else if (update && update.summary.changes) {
@@ -126,10 +131,14 @@ app.get('/server/update', function (req, res) {
 app.get('/client/update', function (req, res) {
     var path = config.get('clientPath');
     if (path === 'web') {
-        res.status(200).json({ error: 'there is no web client defined in server config' });
+        res.status(200).json({
+            error: 'there is no web client defined in server config'
+        });
     } else {
         require('simple-git')(path).pull(function (err, update) {
-            var ret = { target: 'client' };
+            var ret = {
+                target: 'client'
+            };
             if (err) {
                 ret.error = err;
             } else if (update && update.summary.changes) {
