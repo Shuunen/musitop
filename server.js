@@ -60,7 +60,14 @@ var ioEmit = function (channel, data) {
 // var logger = require('morgan');
 // app.use(logger('dev'));
 
-app.get('/pushy', (req, res) => {
+// enable CORS
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
+app.get('/pushy', (req, res, next) => {
     var stream = res.push('/main.js', {
         status: 200, // optional
         method: 'GET', // optional
@@ -78,19 +85,19 @@ app.get('/pushy', (req, res) => {
     res.end('<script src="/main.js"></script>');
 });
 
-app.get('/stream.mp3', function (req, res) {
+app.get('/stream.mp3', function (req, res, next) {
     res.sendFile(song);
 });
 
-app.get('/cover.jpg', function (req, res) {
+app.get('/cover.jpg', function (req, res, next) {
     res.sendFile(coverPath);
 });
 
-app.get('/cover-blurry.jpg', function (req, res) {
+app.get('/cover-blurry.jpg', function (req, res, next) {
     res.sendFile(coverBlurryPath);
 });
 
-app.get('/colors/:primary/:secondary', function (req, res) {
+app.get('/colors/:primary/:secondary', function (req, res, next) {
 
     var colors = {
         primary: req.params.primary,
@@ -105,14 +112,14 @@ app.get('/colors/:primary/:secondary', function (req, res) {
     res.status(200).json(result);
 });
 
-app.get('/server/version', function (req, res) {
+app.get('/server/version', function (req, res, next) {
     var pkg = JSON.parse(fs.readFileSync('./package.json'));
     res.status(200).json({
         version: pkg.version
     });
 });
 
-app.get('/server/update', function (req, res) {
+app.get('/server/update', function (req, res, next) {
     require('simple-git')(__dirname).pull(function (err, update) {
         var ret = {
             target: 'server'
@@ -128,7 +135,7 @@ app.get('/server/update', function (req, res) {
     });
 });
 
-app.get('/client/update', function (req, res) {
+app.get('/client/update', function (req, res, next) {
     var path = config.get('clientPath');
     if (path === 'web') {
         res.status(200).json({
