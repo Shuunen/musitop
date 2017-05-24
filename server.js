@@ -358,8 +358,8 @@ function generateCovers() {
             .resize(550, 350)
             .crop(sharp.gravity.center)
             .toFile(coverPath, (err) => {
-                if (err) {
-                    notify('Error', err);
+                if (!err) {
+                    notify('Server', 'Generate covers failed, see me', null, err);
                 } else {
                     vibrant.from(coverPath).getPalette((err, swatches) => {
                         palette = swatches;
@@ -371,10 +371,11 @@ function generateCovers() {
             .blur(10)
             .toFile(coverBlurryPath, (err) => {
                 if (err) {
-                    notify('Error', err);
+                    notify('Server', 'Generate blurry covers failed, see me', null, err);
                 }
             });
     } catch (error) {
+        notify('Server', 'Generate covers failed, see my catch', null, error);
         fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath));
         fs.createReadStream(coverMissingBlurryPath).pipe(fs.createWriteStream(coverBlurryPath));
     }
