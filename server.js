@@ -352,7 +352,7 @@ function getMetadata() {
 
 function generateCovers() {
     var data = metadata.picture[0];
-    if (data) {
+    try {
         var buffer = new Buffer(data.data, 'binary');
         sharp(buffer)
             .resize(550, 350)
@@ -374,7 +374,7 @@ function generateCovers() {
                     notify('Error', err);
                 }
             });
-    } else {
+    } catch (error) {
         fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath));
         fs.createReadStream(coverMissingBlurryPath).pipe(fs.createWriteStream(coverBlurryPath));
     }
