@@ -234,6 +234,8 @@ connectSocket();
  */
 var notifier = require('node-notifier');
 var os = require('os');
+var Lastfm = require('simple-lastfm');
+var lastfm = null;
 var isLinux = (os.type() === 'Linux');
 var configFile = 'config.json';
 var config = require('config-prompt')({
@@ -272,6 +274,11 @@ var config = require('config-prompt')({
     desktopNotifications: {
         type: 'boolean',
         default: true
+    },
+    lastfmAccess: {
+        type: 'string',
+        required: false,
+        default: 'key/secret/user/pass'
     }
 });
 var shuffle = require('shuffle-array');
@@ -324,6 +331,7 @@ function playNext() {
     // if audio output is server side
     if (!config.get('audioClientSide')) {
         playSong();
+        scrobbleSong();
     }
     setTimeout(function () {
         notify('Server', '♫ Remaining ' + playlist.length + ' track(s)');
@@ -358,7 +366,7 @@ function generateCovers() {
             .resize(550, 350)
             .crop(sharp.gravity.center)
             .toFile(coverPath, (err) => {
-                if (!err) {
+                if (err) {
                     notify('Server', 'Generate covers failed, see me', null, err);
                 } else {
                     vibrant.from(coverPath).getPalette((err, swatches) => {
@@ -496,6 +504,16 @@ function playSong() {
     });
 }
 
+function scrobbleSong() {
+    if (!lastfm) {
+        return;
+    }
+    lastfm.scrobbleNowPlayingTrack({
+        artist: 'Ratatat',
+        track: 'Seventeen Years'
+    });
+}
+
 function getConfigFromUser(callback) {
     notify('Server', 'Will ask user for conf then save it locally');
     config.prompt({
@@ -521,6 +539,28 @@ function getConfigFromUser(callback) {
     });
 }
 
+function initLastFm() {
+    // check if lastfm access has been given
+    if (!config.get('lastfmAccess')) {
+        return;
+    }
+    var accesses = config.get('lastfmAccess').split('/');
+    if (accesses.length !== 4) {
+        return notify('Error', 'LastFm access should have 4 parts', 'error');
+    }
+    // accesses should be like "api_key/api_secret/username/password"
+    lastfm = new Lastfm({
+        api_key: accesses[0],
+        api_secret: accesses[1],
+        username: accesses[2],
+        password: accesses[3]
+    });
+    // once lastfm instance has session key, we should be able to scrobble & like songs
+    lastfm.getSessionKey(function (result) {
+        notify('Info', 'last fm session key :' + result.session_key);
+    });
+}
+
 function getConfig(callback) {
     // get local config
     fs.readFile(configFile, function (err, configContent) {
@@ -538,6 +578,7 @@ function getConfig(callback) {
             var staticPath = config.get('clientPath') || 'web';
             notify('Info', 'will serve "' + staticPath + '"');
             app.use('/', express.static(staticPath));
+            initLastFm();
             callback();
         } else {
             notify('Error', 'Error, no callback provided', 'error');

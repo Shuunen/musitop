@@ -20,6 +20,7 @@
     "sharp": "^0.17.2",
     "shuffle-array": "^1.0.0",
     "simple-git": "^1.66.0",
+    "simple-lastfm": "^1.0.5",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
     "spdy": "^3.4.4"
@@ -27,7 +28,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm i && nodemon server.js",
+    "start": "yarn && nodemon server.js",
     "client-good": "node client.js --musicIs=good",
     "client-bad": "node client.js --musicIs=bad",
     "dont-watch": "start server.js"
