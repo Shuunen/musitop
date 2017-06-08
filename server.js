@@ -170,6 +170,7 @@ var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', '★ Keep this song :D');
         notify('Will keep', fileName(song), 'info');
+        loveSong();
         keep = true;
         ioEmit('music was', musicIs);
     } else if (musicIs === 'bad') {
@@ -331,12 +332,12 @@ function playNext() {
     // if audio output is server side
     if (!config.get('audioClientSide')) {
         playSong();
-        scrobbleSong();
     }
     setTimeout(function () {
         notify('Server', '♫ Remaining ' + playlist.length + ' track(s)');
         notify('Playing', fileName(song), 'info');
         ioEmit('metadata', metadata);
+        scrobbleSong();
     }, 1100);
 }
 
@@ -508,11 +509,40 @@ function scrobbleSong() {
     if (!lastfm) {
         return;
     }
-    lastfm.scrobbleNowPlayingTrack({
-        artist: 'Ratatat',
-        track: 'Seventeen Years'
+    // console.log(metadata);
+    lastfm.getSessionKey(function (result) {
+        // notify('Info', 'last fm session key :' + result.session_key);
+        lastfm.scrobbleTrack({
+            artist: metadata.artist,
+            track: metadata.title,
+            callback: function (result) {
+                if (!result.success) {
+                    notify('Server', 'scrobbleSong failed', 'error');
+                }
+            }
+        });
     });
 }
+
+function loveSong() {
+    if (!lastfm) {
+        return;
+    }
+    // console.log(metadata);
+    lastfm.getSessionKey(function (result) {
+        // notify('Info', 'last fm session key :' + result.session_key);
+        lastfm.loveTrack({
+            artist: metadata.artist,
+            track: metadata.title,
+            callback: function (result) {
+                if (!result.success) {
+                    notify('Server', 'loveSong failed', 'error');
+                }
+            }
+        });
+    });
+}
+
 
 function getConfigFromUser(callback) {
     notify('Server', 'Will ask user for conf then save it locally');
@@ -553,11 +583,8 @@ function initLastFm() {
         api_key: accesses[0],
         api_secret: accesses[1],
         username: accesses[2],
-        password: accesses[3]
-    });
-    // once lastfm instance has session key, we should be able to scrobble & like songs
-    lastfm.getSessionKey(function (result) {
-        notify('Info', 'last fm session key :' + result.session_key);
+        password: accesses[3]/*,
+        debug: true*/
     });
 }
 
