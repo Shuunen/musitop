@@ -1745,10 +1745,6 @@ jpeg-js@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/jpeg-js/-/jpeg-js-0.2.0.tgz#53e448ec9d263e683266467e9442d2c5a2ef5482"
 
-"jquery@>= 1.6.3":
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.2.1.tgz#5c4d9de652af6cd0a770154a631bba12b015c787"
-
 js-base64@~2.1.8:
   version "2.1.9"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.1.9.tgz#f0e80ae039a4bd654b5f281fc93f04a914a7fcce"
@@ -2862,12 +2858,11 @@ simple-git@^1.66.0:
   dependencies:
     debug "^2.6.7"
 
-simple-lastfm@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/simple-lastfm/-/simple-lastfm-1.0.5.tgz#12310a523f2f840381289aefef159fec6db7ae66"
+"simple-lastfm@https://github.com/Shuunen/simple-lastfm":
+  version "1.0.6"
+  resolved "https://github.com/Shuunen/simple-lastfm#e139eee337ca72cc9433cfc32d3a6bf7af2bfd7a"
   dependencies:
     crypto ">= 0.0.3"
-    jquery ">= 1.6.3"
     querystring ">= 0.1.0"
     xml2js ">= 0.1.13"
 

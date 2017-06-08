@@ -20,7 +20,7 @@
     "sharp": "^0.17.2",
     "shuffle-array": "^1.0.0",
     "simple-git": "^1.66.0",
-    "simple-lastfm": "^1.0.5",
+    "simple-lastfm": "https://github.com/Shuunen/simple-lastfm",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
     "spdy": "^3.4.4"
