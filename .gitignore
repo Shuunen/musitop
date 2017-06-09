@@ -35,11 +35,10 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
-.idea/workspace.xml
 lib/1by1/1by1.ini
-.idea/dictionaries/ROMAINRA.xml
 config.json
 
 # musitop
-web/cover.jpg
-web/cover-blurry.jpg
+public/cover.jpg
+public/cover-blurry.jpg
+web-client/
