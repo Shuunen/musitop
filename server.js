@@ -21,10 +21,14 @@ var http = require('http');
 var app = express();
 var colorable = require('colorable');
 var sharp = require('sharp');
-var coverPath = __dirname + '/web/cover.jpg';
-var coverMissingPath = __dirname + '/web/no-cover.jpg';
-var coverBlurryPath = __dirname + '/web/cover-blurry.jpg';
-var coverMissingBlurryPath = __dirname + '/web/no-cover-blurry.jpg';
+var gitServer = require('simple-git')(__dirname);
+var webClientFolder = 'web-client';
+var publicFolder = 'public';
+var gitWebClient = require('simple-git')(webClientFolder);
+var coverPath = __dirname + '/' + publicFolder + '/cover.jpg';
+var coverMissingPath = __dirname + '/' + publicFolder + '/no-cover.jpg';
+var coverBlurryPath = __dirname + '/' + publicFolder + '/cover-blurry.jpg';
+var coverMissingBlurryPath = __dirname + '/' + publicFolder + '/no-cover-blurry.jpg';
 var ip = require('ip').address();
 var options = {
     key: fs.readFileSync('./certs/server.key'),
@@ -120,7 +124,7 @@ app.get('/server/version', function (req, res, next) {
 });
 
 app.get('/server/update', function (req, res, next) {
-    require('simple-git')(__dirname).pull(function (err, update) {
+    gitServer.pull(function (err, update) {
         var ret = {
             target: 'server'
         };
@@ -136,13 +140,12 @@ app.get('/server/update', function (req, res, next) {
 });
 
 app.get('/client/update', function (req, res, next) {
-    var path = config.get('clientPath');
-    if (path === 'web') {
+    if (!config.get('serveWebClient')) {
         res.status(200).json({
-            error: 'there is no web client defined in server config'
+            error: 'there is no web client served'
         });
     } else {
-        require('simple-git')(path).pull(function (err, update) {
+        gitWebClient.pull(function (err, update) {
             var ret = {
                 target: 'client'
             };
@@ -248,10 +251,10 @@ var config = require('config-prompt')({
         type: 'string',
         required: true
     },
-    clientPath: {
-        type: 'string',
-        required: false,
-        default: 'web'
+    serveWebClient: {
+        type: 'boolean',
+        required: true,
+        default: true
     },
     audioClientSide: {
         type: 'boolean',
@@ -588,9 +591,26 @@ function initLastFm() {
     });
 }
 
+function initWebClient() {
+    // will expose musitop client if defined or just the web directory
+    var exposedFolder = config.get('serveWebClient') ? webClientFolder : publicFolder;
+    notify('Info', 'will serve "' + exposedFolder + '"');
+    app.use('/', express.static(exposedFolder));
+    if (config.get('serveWebClient')) {
+        try {
+            gitServer.clone('https://github.com/Shuunen/musitop-client', webClientFolder);
+        } catch (error) {
+            notify('Info', 'musitop client was already cloned');
+        }
+    }
+}
+
 function getConfig(callback) {
     // get local config
     fs.readFile(configFile, function (err, configContent) {
+        if (!configContent.length) {
+            err = true; // we fake an error because file is here but empty
+        }
         if (err) {
             notify('Server', 'No local config found');
         } else {
@@ -601,10 +621,7 @@ function getConfig(callback) {
         if (err || configErrors.length) {
             getConfigFromUser(callback);
         } else if (callback && typeof callback === 'function') {
-            // will expose musitop client if defined or just the web directory
-            var staticPath = config.get('clientPath') || 'web';
-            notify('Info', 'will serve "' + staticPath + '"');
-            app.use('/', express.static(staticPath));
+            initWebClient();
             initLastFm();
             callback();
         } else {
