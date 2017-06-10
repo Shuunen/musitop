@@ -1908,6 +1908,10 @@ lowercase-keys@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/lowercase-keys/-/lowercase-keys-1.0.0.tgz#4e3366b39e7f5457e35f1324bdf6f88d0bfc7306"
 
+"lumi-aqara@https://github.com/Shuunen/node-lumi-aqara":
+  version "1.0.0"
+  resolved "https://github.com/Shuunen/node-lumi-aqara#6ac099461c75c07c599515cdeee038afd8c178a1"
+
 map-obj@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"

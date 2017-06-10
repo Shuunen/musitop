@@ -11,6 +11,7 @@
     "express": "^4.14.1",
     "ip": "^1.1.4",
     "jscs": "^3.0.7",
+    "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
     "minimist": "^1.2.0",
     "morgan": "^1.8.1",
     "musicmetadata": "^2.0.5",
