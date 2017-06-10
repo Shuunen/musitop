@@ -281,7 +281,7 @@ var config = require('config-prompt')({
         default: 'key/secret/user/pass'
     },
     lumiSwitches: {
-        type: 'boolean',
+        type: 'string',
         default: 'goodId/badId'
     }
 })
