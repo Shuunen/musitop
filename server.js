@@ -634,15 +634,15 @@ function initLumiSwitches() {
                 notify('Lumi', 'you should change the battery of the ' + name + ' switch')
             }
             device.on('click', () => {
-                notify('Lumi', `${name} is clicked`)
+                notify('Lumi', name + ' has been clicked')
                 onMusicIs(isGood ? 'good' : 'bad')
             })
             device.on('doubleClick', () => {
-                notify('Lumi', `${name} is double clicked, next song...`)
+                notify('Lumi', name + ' has been double clicked, going to next song...')
                 onMusicIs('next')
             })
             device.on('longClickPress', () => {
-                notify('Lumi', `${name} is long pressed, but no action configured`)
+                notify('Lumi', name + ' has been long pressed, but no action configured')
             })
         })
     })
