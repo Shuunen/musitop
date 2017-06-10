@@ -651,7 +651,7 @@ function initLumiSwitches() {
 function getConfig(callback) {
     // get local config
     fs.readFile(configFile, function (err, configContent) {
-        if (!configContent.length) {
+        if (!configContent || !configContent.length) {
             err = true // we fake an error because file is here but empty
         }
         if (err) {
