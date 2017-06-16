@@ -72,7 +72,7 @@ app.use(function (req, res, next) {
     next()
 })
 
-app.get('/pushy', (req, res, next) => {
+app.get('/pushy', (req, res) => {
     var stream = res.push('/main.js', {
         status: 200, // optional
         method: 'GET', // optional
@@ -90,19 +90,16 @@ app.get('/pushy', (req, res, next) => {
     res.end('<script src="/main.js"></script>')
 })
 
-app.get('/stream.mp3', function (req, res, next) {
+app.get('/stream.mp3', function (req, res) {
     res.sendFile(song)
 })
 
-app.get('/cover.jpg', function (req, res, next) {
-    res.sendFile(coverPath)
-})
+app.get('/cover.jpg', function (req, res) { res.sendFile(coverPath) })
+app.get('/cover-medium.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-256.')) })
+app.get('/cover-large.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-512.')) })
+app.get('/cover-blurry.jpg', function (req, res) { res.sendFile(coverBlurryPath) })
 
-app.get('/cover-blurry.jpg', function (req, res, next) {
-    res.sendFile(coverBlurryPath)
-})
-
-app.get('/colors/:primary/:secondary', function (req, res, next) {
+app.get('/colors/:primary/:secondary', function (req, res) {
 
     var colors = {
         primary: req.params.primary,
@@ -117,14 +114,14 @@ app.get('/colors/:primary/:secondary', function (req, res, next) {
     res.status(200).json(result)
 })
 
-app.get('/server/version', function (req, res, next) {
+app.get('/server/version', function (req, res) {
     var pkg = JSON.parse(fs.readFileSync('./package.json'))
     res.status(200).json({
         version: pkg.version
     })
 })
 
-app.get('/server/update', function (req, res, next) {
+app.get('/server/update', function (req, res) {
     gitServer.pull(function (err, update) {
         var ret = {
             target: 'server'
@@ -140,7 +137,7 @@ app.get('/server/update', function (req, res, next) {
     })
 })
 
-app.get('/client/update', function (req, res, next) {
+app.get('/client/update', function (req, res) {
     if (!config.get('serveWebClient')) {
         res.status(200).json({
             error: 'there is no web client served'
@@ -515,7 +512,7 @@ function scrobbleSong() {
         return
     }
     // console.log(metadata);
-    lastfm.getSessionKey(function (result) {
+    lastfm.getSessionKey(function (/*result*/) {
         // notify('Info', 'last fm session key :' + result.session_key);
         lastfm.scrobbleTrack({
             artist: metadata.artist,
@@ -534,7 +531,7 @@ function loveSong() {
         return
     }
     // console.log(metadata);
-    lastfm.getSessionKey(function (result) {
+    lastfm.getSessionKey(function (/*result*/) {
         // notify('Info', 'last fm session key :' + result.session_key);
         lastfm.loveTrack({
             artist: metadata.artist,
