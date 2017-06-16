@@ -95,7 +95,7 @@ app.get('/stream.mp3', function (req, res) {
 })
 
 app.get('/cover.jpg', function (req, res) { res.sendFile(coverPath) })
-app.get('/cover-256.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-256.')) })
+app.get('/cover-256.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-256.')) }) // TODO : try to factorize
 app.get('/cover-512.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-512.')) })
 app.get('/cover-blurry.jpg', function (req, res) { res.sendFile(coverBlurryPath) })
 
