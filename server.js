@@ -366,12 +366,13 @@ function generateCovers() {
     var data = metadata.picture[0]
     try {
         var buffer = new Buffer(data.data, 'binary')
+        /* Main cover */
         sharp(buffer)
             .resize(550, 350)
             .crop(sharp.gravity.center)
             .toFile(coverPath, (err) => {
                 if (err) {
-                    notify('Server', 'Generate covers failed, see me', null, err)
+                    notify('Server', 'Generate main covers failed, see me', null, err)
                 } else {
                     vibrant.from(coverPath).getPalette((err, swatches) => {
                         palette = swatches
@@ -379,13 +380,14 @@ function generateCovers() {
                     })
                 }
             })
+        /* Blurry one for background */
         sharp(buffer)
             .blur(10)
-            .toFile(coverBlurryPath, (err) => {
-                if (err) {
-                    notify('Server', 'Generate blurry covers failed, see me', null, err)
-                }
-            })
+            .toFile(coverBlurryPath, (err) => { if (err) { notify('Server', 'Generate blurry covers failed, see me', null, err) } })
+        /* Small ones for media session */
+        const resize = size => sharp(buffer).resize(size, size)
+            .toFile(coverPath.replace('.', '-' + size + '.'), (err) => { if (err) { notify('Server', 'Generate blurry covers failed, see me', null, err) } })
+        Promise.all([512, 256].map(resize)).then(() => { notify('Server', 'Generate covers sizes complete') })
     } catch (error) {
         notify('Server', 'Generate covers failed, see my catch', null, error)
         fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath))
