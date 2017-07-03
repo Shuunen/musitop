@@ -236,7 +236,7 @@ connectSocket()
  */
 var notifier = require('node-notifier')
 var os = require('os')
-var Lastfm = require('simple-lastfm')
+var Lastfm = require('lastfm-njs')
 var lastfm = null
 var isLinux = (os.type() === 'Linux')
 var configFile = 'config.json'
@@ -351,12 +351,16 @@ function getMetadata() {
             notify('Error', 'Fail at reading mp3 metadata for song "' + song + '"', 'error', err)
         } else {
             metadata = meta
-            metadata.uid = Math.round(Date.now() / 1000)
+            metadata.uid = getTimestamp()
             metadata.stream = '/stream.mp3'
             readableStream.close()
             generateCovers()
         }
     })
+}
+
+function getTimestamp() {
+    return Math.round(Date.now() / 1000)
 }
 
 function generateCovers() {
@@ -512,17 +516,19 @@ function scrobbleSong() {
         return
     }
     // console.log(metadata);
-    lastfm.getSessionKey(function (/*result*/) {
-        // notify('Info', 'last fm session key :' + result.session_key);
-        lastfm.scrobbleTrack({
-            artist: metadata.artist,
-            track: metadata.title,
-            callback: function (result) {
-                if (!result.success) {
-                    notify('Server', 'scrobbleSong failed', 'error')
+    lastfm.auth_getMobileSession(function (res) {
+        if (res.success) {
+            lastfm.track_scrobble({
+                artist: metadata.artist[0],
+                track: metadata.title,
+                timestamp: getTimestamp(),
+                callback: function (result) {
+                    if (!result.success) {
+                        notify('Server', 'scrobbleSong failed', 'error')
+                    }
                 }
-            }
-        })
+            })
+        }
     })
 }
 
@@ -531,17 +537,18 @@ function loveSong() {
         return
     }
     // console.log(metadata);
-    lastfm.getSessionKey(function (/*result*/) {
-        // notify('Info', 'last fm session key :' + result.session_key);
-        lastfm.loveTrack({
-            artist: metadata.artist,
-            track: metadata.title,
-            callback: function (result) {
-                if (!result.success) {
-                    notify('Server', 'loveSong failed', 'error')
+    lastfm.auth_getMobileSession(function (res) {
+        if (res.success) {
+            lastfm.track_love({
+                artist: metadata.artist[0],
+                track: metadata.title,
+                callback: function (result) {
+                    if (!result.success) {
+                        notify('Server', 'loveSong failed', 'error')
+                    }
                 }
-            }
-        })
+            })
+        }
     })
 }
 
@@ -582,11 +589,10 @@ function initLastFm() {
     }
     // accesses should be like "api_key/api_secret/username/password"
     lastfm = new Lastfm({
-        api_key: accesses[0],
-        api_secret: accesses[1],
+        apiKey: accesses[0],
+        apiSecret: accesses[1],
         username: accesses[2],
-        password: accesses[3]/*,
-        debug: true*/
+        password: accesses[3]
     })
 }
 
