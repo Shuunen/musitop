@@ -536,7 +536,7 @@ cryptiles@2.x.x:
   dependencies:
     boom "2.x.x"
 
-crypto@0.0.3, "crypto@>= 0.0.3":
+crypto@0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/crypto/-/crypto-0.0.3.tgz#470a81b86be4c5ee17acc8207a1f5315ae20dbb0"
 
@@ -2475,7 +2475,7 @@ qs@6.4.0, qs@~6.4.0:
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
 
-querystring@0.2.0, "querystring@>= 0.1.0":
+querystring@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
 
@@ -2783,14 +2783,6 @@ simple-git@^1.66.0:
   dependencies:
     debug "^2.6.7"
 
-"simple-lastfm@https://github.com/Shuunen/simple-lastfm":
-  version "1.0.6"
-  resolved "https://github.com/Shuunen/simple-lastfm#e139eee337ca72cc9433cfc32d3a6bf7af2bfd7a"
-  dependencies:
-    crypto ">= 0.0.3"
-    querystring ">= 0.1.0"
-    xml2js ">= 0.1.13"
-
 simple-swizzle@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/simple-swizzle/-/simple-swizzle-0.2.2.tgz#a4da6b635ffcccca33f70d17cb92592de95e557a"
@@ -2856,9 +2848,9 @@ socket.io-parser@~3.1.1:
     has-binary2 "~1.0.2"
     isarray "2.0.1"
 
-socket.io@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/socket.io/-/socket.io-2.0.2.tgz#133bf3a1b67d02f2ac65103c11f78e6f2c4f3b3a"
+socket.io@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/socket.io/-/socket.io-2.0.3.tgz#4359f06a24933ae6bd087798af78c680eae345e3"
   dependencies:
     debug "~2.6.6"
     engine.io "~3.1.0"
@@ -3411,7 +3403,7 @@ xml-parse-from-string@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/xml-parse-from-string/-/xml-parse-from-string-1.0.1.tgz#a9029e929d3dbcded169f3c6e28238d95a5d5a28"
 
-"xml2js@>= 0.1.13", xml2js@^0.4.5:
+xml2js@^0.4.5:
   version "0.4.17"
   resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.17.tgz#17be93eaae3f3b779359c795b419705a8817e868"
   dependencies:
