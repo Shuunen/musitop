@@ -80,15 +80,14 @@ Now you can control Musitop with custom bindings :)
 
 ## Optional : use Musitop web client over https
 
-Generate a new certificate :
-```
-openssl req -subj "/CN=musitop.io" -new -newkey rsa:2048 -sha256 -days 365 -nodes -x509 -keyout server.key -out server.crt
-```
-
 On linux :
+
+Install [sslfie](https://github.com/mkropat/sslfie) then :
 ```
+cd /path-to-musitop/certs/
+sslfie -o server.crt -k server.key musitop.io
 sudo apt install libnss3-tools
-certutil -d sql:$HOME/.pki/nssdb -A -t P -n "Musitop" -i /home/path-to-musitop/certs/server.crt
+certutil -d sql:$HOME/.pki/nssdb -A -t P -n "Musitop" -i server.crt
 ```
 Then restart Chrome and it should be good :)
 
