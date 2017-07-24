@@ -325,9 +325,9 @@ function fileName(filePath) {
 }
 
 function playNext(from) {
-    if (from) {
-        from += '' // avoid "unused var" errors & keep it in case
-        // notify('Server', 'playNext called by ' + from );
+    if (from === 'Zangdar') {
+        // avoid "unused var from" lint errors & keep it for later uses
+        notify('Server', 'playNext called by ' + from)
     }
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0]
