@@ -324,8 +324,11 @@ function fileName(filePath) {
     return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.')
 }
 
-function playNext() {
-    // notify('Server', 'playNext init' + (from ? ' from : ' + from : ''));
+function playNext(from) {
+    if (from) {
+        from += '' // avoid "unused var" errors & keep it in case
+        // notify('Server', 'playNext called by ' + from );
+    }
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0]
     getMetadata()
