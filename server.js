@@ -379,17 +379,18 @@ function generateCovers() {
     }
 
     let buffer = new Buffer(data.data, 'binary')
+    let quality = 60
 
     jimp.read(buffer)
         .then(image => {
             /* Main cover */
             let clone = image.clone()
-            clone.cover(550, 350).write(coverPath, () => getColorPaletteFrom(coverPath))
+            clone.cover(550, 350).quality(quality).write(coverPath, () => getColorPaletteFrom(coverPath))
             /* Blurry one for background  */
             clone = image.clone()
-            clone.blur(10).write(coverBlurryPath)
+            clone.blur(10).quality(quality).write(coverBlurryPath)
             /* Small ones for media session */
-            const resize = size => image.cover(size, size).write(coverPath.replace('.', '-' + size + '.'))
+            const resize = size => image.cover(size, size).quality(quality).write(coverPath.replace('.', '-' + size + '.'))
             Promise.all([512, 256].map(resize))
         })
         .catch(error => notify('Server', 'Generate small covers failed, see my catch', null, error))
