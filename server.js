@@ -95,14 +95,21 @@ app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-usele
     if (!songId || !songId.length) {
         res.status(404).send('you need to provide the song id')
     } else {
-        songId = songId.split('.')[0]
-        if (!songs.hasOwnProperty(songId)) {
+        songId = parseInt(songId.split('.')[0])
+        let isCurrent = songs.current.uid === songId
+        let isNext = songs.next.uid === songId
+        if (!isCurrent && !isNext) {
             notify('Server', 'Song UID unknow "' + songId + '"')
-            notify('Server', 'Songs known are :', null, songs)
+            notify('Server', 'UIDs known are : ' + songs.current.uid + ' & ' + songs.next.uid)
             res.status(500).send('server has no idea about this song location')
         } else {
-            notify('Server', 'Streaming song with UID "' + songId + '"')
-            res.sendFile(songs[songId])
+            if (isCurrent) {
+                notify('Server', 'Streaming ' + fileName(songs.current.path) + ' (' + songs.current.uid + ')')
+                res.sendFile(songs.current.path)
+            } else {
+                notify('Server', 'Streaming ' + fileName(songs.next.path) + ' (' + songs.next.uid + ')')
+                res.sendFile(songs.next.path)
+            }
         }
     }
 })
@@ -187,13 +194,13 @@ var onConnection = function () {
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', '★ Keep this song :D')
-        notify('Will keep', fileName(song), 'info')
+        notify('Will keep', fileName(songs.current.path), 'info')
         loveSong()
         keep = true
         ioEmit('music was', musicIs)
     } else if (musicIs === 'bad') {
         notify('Client', '✕ Delete this song :|')
-        notify('Deleting', fileName(song), 'info')
+        notify('Deleting', fileName(songs.current.path), 'info')
         deleteSong()
         playNext('onMusicIs bad')
         ioEmit('music was', musicIs)
@@ -231,7 +238,7 @@ var handleConnection = function (socket) {
         audioClientSide: config.get('audioClientSide')
     })
     ioEmit('palette', palette)
-    ioEmit('metadata', metadata)
+    ioEmit('metadata', songs.current.metadata)
 }
 
 var connectSocket = function () {
@@ -302,14 +309,21 @@ const defaultConfig = {
 const config = require('config-prompt')(defaultConfig)
 var shuffle = require('shuffle-array')
 var playlist = []
-var song = ''
-var nextSong = ''
-var songs = {}
+var songs = {
+    current: {
+        uid: 0,
+        path: '',
+        metadata: null
+    },
+    next: {
+        uid: 1,
+        path: ''
+    }
+}
 var player = null
 var autoKill = false
 var manualKill = false
 var keep = false
-var metadata = null
 var palette = null
 
 function playFolder() {
@@ -349,9 +363,12 @@ function playNext(from) {
         // avoid "unused var from" lint errors & keep it for later uses
         notify('Server', 'playNext called by ' + from)
     }
+    // update uids
+    songs.current.uid++
+    songs.next.uid++
     // here splice return first item & remove it from playlist
-    song = playlist.splice(0, 1)[0]
-    nextSong = playlist[1]
+    songs.current.path = playlist.splice(0, 1)[0]
+    songs.next.path = playlist[0]
     getMetadata()
     // if audio output is server side
     if (!config.get('audioClientSide')) {
@@ -359,39 +376,29 @@ function playNext(from) {
     }
     setTimeout(function () {
         notify('Server', '♫ Remaining ' + playlist.length + ' track(s)')
-        notify('Playing', fileName(song), 'info')
-        ioEmit('metadata', metadata)
+        notify('Playing', fileName(songs.current.path) + ' (' + songs.current.uid + ')', 'info')
+        ioEmit('metadata', songs.current.metadata)
         scrobbleSong()
     }, 1100)
 }
 
 function getMetadata() {
-    metadata = null
-    var readableStream = fs.createReadStream(song)
+    songs.current.metadata = null
+    var readableStream = fs.createReadStream(songs.current.path)
     musicMetadata(readableStream, {
         duration: true
     }, function (err, meta) {
         if (err) {
-            notify('Error', 'Fail at reading mp3 metadata for song "' + song + '"', 'error', err)
+            notify('Error', 'Fail at reading mp3 metadata for song "' + songs.current.path + '"', 'error', err)
         } else {
-            let uid = getTimestamp()
-            metadata = meta
-            metadata.uid = uid
-            metadata.stream = '/stream/' + uid + '.mp3'
-            makeSongAvailable(uid)
+            meta.uid = songs.current.uid
+            meta.stream = '/stream/' + songs.current.uid + '.mp3'
+            meta.nextStream = '/stream/' + songs.next.uid + '.mp3'
+            songs.current.metadata = meta
             readableStream.close()
             generateCovers()
         }
     })
-}
-
-function makeSongAvailable(uid) {
-    let uids = Object.keys(songs)
-    if (uids.length > 2) {
-        // to keep songs table small
-        delete songs[uids[0]]
-    }
-    songs[uid] = song
 }
 
 function getTimestamp() {
@@ -399,7 +406,7 @@ function getTimestamp() {
 }
 
 function generateCovers() {
-    let data = metadata.picture[0]
+    let data = songs.current.metadata.picture[0]
     if (!data) {
         notify('Server', 'No embed cover found in this mp3')
         useDefaultCovers()
@@ -474,7 +481,7 @@ function doAsync(callback) {
     if (!callback) {
         notify('Error', 'Do Async need a callback', 'error')
     } else {
-        var lastSongPath = song + ''
+        var lastSongPath = songs.current.path + ''
         setTimeout(function () {
             callback(lastSongPath)
         }, 1000)
@@ -515,10 +522,10 @@ function playSong() {
 
     if (isLinux) {
         // use cvlc on linux
-        player = childProcess.spawn('cvlc', [song, '--play-and-exit'])
+        player = childProcess.spawn('cvlc', [songs.current.path, '--play-and-exit'])
     } else {
         // use 1by1 on win
-        player = childProcess.spawn('lib/1by1/1by1.exe', [song, '/hide', '/close'])
+        player = childProcess.spawn('lib/1by1/1by1.exe', [songs.current.path, '/hide', '/close'])
     }
 
     // because new player started
@@ -560,8 +567,8 @@ function scrobbleSong() {
     lastfm.auth_getMobileSession(function (res) {
         if (res.success) {
             lastfm.track_scrobble({
-                artist: metadata.artist[0],
-                track: metadata.title,
+                artist: songs.current.metadata.artist[0],
+                track: songs.current.metadata.title,
                 timestamp: getTimestamp(),
                 callback: function (result) {
                     if (!result.success) {
@@ -581,8 +588,8 @@ function loveSong() {
     lastfm.auth_getMobileSession(function (res) {
         if (res.success) {
             lastfm.track_love({
-                artist: metadata.artist[0],
-                track: metadata.title,
+                artist: songs.current.metadata.artist[0],
+                track: songs.current.metadata.title,
                 callback: function (result) {
                     if (!result.success) {
                         notify('Server', 'loveSong failed', 'error')
