@@ -374,6 +374,7 @@ function getTimestamp() {
 function generateCovers() {
     let data = metadata.picture[0]
     if (!data) {
+        notify('Server', 'No embed cover found in this mp3')
         useDefaultCovers()
         return
     }
@@ -612,12 +613,18 @@ function initLastFm() {
 function initWebClient() {
     // will expose musitop client if defined or just the web directory
     var exposedFolder = config.get('serveWebClient') ? webClientFolder : publicFolder
-    notify('Info', 'will serve "' + exposedFolder + '"')
+    notify('Info', 'Will serve "' + exposedFolder + '"')
     app.use('/', express.static(exposedFolder))
     if (config.get('serveWebClient')) {
-        gitServer.clone('https://github.com/Shuunen/musitop-client', webClientFolder)
-            .then(() => notify('Server', 'Succefully cloned musitop client...'))
-            .catch(() => notify('Server', 'Failed at clonning musitop client, see logs'))
+        fs.readdir(webClientFolder + '/.git', error => {
+            if (error) {
+                gitServer.clone('https://github.com/Shuunen/musitop-client', webClientFolder)
+                    .then(() => notify('Server', 'Succefully cloned musitop client'))
+                    .catch(() => notify('Server', 'Failed at clonning musitop client'))
+            } else {
+                notify('Server', 'Avoid clonning musitop client, seems to be there already')
+            }
+        })
     }
 }
 
