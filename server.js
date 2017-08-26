@@ -90,8 +90,21 @@ app.get('/pushy', (req, res) => {
     res.end('<script src="/main.js"></script>')
 })
 
-app.get('/stream.mp3', function (req, res) {
-    res.sendFile(song)
+app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-useless-escape
+    let songId = req.params.songId
+    if (!songId || !songId.length) {
+        res.status(404).send('you need to provide the song id')
+    } else {
+        songId = songId.split('.')[0]
+        if (!songs.hasOwnProperty(songId)) {
+            notify('Server', 'Song UID unknow "' + songId + '"')
+            notify('Server', 'Songs known are :', null, songs)
+            res.status(500).send('server has no idea about this song location')
+        } else {
+            notify('Server', 'Streaming song with UID "' + songId + '"')
+            res.sendFile(songs[songId])
+        }
+    }
 })
 
 app.get('/cover.jpg', function (req, res) { res.sendFile(coverPath) })
@@ -290,6 +303,8 @@ const config = require('config-prompt')(defaultConfig)
 var shuffle = require('shuffle-array')
 var playlist = []
 var song = ''
+var nextSong = ''
+var songs = {}
 var player = null
 var autoKill = false
 var manualKill = false
@@ -336,6 +351,7 @@ function playNext(from) {
     }
     // here splice return first item & remove it from playlist
     song = playlist.splice(0, 1)[0]
+    nextSong = playlist[1]
     getMetadata()
     // if audio output is server side
     if (!config.get('audioClientSide')) {
@@ -358,13 +374,24 @@ function getMetadata() {
         if (err) {
             notify('Error', 'Fail at reading mp3 metadata for song "' + song + '"', 'error', err)
         } else {
+            let uid = getTimestamp()
             metadata = meta
-            metadata.uid = getTimestamp()
-            metadata.stream = '/stream.mp3'
+            metadata.uid = uid
+            metadata.stream = '/stream/' + uid + '.mp3'
+            makeSongAvailable(uid)
             readableStream.close()
             generateCovers()
         }
     })
+}
+
+function makeSongAvailable(uid) {
+    let uids = Object.keys(songs)
+    if (uids.length > 2) {
+        // to keep songs table small
+        delete songs[uids[0]]
+    }
+    songs[uid] = song
 }
 
 function getTimestamp() {
