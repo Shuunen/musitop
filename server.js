@@ -21,11 +21,11 @@ var http = require('http')
 var app = express()
 var colorable = require('colorable')
 var aqara = require('lumi-aqara')
-var sharp = require('sharp')
-var gitServer = require('simple-git')(__dirname)
+var jimp = require('jimp')
+var gitServer = require('simple-git/promise')(__dirname)
 var webClientFolder = 'web-client'
 var publicFolder = 'public'
-var gitWebClient = require('simple-git')(webClientFolder)
+var gitWebClient = require('simple-git/promise')(webClientFolder)
 var coverPath = __dirname + '/' + publicFolder + '/cover.jpg'
 var coverMissingPath = __dirname + '/' + publicFolder + '/no-cover.jpg'
 var coverBlurryPath = __dirname + '/' + publicFolder + '/cover-blurry.jpg'
@@ -143,19 +143,23 @@ app.get('/client/update', function (req, res) {
             error: 'there is no web client served'
         })
     } else {
-        gitWebClient.pull(function (err, update) {
-            var ret = {
-                target: 'client'
-            }
-            if (err) {
+        notify('Server', 'Getting git updates form web client folder')
+        let ret = {
+            target: 'client'
+        }
+        gitWebClient.pull()
+            .then(update => {
+                if (update && update.summary.changes) {
+                    ret.changes = update.summary.changes
+                } else {
+                    ret.changes = 'none'
+                }
+                res.status(200).json(ret)
+            })
+            .catch(err => {
                 ret.error = err
-            } else if (update && update.summary.changes) {
-                ret.changes = update.summary.changes
-            } else {
-                ret.changes = 'none'
-            }
-            res.status(200).json(ret)
-        })
+                res.status(200).json(ret) // TODO : keep a 200 here ?
+            })
     }
 })
 
@@ -234,13 +238,13 @@ connectSocket()
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
-var notifier = require('node-notifier')
-var os = require('os')
-var Lastfm = require('lastfm-njs')
-var lastfm = null
-var isLinux = (os.type() === 'Linux')
-var configFile = 'config.json'
-var config = require('config-prompt')({
+const notifier = require('node-notifier')
+const os = require('os')
+const Lastfm = require('lastfm-njs')
+let lastfm = null
+const isLinux = (os.type() === 'Linux')
+const configFile = 'config.json'
+const defaultConfig = {
     musicPath: {
         type: 'string',
         required: true
@@ -281,7 +285,8 @@ var config = require('config-prompt')({
         type: 'string',
         default: 'goodId/badId'
     }
-})
+}
+const config = require('config-prompt')(defaultConfig)
 var shuffle = require('shuffle-array')
 var playlist = []
 var song = ''
@@ -367,36 +372,40 @@ function getTimestamp() {
 }
 
 function generateCovers() {
-    var data = metadata.picture[0]
-    try {
-        var buffer = new Buffer(data.data, 'binary')
-        /* Main cover */
-        sharp(buffer)
-            .resize(550, 350)
-            .crop(sharp.gravity.center)
-            .toFile(coverPath, (err) => {
-                if (err) {
-                    notify('Server', 'Generate main covers failed, see me', null, err)
-                } else {
-                    vibrant.from(coverPath).getPalette((err, swatches) => {
-                        palette = swatches
-                        ioEmit('palette', palette)
-                    })
-                }
-            })
-        /* Blurry one for background */
-        sharp(buffer)
-            .blur(10)
-            .toFile(coverBlurryPath, (err) => { if (err) { notify('Server', 'Generate blurry covers failed, see me', null, err) } })
-        /* Small ones for media session */
-        const resize = size => sharp(buffer).resize(size, size)
-            .toFile(coverPath.replace('.', '-' + size + '.'), (err) => { if (err) { notify('Server', 'Generate blurry covers failed, see me', null, err) } })
-        Promise.all([512, 256].map(resize)).then(() => { notify('Server', 'Generate covers sizes complete') })
-    } catch (error) {
-        notify('Server', 'Generate covers failed, see my catch', null, error)
-        fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath))
-        fs.createReadStream(coverMissingBlurryPath).pipe(fs.createWriteStream(coverBlurryPath))
+    let data = metadata.picture[0]
+    if (!data) {
+        useDefaultCovers()
+        return
     }
+
+    let buffer = new Buffer(data.data, 'binary')
+
+    jimp.read(buffer)
+        .then(image => {
+            /* Main cover */
+            let clone = image.clone()
+            clone.cover(550, 350).write(coverPath, () => getColorPaletteFrom(coverPath))
+            /* Blurry one for background  */
+            clone = image.clone()
+            clone.blur(10).write(coverBlurryPath)
+            /* Small ones for media session */
+            const resize = size => image.cover(size, size).write(coverPath.replace('.', '-' + size + '.'))
+            Promise.all([512, 256].map(resize))
+        })
+        .catch(error => notify('Server', 'Generate small covers failed, see my catch', null, error))
+}
+
+function getColorPaletteFrom(imagePath) {
+    vibrant.from(imagePath).getPalette((err, swatches) => {
+        palette = swatches
+        ioEmit('palette', palette)
+    })
+}
+
+function useDefaultCovers() {
+    notify('Server', 'Using default covers')
+    fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath))
+    fs.createReadStream(coverMissingBlurryPath).pipe(fs.createWriteStream(coverBlurryPath))
 }
 
 function moveSong() {
@@ -605,16 +614,14 @@ function initWebClient() {
     notify('Info', 'will serve "' + exposedFolder + '"')
     app.use('/', express.static(exposedFolder))
     if (config.get('serveWebClient')) {
-        try {
-            gitServer.clone('https://github.com/Shuunen/musitop-client', webClientFolder)
-        } catch (error) {
-            notify('Info', 'musitop client was already cloned')
-        }
+        gitServer.clone('https://github.com/Shuunen/musitop-client', webClientFolder)
+            .then(() => notify('Server', 'Succefully cloned musitop client...'))
+            .catch(() => notify('Server', 'Failed at clonning musitop client, see logs'))
     }
 }
 
 function initLumiSwitches() {
-    if (!config.get('lumiSwitches')) {
+    if (config.get('lumiSwitches') === defaultConfig.lumiSwitches.default) {
         return
     }
     var aqaraInstance = new aqara()

@@ -42,3 +42,6 @@ config.json
 public/cover.jpg
 public/cover-blurry.jpg
 web-client/
+public/cover-256.jpg
+public/cover-512.jpg
+public/Thumbs.db
