@@ -25,11 +25,8 @@ var jimp = require('jimp')
 var gitServer = require('simple-git/promise')(__dirname)
 var webClientFolder = 'web-client'
 var publicFolder = 'public'
+var publicFolderPath = __dirname + '/' + publicFolder
 var gitWebClient = require('simple-git/promise')(webClientFolder)
-var coverPath = __dirname + '/' + publicFolder + '/cover.jpg'
-var coverMissingPath = __dirname + '/' + publicFolder + '/no-cover.jpg'
-var coverBlurryPath = __dirname + '/' + publicFolder + '/cover-blurry.jpg'
-var coverMissingBlurryPath = __dirname + '/' + publicFolder + '/no-cover-blurry.jpg'
 var ip = require('ip').address()
 var options = {
     key: fs.readFileSync('./certs/server.key'),
@@ -104,10 +101,10 @@ app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-usele
             res.status(500).send('server has no idea about this song location')
         } else {
             if (isCurrent) {
-                notify('Server', 'Streaming ' + fileName(songs.current.path) + ' (' + songs.current.uid + ')')
+                notify('Server', 'Streaming ' + songs.current.nameWithId)
                 res.sendFile(songs.current.path)
             } else {
-                notify('Server', 'Streaming ' + fileName(songs.next.path) + ' (' + songs.next.uid + ')')
+                notify('Server', 'Streaming ' + songs.next.nameWithId)
                 res.sendFile(songs.next.path)
             }
         }
@@ -116,8 +113,8 @@ app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-usele
 
 app.get('/cover/:id.jpg', function (req, res) {
     let coverId = req.params.id
-    notify('Server', 'Got a request for cover id "' + coverId)
-    res.sendFile(coverPath)
+    notify('Server', 'Got a request for cover id "' + coverId + '"')
+    res.sendFile(publicFolderPath + '/' + coverId + '.jpg')
 })
 
 app.get('/colors/:primary/:secondary', function (req, res) {
@@ -195,13 +192,13 @@ var onConnection = function () {
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', '★ Keep this song :D')
-        notify('Will keep', fileName(songs.current.path))
+        notify('Will keep', songs.current.name)
         loveSong()
         keep = true
         ioEmit('music was', musicIs)
     } else if (musicIs === 'bad') {
         notify('Client', '✕ Delete this song :|')
-        notify('Deleting', fileName(songs.current.path))
+        notify('Deleting', songs.current.name)
         deleteSong()
         playNext('onMusicIs bad')
         ioEmit('music was', musicIs)
@@ -313,6 +310,8 @@ var songs = {
     current: {
         uid: 0,
         path: '',
+        name: '',
+        nameWithId: '',
         metadata: null
     },
     next: {
@@ -368,38 +367,63 @@ function playNext(from) {
     songs.next.uid++
     // here splice return first item & remove it from playlist
     songs.current.path = playlist.splice(0, 1)[0]
+    songs.current.name = fileName(songs.current.path)
+    songs.current.nameWithId = songs.current.name + ' (' + songs.current.uid + ')'
     songs.next.path = playlist[0]
+    songs.next.name = fileName(songs.next.path)
+    songs.next.nameWithId = songs.next.name + ' (' + songs.next.uid + ')'
     notify('Server', '♫ Remaining ' + playlist.length + ' track(s)')
-    notify('Playing', fileName(songs.current.path) + ' (' + songs.current.uid + ')')
+    notify('Playing', songs.current.nameWithId)
     // if audio output is server side
     if (!config.get('audioClientSide')) {
         playSong()
     }
-    getMetadata()
-    setTimeout(function () {
-        ioEmit('metadata', songs.current.metadata)
-        scrobbleSong()
-    }, 1100)
+
+    getMetadata().then(metadata => {
+        songs.current.metadata = metadata
+        ioEmit('metadata', metadata)
+        // scrobble song after few seconds
+        setTimeout(() => scrobbleSong(), 2000)
+    })
 }
 
 function getMetadata() {
-    console.time('getMetadata') // eslint-disable-line no-console
-    songs.current.metadata = null
-    var readableStream = fs.createReadStream(songs.current.path)
-    musicMetadata(readableStream, {
-        duration: true
-    }, function (err, meta) {
-        if (err) {
-            notify('Error', 'Fail at reading mp3 metadata for song "' + songs.current.path + '"', err)
-        } else {
-            console.timeEnd('getMetadata') // eslint-disable-line no-console
-            meta.uid = songs.current.uid
-            meta.stream = '/stream/' + songs.current.uid + '.mp3'
-            meta.nextStream = '/stream/' + songs.next.uid + '.mp3'
-            songs.current.metadata = meta
-            readableStream.close()
-            generateCovers()
-        }
+    return new Promise(resolve => {
+        var readableStream = fs.createReadStream(songs.current.path)
+        musicMetadata(readableStream, {
+            duration: true
+        }, function (err, metadata) {
+            if (err) {
+                notify('Error', 'Fail at reading mp3 metadata for song "' + songs.current.path + '"', err)
+            } else {
+                metadata.uid = songs.current.uid
+                metadata.stream = '/stream/' + songs.current.uid + '.mp3'
+                metadata.nextStream = '/stream/' + songs.next.uid + '.mp3'
+                metadata.coverId = 'no-cover'
+                readableStream.close()
+                let picture = metadata.picture[0]
+                if (!picture) {
+                    notify('Info', 'No cover art in this mp3')
+                    resolve(metadata)
+                    return
+                }
+                // if covert art has been found, translate it to a file
+                // let buffer = new Buffer(picture.data, 'binary')
+                let buffer = picture.data
+                let name = 'cover'
+                let path = publicFolderPath + '/' + name + '.jpg'
+                fs.writeFile(path, buffer, 'binary', err => {
+                    if (err) {
+                        notify('Error', 'Failed at writing cover file to disk', err)
+                    } else {
+                        metadata.coverId = name
+                        // delay color palette getting
+                        setTimeout(() => getColorPaletteFrom(path), 500)
+                    }
+                    resolve(metadata)
+                })
+            }
+        })
     })
 }
 
@@ -407,47 +431,11 @@ function getTimestamp() {
     return Math.round(Date.now() / 1000)
 }
 
-function generateCovers() {
-    let data = songs.current.metadata.picture[0]
-    if (!data) {
-        notify('Server', 'No embed cover found in this mp3')
-        useDefaultCovers()
-        return
-    }
-    console.time('generateCovers') // eslint-disable-line no-console
-    let buffer = new Buffer(data.data, 'binary')
-    let quality = 60
-
-    jimp.read(buffer)
-        .then(image => {
-            /* Main cover */
-            let clone = image.clone()
-            clone.cover(550, 350).quality(quality).write(coverPath, () => getColorPaletteFrom(coverPath))
-            /* Blurry one for background  */
-            clone = image.clone()
-            clone.blur(10).quality(quality).write(coverBlurryPath)
-            /* Small ones for media session */
-            const resize = size => image.cover(size, size).quality(quality).write(coverPath.replace('.', '-' + size + '.'))
-            Promise.all([512, 256].map(resize)).then(() => {
-                console.timeEnd('generateCovers') // eslint-disable-line no-console
-            })
-        })
-        .catch(error => notify('Server', 'Generate small covers failed', error))
-}
-
 function getColorPaletteFrom(imagePath) {
-    console.time('getColorPaletteFrom') // eslint-disable-line no-console
     vibrant.from(imagePath).getPalette((err, swatches) => {
         palette = swatches
-        console.timeEnd('getColorPaletteFrom') // eslint-disable-line no-console
         ioEmit('palette', palette)
     })
-}
-
-function useDefaultCovers() {
-    notify('Server', 'Using default covers')
-    fs.createReadStream(coverMissingPath).pipe(fs.createWriteStream(coverPath))
-    fs.createReadStream(coverMissingBlurryPath).pipe(fs.createWriteStream(coverBlurryPath))
 }
 
 function moveSong() {
