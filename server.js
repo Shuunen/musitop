@@ -114,10 +114,11 @@ app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-usele
     }
 })
 
-app.get('/cover.jpg', function (req, res) { res.sendFile(coverPath) })
-app.get('/cover-256.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-256.')) }) // TODO : try to factorize
-app.get('/cover-512.jpg', function (req, res) { res.sendFile(coverPath.replace('.', '-512.')) })
-app.get('/cover-blurry.jpg', function (req, res) { res.sendFile(coverBlurryPath) })
+app.get('/cover/:id.jpg', function (req, res) {
+    let coverId = req.params.id
+    notify('Server', 'Got a request for cover id "' + coverId)
+    res.sendFile(coverPath)
+})
 
 app.get('/colors/:primary/:secondary', function (req, res) {
 
@@ -258,7 +259,6 @@ connectSocket()
  *    __▀__________█__________________▀____
  *    ____________▀________________________
  */
-const notifier = require('node-notifier')
 const os = require('os')
 const Lastfm = require('lastfm-njs')
 let lastfm = null
@@ -369,14 +369,14 @@ function playNext(from) {
     // here splice return first item & remove it from playlist
     songs.current.path = playlist.splice(0, 1)[0]
     songs.next.path = playlist[0]
-    getMetadata()
+    notify('Server', '♫ Remaining ' + playlist.length + ' track(s)')
+    notify('Playing', fileName(songs.current.path) + ' (' + songs.current.uid + ')')
     // if audio output is server side
     if (!config.get('audioClientSide')) {
         playSong()
     }
+    getMetadata()
     setTimeout(function () {
-        notify('Server', '♫ Remaining ' + playlist.length + ' track(s)')
-        notify('Playing', fileName(songs.current.path) + ' (' + songs.current.uid + ')')
         ioEmit('metadata', songs.current.metadata)
         scrobbleSong()
     }, 1100)

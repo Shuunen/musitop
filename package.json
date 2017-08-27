@@ -13,7 +13,6 @@
         "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
         "minimist": "^1.2.0",
         "musicmetadata": "^2.0.5",
-        "node-notifier": "^5.1.2",
         "node-vibrant": "^3.0.0-alpha.2",
         "os": "^0.1.1",
         "shuffle-array": "^1.0.0",
