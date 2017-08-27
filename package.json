@@ -6,16 +6,12 @@
     "dependencies": {
         "colorable": "^1.0.5",
         "config-prompt": "^1.1.0",
-        "electron": "^1.7.3",
-        "eslint": "^4.5.0",
         "express": "^4.14.1",
         "ip": "^1.1.4",
         "jimp": "^0.2.28",
-        "jscs": "^3.0.7",
         "lastfm-njs": "^0.2.4",
         "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
         "minimist": "^1.2.0",
-        "morgan": "^1.8.1",
         "musicmetadata": "^2.0.5",
         "node-notifier": "^5.1.2",
         "node-vibrant": "^3.0.0-alpha.2",
@@ -26,10 +22,13 @@
         "socket.io-client": "^2.0.2",
         "spdy": "^3.4.4"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "eslint": "^4.5.0"
+    },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "yarn && nodemon server.js",
+        "start": "yarn --production && nodemon server.js",
+        "start-dev": "yarn && nodemon server.js",
         "client-good": "node client.js --musicIs=good",
         "client-bad": "node client.js --musicIs=bad",
         "dont-watch": "start server.js"

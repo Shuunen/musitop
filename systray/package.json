@@ -1,0 +1,14 @@
+{
+    "name": "musitop-systray",
+    "version": "1.0.0",
+    "description": "this module shows control icons in the systray",
+    "main": "systray.js",
+    "scripts": {
+        "start": "yarn && node_modules/electron/dist/electron systray.js"
+    },
+    "author": "",
+    "license": "AGPL-3.0",
+    "dependencies": {
+        "electron": "^1.7.5"
+    }
+}

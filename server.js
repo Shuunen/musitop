@@ -194,13 +194,13 @@ var onConnection = function () {
 var onMusicIs = function (musicIs) {
     if (musicIs === 'good') {
         notify('Client', '★ Keep this song :D')
-        notify('Will keep', fileName(songs.current.path), 'info')
+        notify('Will keep', fileName(songs.current.path))
         loveSong()
         keep = true
         ioEmit('music was', musicIs)
     } else if (musicIs === 'bad') {
         notify('Client', '✕ Delete this song :|')
-        notify('Deleting', fileName(songs.current.path), 'info')
+        notify('Deleting', fileName(songs.current.path))
         deleteSong()
         playNext('onMusicIs bad')
         ioEmit('music was', musicIs)
@@ -215,12 +215,12 @@ var onMusicIs = function (musicIs) {
         notify('Client', '|| Pause song please')
         ioEmit('pause', 'please :)')
     } else {
-        notify('Server', 'Client said that music is "' + musicIs + '" ?!?', 'info')
+        notify('Server', 'Client said that music is "' + musicIs + '" ?!?')
     }
 }
 
 var onError = function (err) {
-    notify('Socket', 'Client had errors', 'error', err)
+    notify('Socket', 'Client had errors', err)
 }
 
 var onEvent = function (e) {
@@ -293,9 +293,9 @@ const defaultConfig = {
         type: 'boolean',
         default: true
     },
-    desktopNotifications: {
+    systrayControls: {
         type: 'boolean',
-        default: true
+        default: false
     },
     lastfmAccess: {
         type: 'string',
@@ -332,7 +332,7 @@ function playFolder() {
     fs.readdir(musicPath, function (err, files) {
         if (err) {
             config.trash()
-            notify('Error', 'Failed at reading musicPath', 'error', err)
+            notify('Error', 'Failed at reading musicPath', err)
         } else {
             // inject files
             files.forEach(function (fileName) {
@@ -376,7 +376,7 @@ function playNext(from) {
     }
     setTimeout(function () {
         notify('Server', '♫ Remaining ' + playlist.length + ' track(s)')
-        notify('Playing', fileName(songs.current.path) + ' (' + songs.current.uid + ')', 'info')
+        notify('Playing', fileName(songs.current.path) + ' (' + songs.current.uid + ')')
         ioEmit('metadata', songs.current.metadata)
         scrobbleSong()
     }, 1100)
@@ -389,7 +389,7 @@ function getMetadata() {
         duration: true
     }, function (err, meta) {
         if (err) {
-            notify('Error', 'Fail at reading mp3 metadata for song "' + songs.current.path + '"', 'error', err)
+            notify('Error', 'Fail at reading mp3 metadata for song "' + songs.current.path + '"', err)
         } else {
             meta.uid = songs.current.uid
             meta.stream = '/stream/' + songs.current.uid + '.mp3'
@@ -426,9 +426,9 @@ function generateCovers() {
             clone.blur(10).quality(quality).write(coverBlurryPath)
             /* Small ones for media session */
             const resize = size => image.cover(size, size).quality(quality).write(coverPath.replace('.', '-' + size + '.'))
-            Promise.all([512, 256].map(resize))
+            Promise.all([512, 256].map(resize)).then(() => notify('Server', 'Generated small covers'))
         })
-        .catch(error => notify('Server', 'Generate small covers failed, see my catch', null, error))
+        .catch(error => notify('Server', 'Generate small covers failed', error))
 }
 
 function getColorPaletteFrom(imagePath) {
@@ -456,7 +456,7 @@ function moveSong() {
         // notify('Server', 'will move it to : "' + newLastSongPath + '"');
         fs.rename(lastSongPath, newLastSongPath, function (err) {
             if (err) {
-                notify('Server', 'Move failed, see me')
+                notify('Server', 'Move failed')
                 throw new Error(err)
             } else {
                 notify('Server', '> Moved ' + fileName(lastSongPath))
@@ -469,7 +469,7 @@ function deleteSong() {
     doAsync(function (lastSongPath) {
         fs.unlink(lastSongPath, function (err) {
             if (err) {
-                notify('Error', 'Delete failed', 'error', err)
+                notify('Error', 'Delete failed', err)
             } else {
                 notify('Server', '✕ Deleted ' + fileName(lastSongPath))
             }
@@ -479,7 +479,7 @@ function deleteSong() {
 
 function doAsync(callback) {
     if (!callback) {
-        notify('Error', 'Do Async need a callback', 'error')
+        notify('Error', 'Do Async need a callback')
     } else {
         var lastSongPath = songs.current.path + ''
         setTimeout(function () {
@@ -488,15 +488,7 @@ function doAsync(callback) {
     }
 }
 
-function notify(action, message, type, bonus) {
-    if (type && config.get('desktopNotifications') !== false) {
-        // notify client side
-        notifier.notify({
-            title: action,
-            message: message,
-            type: type
-        })
-    }
+function notify(action, message, bonus) {
     // in order to align logs :p
     var actionAligned = action
     while (actionAligned.length < 6) {
@@ -515,7 +507,7 @@ function playSong() {
     // notify('playSong', 'autoKill is ' + autoKill);
     if (player && !autoKill) {
         // if any player we kill it, we don't want to have multiple players at the same time
-        // notify('playSong', 'manualKill was ' + manualKill + ', now true');
+        // notify('playSong', 'manualKill was ' + manualKill + ' now true');
         manualKill = true
         player.kill()
     }
@@ -529,22 +521,22 @@ function playSong() {
     }
 
     // because new player started
-    // notify('playSong', 'autoKill was ' + autoKill + ', now false');
+    // notify('playSong', 'autoKill was ' + autoKill + ' now false');
     autoKill = false
 
     // when user did not asked anything, player close by itself
     player.on('close', function (code) {
         // notify('close', 'manualKill is ' + manualKill);
         if (manualKill) {
-            // notify('Server', 'Player closed, was manual kill');
+            // notify('Server', 'Player closed was manual kill');
             // this avoid making move or play next if player was killed on purpose
-            // notify('close', 'manualKill was ' + manualKill + ', now false');
-            // notify('close', 'autoKill was ' + autoKill + ', now false');
+            // notify('close', 'manualKill was ' + manualKill + ' now false');
+            // notify('close', 'autoKill was ' + autoKill + ' now false');
             manualKill = false
             autoKill = false
         } else {
-            // notify('Server', 'Player closed, was auto kill');
-            // notify('close', 'autoKill was ' + autoKill + ', now true');
+            // notify('Server', 'Player closed was auto kill');
+            // notify('close', 'autoKill was ' + autoKill + ' now true');
             autoKill = true
             // here player just went until the end of the song & then exited
             if (code === null || code === 0) {
@@ -553,7 +545,7 @@ function playSong() {
                 }
                 playNext('player closed')
             } else {
-                notify('Server', 'Player process exited with non-handled code "' + code + '"', 'error')
+                notify('Server', 'Player process exited with non-handled code "' + code + '"')
             }
         }
     })
@@ -572,7 +564,7 @@ function scrobbleSong() {
                 timestamp: getTimestamp(),
                 callback: function (result) {
                     if (!result.success) {
-                        notify('Server', 'scrobbleSong failed', 'error')
+                        notify('Server', 'scrobbleSong failed')
                     }
                 }
             })
@@ -592,7 +584,7 @@ function loveSong() {
                 track: songs.current.metadata.title,
                 callback: function (result) {
                     if (!result.success) {
-                        notify('Server', 'loveSong failed', 'error')
+                        notify('Server', 'loveSong failed')
                     }
                 }
             })
@@ -611,7 +603,7 @@ function getConfigFromUser(callback) {
 
         if (err) {
             config.trash()
-            notify('Server', 'Failed at reading config, see logs', 'error', err)
+            notify('Server', 'Failed at reading config', err)
         }
         // move conf file in config store to local folder
         // from : C:\Users\ME\.config\configstore\musitop.json
@@ -633,7 +625,7 @@ function initLastFm() {
     }
     var accesses = config.get('lastfmAccess').split('/')
     if (accesses.length !== 4) {
-        return notify('Error', 'LastFm access should have 4 parts', 'error')
+        return notify('Error', 'LastFm access should have 4 parts')
     }
     // accesses should be like "api_key/api_secret/username/password"
     lastfm = new Lastfm({
@@ -656,10 +648,28 @@ function initWebClient() {
                     .then(() => notify('Server', 'Succefully cloned musitop client'))
                     .catch(() => notify('Server', 'Failed at clonning musitop client'))
             } else {
-                notify('Server', 'Avoid clonning musitop client, seems to be there already')
+                notify('Server', 'Avoid double clonning musitop client')
             }
         })
     }
+}
+
+function initSystray() {
+    if (config.get('systrayControls') === false) {
+        return
+    }
+    const dir = path.join(__dirname, 'systray')
+    notify('Systray', 'Will be executed in ' + dir)
+    // const systray = childProcess.spawn('yarn', { cwd: dir })
+    // const systray = childProcess.spawn(dir, 'yarn')
+    const child = childProcess.spawn('yarn && "node_modules/electron/dist/electron" systray.js', {
+        stdio: 'inherit',
+        shell: true,
+        cwd: dir
+    })
+    child.on('error', (error) => {
+        notify('Systray', 'Error occured', error)
+    })
 }
 
 function initLumiSwitches() {
@@ -695,11 +705,11 @@ function initLumiSwitches() {
                 onMusicIs(isGood ? 'good' : 'bad')
             })
             device.on('doubleClick', () => {
-                notify('Lumi', name + ' has been double clicked, going to next song...')
+                notify('Lumi', name + ' has been double clicked so going to next song...')
                 onMusicIs('next')
             })
             device.on('longClickPress', () => {
-                notify('Lumi', name + ' has been long pressed, but no action configured')
+                notify('Lumi', name + ' has been long pressed but no action configured')
             })
         })
     })
@@ -714,7 +724,7 @@ function getConfig(callback) {
         if (err) {
             notify('Server', 'No local config found')
         } else {
-            notify('Server', 'Local config found, set found conf key/values into in-memory conf')
+            notify('Server', 'Local config found will set found conf key/values into in-memory conf')
             config.all = JSON.parse(configContent)
         }
         var configErrors = config.validate()
@@ -724,9 +734,10 @@ function getConfig(callback) {
             initWebClient()
             initLastFm()
             initLumiSwitches()
+            initSystray()
             callback()
         } else {
-            notify('Error', 'Error, no callback provided', 'error')
+            notify('Error', 'No callback provided')
         }
     })
 }
@@ -734,8 +745,6 @@ function getConfig(callback) {
 function init() {
     // get conf then play music
     getConfig(playFolder)
-    // add systray controls
-    childProcess.spawn('node_modules/electron/dist/electron', ['systray'])
 }
 
 // init
