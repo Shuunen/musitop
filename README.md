@@ -137,6 +137,7 @@ If you like or dislike, click on the appropriate icons, Musitop will delete bad 
 
 ## Still to do
 
+* after audio preloading do cover image preloading too
 * handle case when server shut down, avoid letting client playing or loading
 * handle last music action, like a dropdown that will act on n-1 song : was good, was bad
 * add pause icon in systray
