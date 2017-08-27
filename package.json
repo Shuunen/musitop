@@ -8,7 +8,6 @@
         "config-prompt": "^1.1.0",
         "express": "^4.14.1",
         "ip": "^1.1.4",
-        "jimp": "^0.2.28",
         "lastfm-njs": "^0.2.4",
         "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
         "minimist": "^1.2.0",

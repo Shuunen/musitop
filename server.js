@@ -21,7 +21,6 @@ var http = require('http')
 var app = express()
 var colorable = require('colorable')
 var aqara = require('lumi-aqara')
-var jimp = require('jimp')
 var gitServer = require('simple-git/promise')(__dirname)
 var webClientFolder = 'web-client'
 var publicFolder = 'public'
