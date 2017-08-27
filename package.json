@@ -1,6 +1,6 @@
 {
     "name": "musitop",
-    "version": "3.4.0",
+    "version": "3.4.1",
     "description": "Sort your music",
     "main": "server.js",
     "dependencies": {
