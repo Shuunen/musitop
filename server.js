@@ -383,6 +383,7 @@ function playNext(from) {
 }
 
 function getMetadata() {
+    console.time('getMetadata') // eslint-disable-line no-console
     songs.current.metadata = null
     var readableStream = fs.createReadStream(songs.current.path)
     musicMetadata(readableStream, {
@@ -391,6 +392,7 @@ function getMetadata() {
         if (err) {
             notify('Error', 'Fail at reading mp3 metadata for song "' + songs.current.path + '"', err)
         } else {
+            console.timeEnd('getMetadata') // eslint-disable-line no-console
             meta.uid = songs.current.uid
             meta.stream = '/stream/' + songs.current.uid + '.mp3'
             meta.nextStream = '/stream/' + songs.next.uid + '.mp3'
@@ -412,7 +414,7 @@ function generateCovers() {
         useDefaultCovers()
         return
     }
-
+    console.time('generateCovers') // eslint-disable-line no-console
     let buffer = new Buffer(data.data, 'binary')
     let quality = 60
 
@@ -426,14 +428,18 @@ function generateCovers() {
             clone.blur(10).quality(quality).write(coverBlurryPath)
             /* Small ones for media session */
             const resize = size => image.cover(size, size).quality(quality).write(coverPath.replace('.', '-' + size + '.'))
-            Promise.all([512, 256].map(resize)).then(() => notify('Server', 'Generated small covers'))
+            Promise.all([512, 256].map(resize)).then(() => {
+                console.timeEnd('generateCovers') // eslint-disable-line no-console
+            })
         })
         .catch(error => notify('Server', 'Generate small covers failed', error))
 }
 
 function getColorPaletteFrom(imagePath) {
+    console.time('getColorPaletteFrom') // eslint-disable-line no-console
     vibrant.from(imagePath).getPalette((err, swatches) => {
         palette = swatches
+        console.timeEnd('getColorPaletteFrom') // eslint-disable-line no-console
         ioEmit('palette', palette)
     })
 }
