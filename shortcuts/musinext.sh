@@ -6,10 +6,11 @@ HERE=$(dirname $0)
 cd $HERE/..
 node client.js --musicIs=next
 
-#date > $HERE/musinext.log
-#whereis node >> $HERE/musinext.log
+# date > $HERE/musinext.log
+# whereis node >> $HERE/musinext.log
 ## if node is not find maybe you'll need to make it globally available :
 # whereis node
-## give you this : "/hey/a/path/to/node"
+## should give you this : "/hey/a/path/to/node"
+## else run :
 # sudo ln -s /hey/a/path/to/node /usr/bin/node
 

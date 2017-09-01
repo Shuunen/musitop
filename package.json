@@ -13,6 +13,7 @@
         "minimist": "^1.2.0",
         "musicmetadata": "^2.0.5",
         "node-vibrant": "^3.0.0-alpha.2",
+        "nodemon": "^1.11.0",
         "os": "^0.1.1",
         "shuffle-array": "^1.0.0",
         "simple-git": "^1.66.0",
