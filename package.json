@@ -26,8 +26,8 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "yarn --production && nodemon server.js",
-        "start-dev": "yarn && nodemon server.js",
+        "start": "yarn --production && nodemon server.js --watch server.js",
+        "start-dev": "yarn && nodemon server.js --watch server.js",
         "client-good": "node client.js --musicIs=good",
         "client-bad": "node client.js --musicIs=bad",
         "dont-watch": "start server.js"
