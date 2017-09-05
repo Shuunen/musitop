@@ -5,6 +5,7 @@
     "main": "server.js",
     "dependencies": {
         "colorable": "^1.0.5",
+        "compression": "^1.7.0",
         "config-prompt": "^1.1.0",
         "express": "^4.15.4",
         "ip": "^1.1.4",

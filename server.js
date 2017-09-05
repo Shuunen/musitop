@@ -16,6 +16,7 @@ var musicMetadata = require('musicmetadata')
 var httpPort = 1404
 var httpsPort = 1444
 var express = require('express')
+var compression = require('compression')
 var https = require('spdy')
 var http = require('http')
 var app = express()
@@ -60,6 +61,9 @@ var ioEmit = function (channel, data) {
 
 // var logger = require('morgan');
 // app.use(logger('dev'));
+
+// compress all responses
+app.use(compression())
 
 // enable CORS
 app.use(function (req, res, next) {
