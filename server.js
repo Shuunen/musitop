@@ -26,6 +26,10 @@ var gitServer = require('simple-git/promise')(__dirname)
 var webClientFolder = 'web-client'
 var publicFolder = 'public'
 var publicFolderPath = __dirname + '/' + publicFolder
+if (!fs.existsSync(webClientFolder)) {
+    // simple git need an existing folder to init
+    fs.mkdirSync(webClientFolder);
+}
 var gitWebClient = require('simple-git/promise')(webClientFolder)
 var ip = require('ip').address()
 var options = {
@@ -102,14 +106,14 @@ app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-usele
             notify('Server', 'Song UID unknow "' + songId + '"')
             notify('Server', 'UIDs known are : ' + songs.current.uid + ' & ' + songs.next.uid)
             res.status(500).send('server has no idea about this song location')
+        } else if (isCurrent) {
+            notify('Server', 'Streaming ' + songs.current.nameWithId)
+            res.sendFile(songs.current.path)
+        } else if (isNext) {
+            notify('Server', 'Streaming ' + songs.next.nameWithId)
+            res.sendFile(songs.next.path)
         } else {
-            if (isCurrent) {
-                notify('Server', 'Streaming ' + songs.current.nameWithId)
-                res.sendFile(songs.current.path)
-            } else {
-                notify('Server', 'Streaming ' + songs.next.nameWithId)
-                res.sendFile(songs.next.path)
-            }
+            notify('Server', 'Impossible case reached :p')
         }
     }
 })
