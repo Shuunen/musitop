@@ -1,63 +1,63 @@
 {
-    "name": "musitop",
-    "version": "3.5.0",
-    "description": "Sort your music",
-    "main": "server.js",
-    "dependencies": {
-        "colorable": "^1.0.5",
-        "compression": "^1.7.0",
-        "config-prompt": "^1.1.0",
-        "express": "^4.15.4",
-        "ip": "^1.1.4",
-        "lastfm-njs": "^0.2.4",
-        "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
-        "minimist": "^1.2.0",
-        "musicmetadata": "^2.0.5",
-        "node-vibrant": "^3.0.0-alpha.2",
-        "nodemon": "^1.11.0",
-        "os": "^0.1.1",
-        "shuffle-array": "^1.0.0",
-        "simple-git": "^1.77.0",
-        "socket.io": "^2.0.3",
-        "socket.io-client": "^2.0.3",
-        "spdy": "^3.4.4"
-    },
-    "devDependencies": {
-        "eslint": "^4.6.1"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "yarn --production && nodemon server.js --watch server.js",
-        "start-dev": "yarn && nodemon server.js --watch server.js",
-        "client-good": "node client.js --musicIs=good",
-        "client-bad": "node client.js --musicIs=bad",
-        "dont-watch": "start server.js"
-    },
-    "jscsConfig": {
-        "preset": "airbnb",
-        "disallowTrailingComma": true,
-        "fix": true,
-        "maximumLineLength": 200,
-        "requireLineFeedAtFileEnd": false,
-        "requirePaddingNewLinesAfterBlocks": false,
-        "requirePaddingNewLinesBeforeLineComments": false,
-        "requireTrailingComma": false,
-        "validateIndentation": 4
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Shuunen/musitop.git"
-    },
-    "keywords": [
-        "music",
-        "top",
-        "sort",
-        "delete"
-    ],
-    "author": "Shuunen",
-    "license": "AGPL-3.0",
-    "bugs": {
-        "url": "https://github.com/Shuunen/musitop/issues"
-    },
-    "homepage": "https://github.com/Shuunen/musitop#readme"
+  "name": "musitop",
+  "version": "3.5.1",
+  "description": "Sort your music",
+  "main": "server.js",
+  "dependencies": {
+    "colorable": "^1.0.5",
+    "compression": "^1.7.0",
+    "config-prompt": "^1.1.0",
+    "express": "^4.15.4",
+    "ip": "^1.1.4",
+    "lastfm-njs": "^0.2.4",
+    "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
+    "minimist": "^1.2.0",
+    "musicmetadata": "^2.0.5",
+    "node-vibrant": "^3.0.0-alpha.2",
+    "nodemon": "^1.11.0",
+    "os": "^0.1.1",
+    "shuffle-array": "^1.0.0",
+    "simple-git": "^1.77.0",
+    "socket.io": "^2.0.3",
+    "socket.io-client": "^2.0.3",
+    "spdy": "^3.4.4"
+  },
+  "devDependencies": {
+    "eslint": "^4.6.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "yarn --production && nodemon server.js --watch server.js",
+    "start-dev": "yarn && nodemon server.js --watch server.js",
+    "client-good": "node client.js --musicIs=good",
+    "client-bad": "node client.js --musicIs=bad",
+    "dont-watch": "start server.js"
+  },
+  "jscsConfig": {
+    "preset": "airbnb",
+    "disallowTrailingComma": true,
+    "fix": true,
+    "maximumLineLength": 200,
+    "requireLineFeedAtFileEnd": false,
+    "requirePaddingNewLinesAfterBlocks": false,
+    "requirePaddingNewLinesBeforeLineComments": false,
+    "requireTrailingComma": false,
+    "validateIndentation": 4
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shuunen/musitop.git"
+  },
+  "keywords": [
+    "music",
+    "top",
+    "sort",
+    "delete"
+  ],
+  "author": "Shuunen",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Shuunen/musitop/issues"
+  },
+  "homepage": "https://github.com/Shuunen/musitop#readme"
 }
