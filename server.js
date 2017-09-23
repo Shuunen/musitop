@@ -28,7 +28,7 @@ var publicFolder = 'public'
 var publicFolderPath = __dirname + '/' + publicFolder
 if (!fs.existsSync(webClientFolder)) {
     // simple git need an existing folder to init
-    fs.mkdirSync(webClientFolder);
+    fs.mkdirSync(webClientFolder)
 }
 var gitWebClient = require('simple-git/promise')(webClientFolder)
 var ip = require('ip').address()
@@ -147,15 +147,19 @@ app.get('/server/version', function (req, res) {
 })
 
 app.get('/server/update', function (req, res) {
+    notify('Server', 'Getting git updates form server folder')
     gitServer.pull(function (err, update) {
         var ret = {
             target: 'server'
         }
         if (err) {
             ret.error = err
+            notify('Server', 'failed at getting updates from git...')
         } else if (update && update.summary.changes) {
+            notify('Server', 'Updated server sources !')
             ret.changes = update.summary.changes
         } else {
+            notify('Server', 'No updates from git...')
             ret.changes = 'none'
         }
         res.status(200).json(ret)
