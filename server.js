@@ -250,7 +250,8 @@ var handleConnection = function (socket) {
     socket.on('connect', onConnection)
     socket.on('event', onEvent)
     ioEmit('options', {
-        audioClientSide: config.get('audioClientSide')
+        audioClientSide: config.get('audioClientSide'),
+        serveWebClient: config.get('serveWebClient')
     })
     ioEmit('palette', palette)
     ioEmit('metadata', songs.current.metadata)
