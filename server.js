@@ -148,22 +148,25 @@ app.get('/server/version', function (req, res) {
 
 app.get('/server/update', function (req, res) {
     notify('Server', 'Getting git updates form server folder')
-    gitServer.pull(function (err, update) {
-        var ret = {
-            target: 'server'
-        }
-        if (err) {
+    let ret = {
+        target: 'server'
+    }
+    gitServer.pull()
+        .then(update => {
+            if (update && update.summary.changes) {
+                notify('Server', 'Updated server sources !')
+                ret.changes = update.summary.changes
+            } else {
+                notify('Server', 'No updates for server from git...')
+                ret.changes = 'none'
+            }
+            res.status(200).json(ret)
+        })
+        .catch(err => {
             ret.error = err
-            notify('Server', 'failed at getting updates from git...')
-        } else if (update && update.summary.changes) {
-            notify('Server', 'Updated server sources !')
-            ret.changes = update.summary.changes
-        } else {
-            notify('Server', 'No updates from git...')
-            ret.changes = 'none'
-        }
-        res.status(200).json(ret)
-    })
+            notify('Server', 'failed at getting server updates from git...')
+            res.status(200).json(ret) // TODO : keep a 200 here ?
+        })
 })
 
 app.get('/client/update', function (req, res) {
@@ -179,14 +182,17 @@ app.get('/client/update', function (req, res) {
         gitWebClient.pull()
             .then(update => {
                 if (update && update.summary.changes) {
+                    notify('Server', 'Updated client sources !')
                     ret.changes = update.summary.changes
                 } else {
+                    notify('Server', 'No updates for client from git...')
                     ret.changes = 'none'
                 }
                 res.status(200).json(ret)
             })
             .catch(err => {
                 ret.error = err
+                notify('Server', 'failed at getting client updates from git...')
                 res.status(200).json(ret) // TODO : keep a 200 here ?
             })
     }
