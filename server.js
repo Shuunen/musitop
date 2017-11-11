@@ -105,7 +105,7 @@ app.get('/stream/:songId', function (req, res) { // eslint-disable-line no-usele
         if (!isCurrent && !isNext) {
             notify('Server', 'Song UID unknow "' + songId + '"')
             notify('Server', 'UIDs known are : ' + songs.current.uid + ' & ' + songs.next.uid)
-            res.status(500).send('server has no idea about this song location')
+            res.status(200).send('server has no idea about this song location')
         } else if (isCurrent) {
             notify('Server', 'Streaming ' + songs.current.nameWithId)
             res.sendFile(songs.current.path)
