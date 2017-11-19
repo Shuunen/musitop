@@ -23,14 +23,8 @@ var app = express()
 var colorable = require('colorable')
 var aqara = require('lumi-aqara')
 var gitServer = require('simple-git/promise')(__dirname)
-var webClientFolder = 'web-client'
 var publicFolder = 'public'
 var publicFolderPath = __dirname + '/' + publicFolder
-if (!fs.existsSync(webClientFolder)) {
-    // simple git need an existing folder to init
-    fs.mkdirSync(webClientFolder)
-}
-var gitWebClient = require('simple-git/promise')(webClientFolder)
 var ip = require('ip').address()
 var options = {
     key: fs.readFileSync('./certs/server.key'),
@@ -169,35 +163,6 @@ app.get('/server/update', function (req, res) {
         })
 })
 
-app.get('/client/update', function (req, res) {
-    if (!config.get('serveWebClient')) {
-        res.status(200).json({
-            error: 'there is no web client served'
-        })
-    } else {
-        notify('Server', 'Getting git updates form web client folder')
-        let ret = {
-            target: 'client'
-        }
-        gitWebClient.pull()
-            .then(update => {
-                if (update && update.summary.changes) {
-                    notify('Server', 'Updated client sources !')
-                    ret.changes = update.summary.changes
-                } else {
-                    notify('Server', 'No updates for client from git...')
-                    ret.changes = 'none'
-                }
-                res.status(200).json(ret)
-            })
-            .catch(err => {
-                ret.error = err
-                notify('Server', 'failed at getting client updates from git...')
-                res.status(200).json(ret) // TODO : keep a 200 here ?
-            })
-    }
-})
-
 var onDisconnect = function () {
     // notify('Socket', 'server side disconnected');
 }
@@ -250,8 +215,7 @@ var handleConnection = function (socket) {
     socket.on('connect', onConnection)
     socket.on('event', onEvent)
     ioEmit('options', {
-        audioClientSide: config.get('audioClientSide'),
-        serveWebClient: config.get('serveWebClient')
+        audioClientSide: config.get('audioClientSide')
     })
     ioEmit('palette', palette)
     ioEmit('metadata', songs.current.metadata)
@@ -287,10 +251,6 @@ const defaultConfig = {
     keepPath: {
         type: 'string',
         required: true
-    },
-    serveWebClient: {
-        type: 'boolean',
-        default: true
     },
     audioClientSide: {
         type: 'boolean',
@@ -451,8 +411,13 @@ function getTimestamp() {
 
 function getColorPaletteFrom(imagePath) {
     vibrant.from(imagePath).getPalette((err, swatches) => {
-        palette = swatches
-        ioEmit('palette', palette)
+        if (err) {
+            notify('Server', 'Move failed')
+            throw new Error(err)
+        } else {
+            palette = swatches
+            ioEmit('palette', palette)
+        }
     })
 }
 
@@ -648,24 +613,6 @@ function initLastFm() {
     })
 }
 
-function initWebClient() {
-    // will expose musitop client if defined or just the web directory
-    var exposedFolder = config.get('serveWebClient') ? webClientFolder : publicFolder
-    notify('Info', 'Will serve "' + exposedFolder + '"')
-    app.use('/', express.static(exposedFolder))
-    if (config.get('serveWebClient')) {
-        fs.readdir(webClientFolder + '/.git', error => {
-            if (error) {
-                gitServer.clone('https://github.com/Shuunen/musitop-client', webClientFolder)
-                    .then(() => notify('Server', 'Succefully cloned musitop client'))
-                    .catch(() => notify('Server', 'Failed at clonning musitop client'))
-            } else {
-                notify('Server', 'Avoid double clonning musitop client')
-            }
-        })
-    }
-}
-
 function initSystray() {
     if (config.get('systrayControls') === false) {
         return
@@ -743,7 +690,6 @@ function getConfig(callback) {
         if (err || configErrors.length) {
             getConfigFromUser(callback)
         } else if (callback && typeof callback === 'function') {
-            initWebClient()
             initLastFm()
             initLumiSwitches()
             initSystray()
