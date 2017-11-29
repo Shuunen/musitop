@@ -31,10 +31,9 @@
         "typescript": "^2.6.1"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "watch": "nodemon -e ts  --exec \"npm run compile-and-start\"",
-        "start": "node build/app.js",
-        "compile-and-start": "tsc --lib ES6 --outDir build --module commonjs src/app.ts && npm start"
+        "build": "tsc",
+        "dev": "nodemon -e ts  --exec \"tsc && npm start\"",
+        "start": "node build/app"
     },
     "repository": {
         "type": "git",
