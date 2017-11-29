@@ -1,7 +1,10 @@
 {
     "name": "musitop",
-    "version": "3.5.2",
+    "version": "4.0.0",
     "description": "Sort your music",
+    "engines": {
+        "node": ">=9.0.0"
+    },
     "main": "server.js",
     "dependencies": {
         "colorable": "^1.0.5",
@@ -23,15 +26,15 @@
         "spdy": "^3.4.4"
     },
     "devDependencies": {
+        "nodemon": "^1.11.0",
         "tslint": "^5.8.0",
-        "typescript": "^2.6.1",
-        "nodemon": "^1.11.0"
+        "typescript": "^2.6.1"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "watch": "nodemon -e ts  --exec \"npm run compile\"",
+        "watch": "nodemon -e ts  --exec \"npm run compile-and-start\"",
         "start": "node build/app.js",
-        "compile": "tsc --outDir build --module commonjs src/app.ts && npm start"
+        "compile-and-start": "tsc --lib ES6 --outDir build --module commonjs src/app.ts && npm start"
     },
     "repository": {
         "type": "git",
