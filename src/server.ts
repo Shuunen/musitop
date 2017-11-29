@@ -39,7 +39,7 @@ export class Server {
             const reqPath = headers[HTTP2_HEADER_PATH]
             const reqMethod = headers[HTTP2_HEADER_METHOD]
             let fullPath = path.join(serverRoot, reqPath)
-            if (fullPath === 'public/') {
+            if (fullPath.match(/^public[\/|\\]$/)) {
                 fullPath += 'index.html'
             }
             const responseMimeType = mime.lookup(fullPath)
