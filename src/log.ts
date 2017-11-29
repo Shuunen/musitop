@@ -6,7 +6,7 @@ const pino = Pino({
     prettyPrint: true, // lighter output
 })
 
-export class Log {
+export default class Log {
 
     // From Pino doc : level (string): one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace'
 
