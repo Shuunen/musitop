@@ -38,21 +38,18 @@ export class Server {
         this.server.on('stream', (stream, headers) => {
             const reqPath = headers[HTTP2_HEADER_PATH]
             const reqMethod = headers[HTTP2_HEADER_METHOD]
-            let fullPath = path.join(serverRoot, reqPath)
-            if (fullPath.match(/^public[\/|\\]$/)) {
-                fullPath += 'index.html'
-            }
+            const fullPath = path.join(serverRoot, reqPath)
             const responseMimeType = mime.lookup(fullPath)
             Log.info('Server : path requested :', fullPath)
             Log.info('Server : mime prepared :', responseMimeType)
-
-            if (fullPath.endsWith('.html')) {
-                Log.info('Server : handle HTML file')
-                stream.respondWithFile(fullPath, { 'content-type': 'text/html' }, {
+            if (!responseMimeType) {
+                Log.info('Server : serve text')
+                stream.respond({ 'content-type': 'text/plain' }, {
                     onError: (err) => this.respondToStreamError(err, stream),
                 })
+                stream.end('hello you :)')
             } else {
-                Log.info('Server : handle static file')
+                Log.info('Server : serve static file')
                 stream.respondWithFile(fullPath, { 'content-type': responseMimeType }, {
                     onError: (err) => this.respondToStreamError(err, stream),
                 })
