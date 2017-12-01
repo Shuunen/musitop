@@ -4,5 +4,6 @@
     "files.autoSave": "onFocusChange",
     "editor.formatOnSave": true,
     "eslint.autoFixOnSave": true,
-    "window.title": "Musitop"
+    "window.title": "Musitop",
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
