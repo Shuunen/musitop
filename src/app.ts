@@ -1,8 +1,13 @@
 'use strict'
 
 import Log from './log'
+import Playlist from './playlist'
 import Server from './server'
-import Song from './song'
+
+// TODO : this should come from external file
+const userOptions = {
+    musicPath: '/home/rracamier/Downloads/music',
+}
 
 const defaultOptions = {
     port: 1444,
@@ -12,12 +17,13 @@ export default class App {
 
     protected options
     protected server
+    protected playlist
 
     constructor() {
         Log.info('App : in constructor')
-        this.options = Object.assign({}, defaultOptions)
+        this.options = Object.assign({}, userOptions, defaultOptions)
         this.server = new Server(this.options).instance
-        Log.info(new Song('test.mp3'))
+        this.playlist = new Playlist(this.options)
     }
 }
 

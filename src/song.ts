@@ -6,12 +6,16 @@ export default class Song {
 
     protected title
     protected artist
-    protected path
+    protected filepath
     protected cover
 
-    constructor(path) {
-        Log.info('Song : in constructor')
-        this.path = path
+    constructor(filepath) {
+        if (!filepath) {
+            Log.error('Song : cannot init without a filepath')
+            return
+        }
+        Log.info('Song : in constructor with filepath', filepath)
+        this.filepath = filepath
         this.title = 'Ecuador'
         this.artist = '666'
     }
