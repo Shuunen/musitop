@@ -23,15 +23,14 @@ const serverRoot = './public'
 
 export default class Server {
 
-    private server
+    public instance
 
     constructor(options) {
         Log.info('Server : in constructor')
-        this.server = http2.createSecureServer(serverOptions)
-        this.server.on('stream', (stream, headers) => this.onStream(stream, headers))
-        this.server.listen(options.port)
+        this.instance = http2.createSecureServer(serverOptions)
+        this.instance.on('stream', (stream, headers) => this.onStream(stream, headers))
+        this.instance.listen(options.port)
         Log.info('Server : listening on https://musitop.io:' + options.port)
-        return this.server
     }
 
     private onStream(stream, headers) {

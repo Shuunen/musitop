@@ -2,6 +2,7 @@
 
 import Log from './log'
 import Server from './server'
+import Song from './song'
 
 const defaultOptions = {
     port: 1444,
@@ -15,7 +16,8 @@ export default class App {
     constructor() {
         Log.info('App : in constructor')
         this.options = Object.assign({}, defaultOptions)
-        this.server = new Server(this.options)
+        this.server = new Server(this.options).instance
+        Log.info(new Song('test.mp3'))
     }
 }
 
