@@ -7,10 +7,10 @@ export default class Song {
 
     title: string
     artist: string
-    filepath: fs.PathLike
+    filepath: string
     cover: string // ?
 
-    constructor(filepath: fs.PathLike) {
+    constructor(filepath: string) {
         if (!filepath) {
             Log.error('Song : cannot init without a filepath')
             return

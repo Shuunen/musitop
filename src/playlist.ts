@@ -8,7 +8,7 @@ import Song from './song'
 
 export default class Playlist {
 
-    list: fs.PathLike[] = []
+    list: string[] = []
 
     constructor(options: IAppOptions) {
         Log.info('Playlist : in constructor')
@@ -16,7 +16,7 @@ export default class Playlist {
 
     play(): Promise<Song> {
         return new Promise((resolve, reject) => {
-            const filepath: fs.PathLike = this.list[0]
+            const filepath: string = this.list[0]
             Log.info('Playlist : creating song with filepath', filepath)
             const song: Song = new Song(filepath)
             resolve(song)
@@ -37,7 +37,7 @@ export default class Playlist {
                 } else {
                     // inject files
                     files.forEach(fileName => {
-                        const filePath: fs.PathLike = path.join(musicPath, fileName)
+                        const filePath: string = path.join(musicPath, fileName)
                         const fileStat: fs.Stats = fs.statSync(filePath)
                         if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
                             this.list.push(filePath)

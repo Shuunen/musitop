@@ -13,6 +13,7 @@ const serverRoot: string = './public'
 export default class Server {
 
     instance: Http2SecureServer
+    activeSong: Song
 
     constructor(options: IAppOptions) {
         Log.info('Server : in constructor')
@@ -26,10 +27,17 @@ export default class Server {
         Log.info(`Server : listening on https://${options.host}:${options.port}`)
     }
 
+    setActiveSong(song: Song): void {
+        this.activeSong = song
+    }
+
     onStream(stream: ServerHttp2Stream, headers: IncomingHttpHeaders): void {
         const reqPath: string = headers[constants.HTTP2_HEADER_PATH].toString()
         const reqMethod: string = headers[constants.HTTP2_HEADER_METHOD].toString()
-        const fullPath: fs.PathLike = path.join(serverRoot, reqPath)
+        let fullPath: string = path.join(serverRoot, reqPath)
+        if (reqPath.includes('active-song')) {
+            fullPath = this.activeSong.filepath
+        }
         const responseMimeType: string = mime.lookup(fullPath)
         Log.info('Server : path requested :', fullPath)
         Log.info('Server : mime prepared :', responseMimeType)

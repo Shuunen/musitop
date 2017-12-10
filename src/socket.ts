@@ -15,6 +15,8 @@ export default class Socket {
         // initialize the WebSocket server instance
         this.instance = new WebSocket.Server({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
+        this.instance.on('open', () => Log.info('Socket : is open'))
+        this.instance.on('close', () => Log.info('Socket : is close'))
     }
 
     playing(song: Song): void {
@@ -29,6 +31,7 @@ export default class Socket {
             ws.send(`Hello, you sent -> ${message}`)
         })
         // send immediatly a feedback to the incoming connection
+        Log.info('Socket : sending a message to reply to client connection')
         ws.send('Hi there, I am a WebSocket server')
     }
 }

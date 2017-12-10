@@ -30,7 +30,7 @@ export default class App {
             .scan(options)
             .then(status => Log.info('App : ' + status))
             .then(() => this.playlist.play())
-            .then(song => this.socket.playing(song))
+            .then(song => this.server.setActiveSong(song))
             .catch(error => Log.error(error))
     }
 }

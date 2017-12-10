@@ -1,1 +1,34 @@
-Musitop server is running.
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Musitop - Minimal client</title>
+</head>
+
+<body>
+    <h1>Musitop</h1>
+
+    <audio controls autoplay>
+        <!-- autoplay -->
+        <source src="/active-song" type="audio/mpeg"> Your browser does not support the audio element.
+    </audio>
+
+    <button>next</button>
+
+    <script>
+        /*
+        const log = (msg) => console.log("socket state: %s (%s)", socket.readyState, msg)
+        // const socket = new WebSocket('wss://' + document.location.hostname + ':' + (parseInt(document.location.port) + 1))
+        const socket = new WebSocket('wss://' + document.location.host)
+        socket.onopen = () => log('open')
+        socket.onclose = () => log('close')
+        socket.onmessage = (msg) => log(msg)
+        // socket.send('hello from minimal client :)')
+        */
+    </script>
+</body>
+
+</html>
