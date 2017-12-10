@@ -5,7 +5,87 @@
     ],
     "jsRules": {},
     "rules": {
-        "arrow-parens": false, // Requires parentheses around the parameters of arrow function definitions.
+        "align": [
+            true,
+            "arguments",
+            "elements",
+            "members",
+            "parameters",
+            "statements"
+        ],
+        "arrow-parens": false,
+        "arrow-return-shorthand": true,
+        "await-promise": true,
+        "ban": [
+            true,
+            "eval",
+            {
+                "message": "please don't",
+                "name": "$"
+            }
+        ],
+        "binary-expression-operand-order": true,
+        "class-name": true,
+        "curly": true,
+        "cyclomatic-complexity": true,
+        "deprecation": true,
+        "encoding": true,
+        "import-spacing": true,
+        "indent": [
+            true,
+            "spaces",
+            4
+        ],
+        "linebreak-style": [
+            true,
+            "LF"
+        ],
+        "max-file-line-count": [
+            true,
+            300
+        ],
+        "member-access": false,
+        "no-any": true,
+        "no-conditional-assignment": true,
+        "no-consecutive-blank-lines": true,
+        "no-console": true,
+        "no-duplicate-imports": true,
+        "no-duplicate-switch-case": true,
+        "no-duplicate-variable": true,
+        "no-empty": true,
+        "no-eval": true,
+        "no-floating-promises": true,
+        "no-invalid-template-strings": true,
+        "no-invalid-this": true,
+        "no-irregular-whitespace": true,
+        "no-misused-new": true,
+        "no-object-literal-type-assertion": true,
+        "no-parameter-reassignment": true,
+        "no-shadowed-variable": true,
+        "no-string-literal": true,
+        "no-string-throw": true,
+        "no-this-assignment": true,
+        "no-trailing-whitespace": true,
+        "no-unnecessary-initializer": true,
+        "no-unsafe-any": true,
+        "no-unused-expression": true,
+        "no-unused-variable": true,
+        "no-var-keyword": true,
+        "no-var-requires": true,
+        "object-literal-key-quotes": [
+            true,
+            "as-needed"
+        ],
+        "object-literal-sort-keys": [
+            true,
+            "ignore-case",
+            "match-declaration-order"
+        ],
+        "one-variable-per-declaration": true,
+        "ordered-imports": true,
+        "prefer-conditional-expression": true,
+        "prefer-const": true,
+        "prefer-method-signature": true,
         "quotemark": [
             true,
             "single",
@@ -16,7 +96,15 @@
             true,
             "never"
         ],
-        "no-any": true,
+        "strict-type-predicates": true,
+        "trailing-comma": [
+            true,
+            {
+                "multiline": "always",
+                "singleline": "never"
+            }
+        ],
+        "triple-equals": true,
         "typedef": [
             true,
             "call-signature",
@@ -26,95 +114,7 @@
             "member-variable-declaration",
             "array-destructuring"
         ],
-        "curly": true,
-        "no-conditional-assignment": true,
-        "no-duplicate-variable": true,
-        "no-duplicate-switch-case": true,
-        "no-empty": true,
-        "no-eval": true,
-        "no-floating-promises": true,
-        "no-invalid-template-strings": true,
-        "no-invalid-this": true,
-        "no-misused-new": true,
-        "no-object-literal-type-assertion": true,
-        "no-shadowed-variable": true,
-        "no-string-literal": true,
-        "cyclomatic-complexity": true,
-        "deprecation": true,
-        "no-string-throw": true,
-        "no-this-assignment": true,
-        "prefer-conditional-expression": true,
-        "strict-type-predicates": true,
-        "triple-equals": true,
-        "typeof-compare": true,
-        "no-unsafe-any": true,
-        "no-unused-expression": true,
-        "no-unused-variable": true,
-        "no-var-keyword": true,
-        "no-duplicate-imports": true,
-        "object-literal-sort-keys": [
-            true,
-            "ignore-case",
-            "match-declaration-order"
-        ],
-        "linebreak-style": [
-            true,
-            "LF"
-        ],
-        "max-file-line-count": [
-            true,
-            300
-        ],
-        "no-console": true,
-        "indent": [
-            true,
-            "spaces",
-            4
-        ],
-        "arrow-return-shorthand": true,
-        "ban": [
-            true,
-            "eval",
-            {
-                "name": "$",
-                "message": "please don't"
-            }
-        ],
-        "class-name": true,
-        "no-consecutive-blank-lines": true,
-        "no-irregular-whitespace": true,
-        "no-trailing-whitespace": true,
-        "no-unnecessary-initializer": true,
-        "object-literal-key-quotes": [
-            true,
-            "as-needed"
-        ],
-        "one-variable-per-declaration": true,
-        "encoding": true,
-        "import-spacing": true,
-        "await-promise": true,
-        "no-var-requires": true,
-        "prefer-method-signature": true,
-        "ordered-imports": true,
-        "binary-expression-operand-order": true,
-        "no-parameter-reassignment": true,
-        "member-access": false, // i'm tired of private/protected/public stuff
-        "prefer-const": true,
-        "align": [
-            true,
-            "arguments",
-            "elements",
-            "members",
-            "parameters",
-            "statements"
-        ],
-        "trailing-comma": [
-            true,
-            {
-                "multiline": "always",
-                "singleline": "never"
-            }
-        ]
+        "typeof-compare": true
     },
     "rulesDirectory": []
 }
