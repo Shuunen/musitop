@@ -2,29 +2,30 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
+import { IAppOptions } from './app'
 import Log from './log'
 import Song from './song'
 
 export default class Playlist {
 
-    protected list = []
+    list: fs.PathLike[] = []
 
-    constructor(options) {
+    constructor(options: IAppOptions) {
         Log.info('Playlist : in constructor')
     }
 
-    public loadNext(): Promise<Song> {
+    play(): Promise<Song> {
         return new Promise((resolve, reject) => {
-            const filepath = this.list[0]
+            const filepath: fs.PathLike = this.list[0]
             Log.info('Playlist : creating song with filepath', filepath)
-            const song = new Song(filepath)
+            const song: Song = new Song(filepath)
             resolve(song)
         })
     }
 
-    private scan(options) {
+    scan(options: IAppOptions): Promise<string> {
         return new Promise((resolve, reject) => {
-            const musicPath = options.musicPath
+            const musicPath: string = options.musicPath
             if (!musicPath || !musicPath.length) {
                 reject('musicPath is not defined')
             }
@@ -36,8 +37,8 @@ export default class Playlist {
                 } else {
                     // inject files
                     files.forEach(fileName => {
-                        const filePath = path.join(musicPath, fileName)
-                        const fileStat = fs.statSync(filePath)
+                        const filePath: fs.PathLike = path.join(musicPath, fileName)
+                        const fileStat: fs.Stats = fs.statSync(filePath)
                         if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
                             this.list.push(filePath)
                         }

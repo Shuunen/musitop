@@ -5,7 +5,7 @@
     ],
     "jsRules": {},
     "rules": {
-        "arrow-parens": false,
+        "arrow-parens": false, // Requires parentheses around the parameters of arrow function definitions.
         "quotemark": [
             true,
             "single",
@@ -16,6 +16,19 @@
             true,
             "never"
         ],
+        "no-any": true,
+        "typedef": [
+            true,
+            "call-signature",
+            "parameter",
+            "property-declaration",
+            "variable-declaration",
+            "member-variable-declaration",
+            "array-destructuring"
+        ],
+        "no-var-requires": true,
+        "no-parameter-reassignment": true,
+        "member-access": false, // i'm tired of private/protected/public stuff
         "prefer-const": true,
         "trailing-comma": [
             true,

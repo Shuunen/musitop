@@ -6,31 +6,39 @@ import Playlist from './playlist'
 import Server from './server'
 import Socket from './socket'
 
-const defaultOptions = {
+const defaultOptions: IAppOptions = {
     host: 'musitop.io',
+    musicPath: '',
     port: 1606,
 }
 
 export default class App {
 
-    protected options
-    protected server
-    protected socket
-    protected playlist
+    options: IAppOptions
+    server: Server
+    socket: Socket
+    playlist: Playlist
 
     constructor() {
         Log.info('App : in constructor')
-        const options = Object.assign({}, defaultOptions, userOptions)
+        const options: IAppOptions = Object.assign({}, defaultOptions, userOptions)
         this.options = options
-        this.server = new Server(options).instance
-        this.socket = new Socket(this.server).instance
+        this.server = new Server(options)
+        this.socket = new Socket(options, this.server.instance)
         this.playlist = new Playlist(options)
         this.playlist
-            .scan(options).then(status => {
-                Log.info('App : ' + status)
-            })
+            .scan(options)
+            .then(status => Log.info('App : ' + status))
+            .then(() => this.playlist.play())
+            .then(song => this.socket.playing(song))
             .catch(error => Log.error(error))
     }
 }
 
-const instance = new App()
+const instance: App = new App()
+
+export interface IAppOptions {
+    host: string
+    musicPath: string
+    port: number
+}

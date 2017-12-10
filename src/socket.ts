@@ -1,24 +1,27 @@
 'use strict'
 
+import { Http2SecureServer } from 'http2'
 import * as WebSocket from 'ws'
+import { IAppOptions } from './app'
 import Log from './log'
+import Song from './song'
 
 export default class Socket {
 
-    public instance
+    instance: WebSocket
 
-    constructor(server) {
+    constructor(options: IAppOptions, server: Http2SecureServer) {
         Log.info('Socket : in constructor')
-        this.create(server)
-    }
-
-    private create(server) {
         // initialize the WebSocket server instance
         this.instance = new WebSocket.Server({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
     }
 
-    private onConnection(ws: WebSocket) {
+    playing(song: Song): void {
+        Log.info('Socket : saying to clients that current song is', song)
+    }
+
+    onConnection(ws: WebSocket): void {
         // connection is up, let's add a simple simple event
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
