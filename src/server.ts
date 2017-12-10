@@ -14,11 +14,6 @@ const {
     HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } = http2.constants
 
-const serverOptions = {
-    cert: fs.readFileSync('./certs/server.crt'),
-    key: fs.readFileSync('./certs/server.key'),
-}
-
 const serverRoot = './public'
 
 export default class Server {
@@ -27,6 +22,10 @@ export default class Server {
 
     constructor(options) {
         Log.info('Server : in constructor')
+        const serverOptions = {
+            cert: fs.readFileSync(`./certs/${options.host}.crt`),
+            key: fs.readFileSync(`./certs/${options.host}.key`),
+        }
         this.instance = http2.createSecureServer(serverOptions)
         this.instance.on('stream', (stream, headers) => this.onStream(stream, headers))
         this.instance.listen(options.port)
