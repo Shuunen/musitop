@@ -2,7 +2,6 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import * as shuffle from 'shuffle-array'
 import Log from './log'
 import Song from './song'
 
@@ -12,15 +11,6 @@ export default class Playlist {
 
     constructor(options) {
         Log.info('Playlist : in constructor')
-        this.scan(options)
-            .then(status => {
-                Log.info(status)
-                return this.loadNext()
-            })
-            .then(song => {
-                Log.info('Playlist : got first song', song)
-            })
-            .catch(error => Log.error(error))
     }
 
     public loadNext(): Promise<Song> {
@@ -53,9 +43,7 @@ export default class Playlist {
                         }
                     })
                     // shuffle if necessary
-                    if (options.shuffle) {
-                        shuffle(this.list)
-                    }
+                    // if (options.shuffle) { }
                     resolve('path scanned, found ' + this.list.length + ' songs')
                 }
             })

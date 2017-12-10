@@ -46,3 +46,5 @@ public/cover-512.jpg
 public/Thumbs.db
 build
 yarn.lock
+package-lock.json
+config.ts

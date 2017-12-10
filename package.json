@@ -9,19 +9,16 @@
     "dependencies": {
         "colorable": "^1.0.5",
         "compression": "^1.7.1",
-        "config-prompt": "^1.1.0",
         "ip": "^1.1.4",
         "lastfm-njs": "^1.0.0",
-        "lumi-aqara": "https://github.com/Shuunen/node-lumi-aqara",
         "minimist": "^1.2.0",
         "musicmetadata": "^2.0.5",
         "node-vibrant": "^3.0.0",
         "os": "^0.1.1",
         "pino": "^4.10.2",
-        "shuffle-array": "^1.0.0",
         "simple-git": "^1.83.0",
-        "socket.io": "^2.0.4",
-        "socket.io-client": "^2.0.4"
+        "socket.io-client": "^2.0.4",
+        "ws": "^3.3.2"
     },
     "devDependencies": {
         "nodemon": "^1.12.1",
@@ -31,7 +28,7 @@
     "scripts": {
         "build": "tsc",
         "dev": "nodemon -e ts  --exec \"tsc && npm start\"",
-        "start": "node build/app"
+        "start": "node build/src/app"
     },
     "repository": {
         "type": "git",

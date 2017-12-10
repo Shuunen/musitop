@@ -1,17 +1,14 @@
 'use strict'
 
+import userOptions from '../config'
 import Log from './log'
 import Playlist from './playlist'
 import Server from './server'
 import Socket from './socket'
 
-// TODO : this should come from external file
-const userOptions = {
-    musicPath: 'D:/Cloud/music/good',
-}
-
 const defaultOptions = {
-    port: 1444,
+    host: 'musitop.io',
+    port: 1606,
 }
 
 export default class App {
@@ -23,10 +20,16 @@ export default class App {
 
     constructor() {
         Log.info('App : in constructor')
-        this.options = Object.assign({}, userOptions, defaultOptions)
-        this.server = new Server(this.options).instance
+        const options = Object.assign({}, defaultOptions, userOptions)
+        this.options = options
+        this.server = new Server(options).instance
         this.socket = new Socket(this.server).instance
-        this.playlist = new Playlist(this.options)
+        this.playlist = new Playlist(options)
+        this.playlist
+            .scan(options).then(status => {
+                Log.info('App : ' + status)
+            })
+            .catch(error => Log.error(error))
     }
 }
 
