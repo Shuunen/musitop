@@ -35,7 +35,7 @@ export default class Server {
         const reqPath: string = headers[constants.HTTP2_HEADER_PATH].toString()
         const reqMethod: string = headers[constants.HTTP2_HEADER_METHOD].toString()
         let fullPath: string = path.join(serverRoot, reqPath)
-        if (reqPath.includes('active-song')) {
+        if (reqPath.includes('song')) {
             fullPath = this.activeSong.filepath
         }
         const responseMimeType: string = mime.lookup(fullPath)

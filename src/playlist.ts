@@ -23,7 +23,7 @@ export default class Playlist {
         })
     }
 
-    scan(options: IAppOptions): Promise<string> {
+    getSongs(options: IAppOptions): Promise<string[]> {
         return new Promise((resolve, reject) => {
             const musicPath: string = options.musicPath
             if (!musicPath || !musicPath.length) {
@@ -35,17 +35,15 @@ export default class Playlist {
                     Log.error(err)
                     reject('failed at reading path')
                 } else {
-                    // inject files
+                    const list: string[] = []
                     files.forEach(fileName => {
                         const filePath: string = path.join(musicPath, fileName)
                         const fileStat: fs.Stats = fs.statSync(filePath)
                         if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
-                            this.list.push(filePath)
+                            list.push(filePath)
                         }
                     })
-                    // shuffle if necessary
-                    // if (options.shuffle) { }
-                    resolve('path scanned, found ' + this.list.length + ' songs')
+                    resolve(list)
                 }
             })
         })
