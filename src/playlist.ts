@@ -12,10 +12,14 @@ export default class Playlist {
 
     constructor(options: IAppOptions) {
         Log.info('Playlist : in constructor')
+        this.getSongs(options).then(list => {
+            this.list = list
+            Log.info(`App : scanned ${this.list.length} songs !`)
+        })
     }
 
     play(): Promise<Song> {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
             const filepath: string = this.list[0]
             Log.info('Playlist : creating song with filepath', filepath)
             const song: Song = new Song(filepath)
@@ -47,5 +51,10 @@ export default class Playlist {
                 }
             })
         })
+    }
+
+    getRandomSong(): string {
+        Log.info(`Playlist : getRandomSong from ${this.list.length}`)
+        return this.list[Math.floor(Math.random() * this.list.length)]
     }
 }

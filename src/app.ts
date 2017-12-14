@@ -16,7 +16,7 @@ export default class App {
     options: IAppOptions
     server: Server
     playlist: Playlist
-    songs: string[]
+    list: string[]
 
     constructor() {
         Log.info('App : in constructor')
@@ -24,17 +24,17 @@ export default class App {
         this.options = options
         this.server = new Server(options)
         this.playlist = new Playlist(options)
+        this.server.getRandomSong = this.playlist.getRandomSong.bind(this.playlist)
         this.init()
     }
 
     init(): void {
         Log.info('App : init')
-        this.playlist.getSongs(this.options)
-            .then(songs => this.songs = songs)
     }
 }
 
 const instance: App = new App()
+Log.debug('App instance created', instance)
 
 export interface IAppOptions {
     host: string

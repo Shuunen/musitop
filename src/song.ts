@@ -1,6 +1,5 @@
 'use strict'
 
-import * as fs from 'fs'
 import Log from './log'
 
 export default class Song {

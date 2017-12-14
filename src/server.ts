@@ -1,10 +1,10 @@
 'use strict'
 
-import * as fs from 'fs'
+import { readFileSync } from 'fs'
 import { constants, createSecureServer, Http2SecureServer, IncomingHttpHeaders, ServerHttp2Stream } from 'http2'
 import * as mime from 'mime-types'
 import * as path from 'path'
-import App, { IAppOptions } from './app'
+import { IAppOptions } from './app'
 import Log from './log'
 import Song from './song'
 
@@ -14,12 +14,13 @@ export default class Server {
 
     instance: Http2SecureServer
     activeSong: Song
+    getRandomSong: () => string
 
     constructor(options: IAppOptions) {
         Log.info('Server : in constructor')
         const serverOptions: IServerOptions = {
-            cert: fs.readFileSync(`./certs/${options.host}.crt`),
-            key: fs.readFileSync(`./certs/${options.host}.key`),
+            cert: readFileSync(`./certs/${options.host}.crt`),
+            key: readFileSync(`./certs/${options.host}.key`),
         }
         this.instance = createSecureServer(serverOptions)
         this.instance.on('stream', (stream, headers) => this.onStream(stream, headers))
@@ -27,16 +28,12 @@ export default class Server {
         Log.info(`Server : listening on https://${options.host}:${options.port}`)
     }
 
-    setActiveSong(song: Song): void {
-        this.activeSong = song
-    }
-
     onStream(stream: ServerHttp2Stream, headers: IncomingHttpHeaders): void {
-        const reqPath: string = headers[constants.HTTP2_HEADER_PATH].toString()
-        const reqMethod: string = headers[constants.HTTP2_HEADER_METHOD].toString()
+        const { HTTP2_HEADER_PATH } = constants
+        const reqPath: string = (headers[HTTP2_HEADER_PATH] || '').toString()
         let fullPath: string = path.join(serverRoot, reqPath)
         if (reqPath.includes('song')) {
-            fullPath = this.activeSong.filepath
+            fullPath = this.getRandomSong()
         }
         const responseMimeType: string = mime.lookup(fullPath)
         Log.info('Server : path requested :', fullPath)
@@ -63,7 +60,6 @@ export default class Server {
         }
         stream.end()
     }
-
 }
 
 interface IServerOptions {

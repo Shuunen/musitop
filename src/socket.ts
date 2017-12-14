@@ -11,7 +11,7 @@ export default class Socket {
     instance: WebSocket
 
     constructor(options: IAppOptions, server: Http2SecureServer) {
-        Log.info('Socket : in constructor')
+        Log.info('Socket : in constructor with option', options)
         // initialize the WebSocket server instance
         this.instance = new WebSocket.Server({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
