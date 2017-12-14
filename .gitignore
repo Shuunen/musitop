@@ -48,3 +48,4 @@ build
 yarn.lock
 package-lock.json
 config.ts
+.cache
