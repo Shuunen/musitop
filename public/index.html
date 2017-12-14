@@ -11,23 +11,35 @@
 <body>
     <h1>Musitop</h1>
 
-    <audio controls autoplay>
+    <audio src="/song" controls>
         <!-- autoplay -->
-        <source src="/song" type="audio/mpeg"> Your browser does not support the audio element.
+        <source type="audio/mpeg"> Your browser does not support the audio element.
     </audio>
 
-    <button>next</button>
+    <button class="button next" onclick="nextSong()">Next</button>
+    <button class="button play" onclick="playPause(this)">Play</button>
 
     <script>
-        /*
-        const log = (msg) => console.log("socket state: %s (%s)", socket.readyState, msg)
-        // const socket = new WebSocket('wss://' + document.location.hostname + ':' + (parseInt(document.location.port) + 1))
-        const socket = new WebSocket('wss://' + document.location.host)
-        socket.onopen = () => log('open')
-        socket.onclose = () => log('close')
-        socket.onmessage = (msg) => log(msg)
-        // socket.send('hello from minimal client :)')
-        */
+        const player = document.querySelector('audio')
+        const playPauseButton = document.querySelector('.button.play')
+        player.autoplay = false
+        function nextSong() {
+            console.log('nextSong...')
+            player.src = '/song?time=' + new Date().getTime()
+            // dont do more playPause will do it & update btn accordingly
+        }
+        function playPause(button) {
+            console.log('playPause...')
+            if (player.paused) {
+                player.play()
+                button.textContent = 'Pause'
+            } else {
+                player.pause()
+                button.textContent = 'Play'
+            }
+        }
+        player.addEventListener('ended', nextSong)
+        player.addEventListener('canplay', () => playPause(playPauseButton))
     </script>
 </body>
 
