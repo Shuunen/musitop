@@ -6,40 +6,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Musitop - Minimal client</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-size: 14px;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 4rem;
+        }
+
+        .line {
+            display: flex;
+        }
+
+        .log {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border: 2px dashed lightgray;
+            padding: 10px;
+            min-height: 10vh;
+            max-height: 30vh;
+            width: calc(100vw - 2rem);
+            margin: 1rem;
+            overflow: auto;
+        }
+
+        .buttons {
+            margin-top: 1rem;
+            justify-content: space-around;
+            width: 80%;
+        }
+
+        .button {
+            flex: 1;
+            margin: 0.4rem;
+            height: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 1rem;
+            font-size: 20px;
+            text-transform: uppercase;
+            font-family: monospace;
+            letter-spacing: 1px;
+            padding: 0;
+        }
+
+        .button i {
+            font-style: normal;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
     <h1>Musitop</h1>
 
-    <audio src="/song" controls>
+    <div class="log"></div>
+
+    <audio controls preload="auto">
         <!-- autoplay -->
         <source type="audio/mpeg"> Your browser does not support the audio element.
     </audio>
 
-    <button class="button next" onclick="nextSong()">Next</button>
-    <button class="button play" onclick="playPause(this)">Play</button>
+    <div class="line buttons">
+        <button class="button refresh" onclick="document.location.reload()">
+            <i>( )</i>
+            <div>Reload</div>
+        </button>
+        <button class="button play" onclick="playPause(this)">
+            <i>i></i>
+            <div>Play</div>
+        </button>
+        <button class="button next" onclick="nextSong()">
+            <i>>></i>
+            <div>Next</div>
+        </button>
+    </div>
 
     <script>
         const player = document.querySelector('audio')
         const playPauseButton = document.querySelector('.button.play')
+        const logEl = document.querySelector('.log')
         player.autoplay = false
+        function log(str) {
+            console.log(str)
+            logEl.innerHTML += '<div class="line">' + str + '</div>'
+            logEl.scrollTo(0, logEl.scrollHeight)
+        }
         function nextSong() {
-            console.log('nextSong...')
+            log('nextSong')
             player.src = '/song?time=' + new Date().getTime()
             // dont do more playPause will do it & update btn accordingly
         }
-        function playPause(button) {
-            console.log('playPause...')
+        function playPause() {
             if (player.paused) {
                 player.play()
-                button.textContent = 'Pause'
+                log('playPause : was paused -> do play')
             } else {
                 player.pause()
-                button.textContent = 'Play'
+                log('playPause : was playing -> do pause')
             }
         }
+        function updateStatus() {
+            log('updateStatus')
+            playPauseButton.innerHTML = player.paused ? '<i>i></i><div>Play</div>' : '<i>ii</i><div>Pause</div>'
+        }
         player.addEventListener('ended', nextSong)
-        player.addEventListener('canplay', () => playPause(playPauseButton))
+        player.addEventListener('pause', updateStatus)
+        player.addEventListener('play', updateStatus)
+        player.addEventListener('canplay', playPause)
+        nextSong()
     </script>
 </body>
 

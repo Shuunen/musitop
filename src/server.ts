@@ -31,12 +31,12 @@ export default class Server {
     onStream(stream: ServerHttp2Stream, headers: IncomingHttpHeaders): void {
         const { HTTP2_HEADER_PATH } = constants
         const reqPath: string = (headers[HTTP2_HEADER_PATH] || '').toString()
+        Log.info('Server : path requested :', reqPath)
         let fullPath: string = path.join(serverRoot, reqPath)
         if (reqPath.includes('song')) {
             fullPath = this.getRandomSong()
         }
         const responseMimeType: string = mime.lookup(fullPath)
-        Log.info('Server : path requested :', fullPath)
         Log.info('Server : mime prepared :', responseMimeType)
         if (!responseMimeType) {
             Log.info('Server : serve text')
