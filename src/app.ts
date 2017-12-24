@@ -20,16 +20,23 @@ export default class App {
 
     constructor() {
         Log.info('App : in constructor')
-        const options: IAppOptions = Object.assign({}, defaultOptions, userOptions)
-        this.options = options
-        this.server = new Server(options)
-        this.playlist = new Playlist(options)
+        this.options = this.getOptions()
+        this.server = new Server(this.options)
+        this.playlist = new Playlist(this.options)
         this.server.getRandomSong = this.playlist.getRandomSong.bind(this.playlist)
         this.init()
     }
 
     init(): void {
         Log.info('App : init')
+    }
+
+    getOptions(): IAppOptions {
+        const options: IAppOptions = Object.assign({}, defaultOptions, userOptions)
+        if (!options.musicPath.includes('/')) {
+            Log.info('musicPath does not contains any slash, you might check it')
+        }
+        return options
     }
 }
 
