@@ -135,6 +135,12 @@
         player.addEventListener('play', updateStatus)
         player.addEventListener('canplay', playPause)
         nextSong()
+        // WebSocket
+        var ws = new WebSocket('wss://' + document.location.host)
+        ws.onopen = () => ws.send('client ws : i\'m open :)')
+        ws.onmessage = event => console.log('client ws : got this message from server "' + event.data + '"')
+        ws.onerror = event => console.log('client ws : error happened', event)
+        ws.onclose = event => console.log('client ws : connection closed', event)
     </script>
 </body>
 

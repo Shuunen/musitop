@@ -1,9 +1,10 @@
 'use strict'
 
-import { readFileSync } from 'fs'
-import { constants, createSecureServer, Http2SecureServer, IncomingHttpHeaders, ServerHttp2Stream } from 'http2'
-import * as mime from 'mime-types'
-import * as path from 'path'
+import { exists as fileExists, readFile, readFileSync, statSync as fileStatSync } from 'fs'
+import { IncomingMessage as Request, ServerResponse as Response } from 'http'
+import { createServer as createSecureServer, Server as SecureServer, ServerOptions } from 'https'
+import { lookup as mimeLookup } from 'mime-types'
+import { join as pathJoin } from 'path'
 import { IAppOptions } from './app'
 import Log from './log'
 import Song from './song'
@@ -12,57 +13,52 @@ const serverRoot: string = './public'
 
 export default class Server {
 
-    instance: Http2SecureServer
+    instance: SecureServer
     activeSong: Song
     getRandomSong: () => string
 
     constructor(options: IAppOptions) {
         Log.info('Server : in constructor')
-        const serverOptions: IServerOptions = {
+        const serverOptions: ServerOptions = {
             cert: readFileSync(`./certs/${options.host}.crt`),
             key: readFileSync(`./certs/${options.host}.key`),
         }
-        this.instance = createSecureServer(serverOptions)
-        this.instance.on('stream', (stream, headers) => this.onStream(stream, headers))
+        this.instance = createSecureServer(serverOptions, this.onRequest.bind(this))
         this.instance.listen(options.port)
         Log.info(`Server : listening on https://${options.host}:${options.port}`)
     }
 
-    onStream(stream: ServerHttp2Stream, headers: IncomingHttpHeaders): void {
-        const { HTTP2_HEADER_PATH } = constants
-        const reqPath: string = (headers[HTTP2_HEADER_PATH] || '').toString()
-        Log.info('Server : path requested :', reqPath)
-        let fullPath: string = path.join(serverRoot, reqPath)
+    onRequest(request: Request, response: Response): void {
+        Log.info(`Server : got request "${request.method} ${request.url}"`)
+        const reqPath: string = request.url + ''
+        let fullPath: string = pathJoin(serverRoot, reqPath)
         if (reqPath.includes('song')) {
             fullPath = this.getRandomSong()
         }
-        const responseMimeType: string = mime.lookup(fullPath)
-        Log.info('Server : mime prepared :', responseMimeType)
-        if (!responseMimeType) {
-            Log.info('Server : serve text')
-            stream.respond({ 'content-type': 'text/plain' })
-            stream.end('hello you :)')
-        } else {
-            Log.info('Server : serve static file')
-            stream.respondWithFile(fullPath, { 'content-type': responseMimeType }, {
-                onError: (err) => this.respondToStreamError(err, stream),
+        const mimeType: string = mimeLookup(fullPath)
+        // Log.info('Server : mime detected :', mimeType)
+        fileExists(fullPath, exist => {
+            if (!exist) {
+                // if the file is not found, return 404
+                response.statusCode = 404
+                response.end(`File ${fullPath} not found!`)
+                return
+            }
+            // if is a directory, then look for index.html
+            if (fileStatSync(fullPath).isDirectory()) {
+                fullPath += '/index.html'
+            }
+            // read file from file system
+            readFile(fullPath, (err, data) => {
+                if (err) {
+                    response.statusCode = 500
+                    response.end(`Error getting the file: ${err}.`)
+                } else {
+                    // if the file is found, set Content-type and send data
+                    response.setHeader('Content-type', mimeType)
+                    response.end(data)
+                }
             })
-        }
+        })
     }
-
-    respondToStreamError(err: NodeJS.ErrnoException, stream: ServerHttp2Stream): void {
-        Log.info('Server : stream error')
-        Log.info(err)
-        if (err.code === 'ENOENT') {
-            stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND })
-        } else {
-            stream.respond({ ':status': constants.HTTP_STATUS_INTERNAL_SERVER_ERROR })
-        }
-        stream.end()
-    }
-}
-
-interface IServerOptions {
-    cert: Buffer
-    key: Buffer
 }

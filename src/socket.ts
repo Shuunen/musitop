@@ -1,19 +1,18 @@
 'use strict'
 
-import { Http2SecureServer } from 'http2'
-import * as WebSocket from 'ws'
-import { IAppOptions } from './app'
+import { Server as SecureServer } from 'https'
+import { Server as WebSocketServer, WebSocket } from 'ws'
 import Log from './log'
 import Song from './song'
 
 export default class Socket {
 
-    instance: WebSocket
+    instance: WebSocketServer
 
-    constructor(options: IAppOptions, server: Http2SecureServer) {
-        Log.info('Socket : in constructor with option', options)
+    constructor(server: SecureServer) {
+        Log.info('Socket : in constructor')
         // initialize the WebSocket server instance
-        this.instance = new WebSocket.Server({ server })
+        this.instance = new WebSocketServer({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
         this.instance.on('open', () => Log.info('Socket : is open'))
         this.instance.on('close', () => Log.info('Socket : is close'))
@@ -28,10 +27,10 @@ export default class Socket {
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
             Log.info('Socket : received: ' + message)
-            ws.send(`Hello, you sent -> ${message}`)
+            ws.send(`server ws : client said "${message}"`)
         })
         // send immediatly a feedback to the incoming connection
-        Log.info('Socket : sending a message to reply to client connection')
-        ws.send('Hi there, I am a WebSocket server')
+        // Log.info('Socket : sending a message to reply to client connection')
+        ws.send('server ws : hi from node !')
     }
 }

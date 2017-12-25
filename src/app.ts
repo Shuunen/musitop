@@ -4,6 +4,7 @@ import userOptions from '../config'
 import Log from './log'
 import Playlist from './playlist'
 import Server from './server'
+import Socket from './socket'
 
 const defaultOptions: IAppOptions = {
     host: 'musitop.io',
@@ -15,6 +16,7 @@ export default class App {
 
     options: IAppOptions
     server: Server
+    socket: Socket
     playlist: Playlist
     list: string[]
 
@@ -23,6 +25,7 @@ export default class App {
         this.options = this.getOptions()
         this.server = new Server(this.options)
         this.playlist = new Playlist(this.options)
+        this.socket = new Socket(this.server.instance)
         this.server.getRandomSong = this.playlist.getRandomSong.bind(this.playlist)
         this.init()
     }

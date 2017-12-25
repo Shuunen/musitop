@@ -54,7 +54,7 @@ export default class Playlist {
     }
 
     getRandomSong(): string {
-        Log.info(`Playlist : getRandomSong from ${this.list.length}`)
+        // Log.info(`Playlist : getRandomSong from ${this.list.length}`)
         return this.list[Math.floor(Math.random() * this.list.length)]
     }
 }
