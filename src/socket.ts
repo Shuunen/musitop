@@ -26,7 +26,13 @@ export default class Socket {
         // connection is up, let's add a simple simple event
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
-            Log.info('Socket : received "' + message + '"')
+            // if the message need to be broadcasted to clients
+            if (message === 'next-song') {
+                Log.info('Socket : received action "' + message + '"')
+                ws.send(message)
+            } else {
+                Log.info('Socket : received non-handled message "' + message + '"')
+            }
             ws.send(`server ws node : client said "${message}"`)
         })
         // send immediatly a feedback to the incoming connection
