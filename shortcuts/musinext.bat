@@ -1,2 +1,2 @@
 cd ..
-node client.js --musicIs=next
+node build/src/client next-song

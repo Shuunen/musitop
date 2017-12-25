@@ -28,7 +28,8 @@
     "scripts": {
         "build": "tsc",
         "dev": "nodemon -e ts  --exec \"tsc && npm start\"",
-        "start": "node build/src/app"
+        "start": "node build/src/app",
+        "send-toto-ws": "node build/src/client toto"
     },
     "repository": {
         "type": "git",

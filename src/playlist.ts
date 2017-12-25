@@ -2,7 +2,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { IAppOptions } from './app'
+import { AppConfig } from './config'
 import Log from './log'
 import Song from './song'
 
@@ -10,9 +10,9 @@ export default class Playlist {
 
     list: string[] = []
 
-    constructor(options: IAppOptions) {
+    constructor() {
         Log.info('Playlist : in constructor')
-        this.getSongs(options).then(list => {
+        this.getSongs().then(list => {
             this.list = list
             Log.info(`App : scanned ${this.list.length} songs !`)
         })
@@ -27,9 +27,9 @@ export default class Playlist {
         })
     }
 
-    getSongs(options: IAppOptions): Promise<string[]> {
+    getSongs(): Promise<string[]> {
         return new Promise((resolve, reject) => {
-            const musicPath: string = options.musicPath
+            const musicPath: string = AppConfig.musicPath
             if (!musicPath || !musicPath.length) {
                 reject('musicPath is not defined')
             }

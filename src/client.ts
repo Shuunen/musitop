@@ -10,23 +10,21 @@
  *    ______________________________________________
  */
 
-var httpPort = 1404
-var ioClient = require('socket.io-client')
-var argv = require('minimist')(process.argv.slice(2))
-var musicIs = argv.musicIs || 'smooth'
-var socket = ioClient.connect('http://musitop.io:' + httpPort)
+import * as WebSocket from 'ws'
+import { AppConfig } from './config'
+import Log from './log'
 
-socket.on('connect', function () {
-    console.log('Client connected') // eslint-disable-line no-console
-    socket.emit('music is', musicIs)
-    socket.emit('debug', JSON.stringify(argv))
-    socket.disconnect()
+const address: string = 'wss://' + AppConfig.host + ':' + AppConfig.port
+// Log.info('Client ws node : will connect to "' + address + '"')
+const ws: WebSocket = new WebSocket(address, { rejectUnauthorized: false })
+
+const action: string = process.argv.slice(2).join(' ')
+// Log.info('Client ws node : will send action "' + action + '"')
+
+ws.on('open', () => {
+    Log.info('Client ws node : ws is open, sending action "' + action + '"')
+    ws.send(action)
+    ws.close()
 })
 
-socket.on('disconnect', function () {
-    console.log('Client disconnected') // eslint-disable-line no-console
-})
-
-socket.on('error', function (e) {
-    console.log('Client error', e) // eslint-disable-line no-console
-})
+ws.on('error', error => Log.info('Client ws node : ws got error', error))

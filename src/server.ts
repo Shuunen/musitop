@@ -5,7 +5,7 @@ import { IncomingMessage as Request, ServerResponse as Response } from 'http'
 import { createServer as createSecureServer, Server as SecureServer, ServerOptions } from 'https'
 import { lookup as mimeLookup } from 'mime-types'
 import { join as pathJoin } from 'path'
-import { IAppOptions } from './app'
+import { AppConfig } from './config'
 import Log from './log'
 import Song from './song'
 
@@ -17,15 +17,15 @@ export default class Server {
     activeSong: Song
     getRandomSong: () => string
 
-    constructor(options: IAppOptions) {
+    constructor() {
         Log.info('Server : in constructor')
         const serverOptions: ServerOptions = {
-            cert: readFileSync(`./certs/${options.host}.crt`),
-            key: readFileSync(`./certs/${options.host}.key`),
+            cert: readFileSync(`./certs/${AppConfig.host}.crt`),
+            key: readFileSync(`./certs/${AppConfig.host}.key`),
         }
         this.instance = createSecureServer(serverOptions, this.onRequest.bind(this))
-        this.instance.listen(options.port)
-        Log.info(`Server : listening on https://${options.host}:${options.port}`)
+        this.instance.listen(AppConfig.port)
+        Log.info(`Server : listening on https://${AppConfig.host}:${AppConfig.port}`)
     }
 
     onRequest(request: Request, response: Response): void {
