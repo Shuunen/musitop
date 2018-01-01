@@ -49,3 +49,4 @@ yarn.lock
 package-lock.json
 config.ts
 .cache
+!src/config.ts

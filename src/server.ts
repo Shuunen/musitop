@@ -5,7 +5,7 @@ import { IncomingMessage as Request, ServerResponse as Response } from 'http'
 import { createServer as createSecureServer, Server as SecureServer, ServerOptions } from 'https'
 import { lookup as mimeLookup } from 'mime-types'
 import { join as pathJoin } from 'path'
-import { AppConfig } from './config'
+import AppConfig from './config'
 import Log from './log'
 import Song from './song'
 

@@ -11,7 +11,7 @@
  */
 
 import * as WebSocket from 'ws'
-import { AppConfig } from './config'
+import AppConfig from './config'
 import Log from './log'
 
 const address: string = 'wss://' + AppConfig.host + ':' + AppConfig.port

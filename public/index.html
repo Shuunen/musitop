@@ -35,6 +35,10 @@
             display: flex;
         }
 
+        .line.error {
+            color: red;
+        }
+
         .log {
             position: absolute;
             bottom: 0;
@@ -96,7 +100,7 @@
             <i>i></i>
             <div>Play</div>
         </button>
-        <button class="button next" onclick="nextSong()">
+        <button class="button next" onclick="nextSong(true)">
             <i>>></i>
             <div>Next</div>
         </button>
@@ -107,15 +111,25 @@
         const playPauseButton = document.querySelector('.button.play')
         const logEl = document.querySelector('.log')
         player.autoplay = false
-        function log(str) {
+        function log(str, isError) {
             console.log(str)
-            logEl.innerHTML += '<div class="line">' + str + '</div>'
+            const line = document.createElement('div')
+            line.classList.add('line')
+            if (isError) {
+                line.classList.add('error')
+            }
+            line.textContent = str
+            logEl.appendChild(line)
             logEl.scrollTo(0, logEl.scrollHeight)
         }
-        function nextSong() {
+        function nextSong(sendToServer) {
             log('nextSong')
-            player.src = '/song?time=' + new Date().getTime()
             // dont do more playPause will do it & update btn accordingly
+            if (sendToServer) {
+                socket.send('next-song')
+            } else {
+                player.src = '/song?time=' + new Date().getTime()
+            }
         }
         function playPause() {
             if (player.paused) {
@@ -136,11 +150,26 @@
         player.addEventListener('canplay', playPause)
         nextSong()
         // WebSocket
-        var ws = new WebSocket('wss://' + document.location.host)
-        ws.onopen = () => ws.send('client ws web : i\'m open :)')
-        ws.onmessage = event => console.log('client ws web : got this message from server "' + event.data + '"')
-        ws.onerror = event => console.log('client ws web : error happened', event)
-        ws.onclose = event => console.log('client ws web : connection closed', event)
+        var socket = null
+        function connectSocket() {
+            socket = new WebSocket('wss://' + document.location.host)
+            socket.onopen = () => log('client ws web : open :)')
+            socket.onmessage = event => {
+                const msg = event.data
+                log('client ws web : got this message from server "' + msg + '"')
+                if (msg === 'next-song') {
+                    nextSong()
+                } else {
+                    log('unhandled message from server', true)
+                }
+            }
+            socket.onerror = event => log('client ws web : error happened', event)
+            socket.onclose = (event) => {
+                log('client ws web : connection closed', event)
+                connectSocket()
+            }
+        }
+        connectSocket()
     </script>
 </body>
 

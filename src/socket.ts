@@ -8,10 +8,12 @@ import Song from './song'
 export default class Socket {
 
     instance: WebSocketServer
+    clients: WebSocket[]
 
     constructor(server: SecureServer) {
         Log.info('Socket : in constructor')
         // initialize the WebSocket server instance
+        this.clients = []
         this.instance = new WebSocketServer({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
         this.instance.on('open', () => Log.info('Socket : is open'))
@@ -23,20 +25,50 @@ export default class Socket {
     }
 
     onConnection(ws: WebSocket): void {
+        this.addClient(ws)
         // connection is up, let's add a simple simple event
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
             // if the message need to be broadcasted to clients
             if (message === 'next-song') {
                 Log.info('Socket : received action "' + message + '"')
-                ws.send(message)
+                this.broadcast(message)
             } else {
                 Log.info('Socket : received non-handled message "' + message + '"')
             }
-            ws.send(`server ws node : client said "${message}"`)
         })
-        // send immediatly a feedback to the incoming connection
-        // Log.info('Socket : sending a message to reply to client connection')
-        ws.send('server ws node : hi from node !')
+    }
+
+    addClient(client: WebSocket): void {
+        this.clients.push(client)
+        Log.info(`Socket : ${this.clients.length} client(s) connected !`)
+    }
+
+    broadcast(action: string): void {
+        if (!this.clients.length) {
+            Log.info('Socket : no clients = no broadcast :)')
+        } else {
+            Log.info(`Socket : broadcasting "${action}" to ${this.clients.length} client(s)`)
+        }
+        let clientsToDelete: number[] = []
+        this.clients.forEach((client, index) => {
+            try {
+                client.send(action)
+            } catch (error) {
+                const msg: string = error.message
+                if (msg.includes('not opened')) {
+                    clientsToDelete.push(index)
+                } else {
+                    Log.error('Socket : unhandled error :')
+                    Log.error(error)
+                }
+            }
+        })
+        if (clientsToDelete.length) {
+            Log.info(`Socket : deleting ${clientsToDelete.length} unusable client(s) of ${this.clients.length}`)
+            // reverse to delete indexes from higher to lower to avoid deleting wrong indexes
+            clientsToDelete = clientsToDelete.reverse()
+            clientsToDelete.forEach(clientIndex => this.clients.splice(clientIndex, 1))
+        }
     }
 }

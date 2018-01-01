@@ -2,7 +2,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { AppConfig } from './config'
+import AppConfig from './config'
 import Log from './log'
 import Song from './song'
 
