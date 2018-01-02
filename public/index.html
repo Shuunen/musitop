@@ -122,14 +122,10 @@
             logEl.appendChild(line)
             logEl.scrollTo(0, logEl.scrollHeight)
         }
-        function nextSong(sendToServer) {
-            log('nextSong')
+        function nextSong() {
+            log('sending "next-song" to server socket')
             // dont do more playPause will do it & update btn accordingly
-            if (sendToServer) {
-                socket.send('next-song')
-            } else {
-                player.src = '/song?time=' + new Date().getTime()
-            }
+            socket.send('next-song')
         }
         function playPause() {
             if (player.paused) {
@@ -148,7 +144,6 @@
         player.addEventListener('pause', updateStatus)
         player.addEventListener('play', updateStatus)
         player.addEventListener('canplay', playPause)
-        nextSong()
         // WebSocket
         var socket = null
         function connectSocket() {
@@ -157,8 +152,8 @@
             socket.onmessage = event => {
                 const msg = event.data
                 log('client ws web : got this message from server "' + msg + '"')
-                if (msg === 'next-song') {
-                    nextSong()
+                if (msg === 'song-changed') {
+                    player.src = '/song?time=' + new Date().getTime()
                 } else if (msg === 'pause-song') {
                     playPause()
                 } else {

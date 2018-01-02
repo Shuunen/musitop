@@ -8,6 +8,7 @@ import Song from './song'
 
 export default class Playlist {
 
+    current: number = 0
     list: string[] = []
 
     constructor() {
@@ -56,5 +57,10 @@ export default class Playlist {
     getRandomSong(): string {
         // Log.info(`Playlist : getRandomSong from ${this.list.length}`)
         return this.list[Math.floor(Math.random() * this.list.length)]
+    }
+
+    getCurrentSong(): string {
+        Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
+        return this.list[this.current]
     }
 }

@@ -7,18 +7,20 @@ import { lookup as mimeLookup } from 'mime-types'
 import { join as pathJoin } from 'path'
 import AppConfig from './config'
 import Log from './log'
+import Playlist from './playlist'
 import Song from './song'
 
 const serverRoot: string = './public'
 
 export default class Server {
 
-    instance: SecureServer
     activeSong: Song
-    getRandomSong: () => string
+    instance: SecureServer
+    playlist: Playlist
 
-    constructor() {
+    constructor(playlist: Playlist) {
         Log.info('Server : in constructor')
+        this.playlist = playlist
         const serverOptions: ServerOptions = {
             cert: readFileSync(`./certs/${AppConfig.host}.crt`),
             key: readFileSync(`./certs/${AppConfig.host}.key`),
@@ -36,7 +38,7 @@ export default class Server {
         }
         let fullPath: string = pathJoin(serverRoot, reqPath)
         if (reqPath.includes('song')) {
-            fullPath = this.getRandomSong()
+            fullPath = this.playlist.getCurrentSong()
         }
         const mimeType: string = mimeLookup(fullPath)
         // Log.info('Server : mime detected :', mimeType)

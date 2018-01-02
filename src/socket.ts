@@ -3,17 +3,21 @@
 import { Server as SecureServer } from 'https'
 import { Server as WebSocketServer, WebSocket } from 'ws'
 import Log from './log'
+import Playlist from './playlist'
 import Song from './song'
 
 export default class Socket {
 
-    messagesToBroadcast: string[] = ['next-song', 'love-song', 'hate-song', 'pause-song']
+    messagesToBroadcast: string[] = ['love-song', 'pause-song']
+    messagesToHandle: string[] = ['hate-song', 'next-song', 'prev-song']
     instance: WebSocketServer
     clients: WebSocket[]
+    playlist: Playlist
 
-    constructor(server: SecureServer) {
+    constructor(server: SecureServer, playlist: Playlist) {
         Log.info('Socket : in constructor')
         // initialize the WebSocket server instance
+        this.playlist = playlist
         this.clients = []
         this.instance = new WebSocketServer({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
@@ -32,8 +36,19 @@ export default class Socket {
             // log the received message and send it back to the client
             // if the message need to be broadcasted to clients
             if (this.messagesToBroadcast.indexOf(message) !== -1) {
-                Log.info('Socket : received action "' + message + '"')
+                Log.info('Socket : received action to broadcast "' + message + '"')
                 this.broadcast(message)
+            } else if (this.messagesToHandle.indexOf(message) !== -1) {
+                Log.info('Socket : received action to handle "' + message + '"')
+                if (message === 'next-song') {
+                    this.playlist.current++
+                    this.broadcast('song-changed')
+                } else if (message === 'prev-song') {
+                    this.playlist.current--
+                    this.broadcast('song-changed')
+                } else {
+                    Log.info('Socket : action not-handled yet "' + message + '"')
+                }
             } else {
                 Log.info('Socket : received non-handled message "' + message + '"')
             }
@@ -42,6 +57,7 @@ export default class Socket {
 
     addClient(client: WebSocket): void {
         this.clients.push(client)
+        client.send('song-changed')
         Log.info(`Socket : ${this.clients.length} client(s) connected !`)
     }
 
