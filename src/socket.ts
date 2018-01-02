@@ -7,6 +7,7 @@ import Song from './song'
 
 export default class Socket {
 
+    messagesToBroadcast: string[] = ['next-song', 'love-song', 'hate-song', 'pause-song']
     instance: WebSocketServer
     clients: WebSocket[]
 
@@ -30,7 +31,7 @@ export default class Socket {
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
             // if the message need to be broadcasted to clients
-            if (message === 'next-song') {
+            if (this.messagesToBroadcast.indexOf(message) !== -1) {
                 Log.info('Socket : received action "' + message + '"')
                 this.broadcast(message)
             } else {

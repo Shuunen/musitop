@@ -159,6 +159,8 @@
                 log('client ws web : got this message from server "' + msg + '"')
                 if (msg === 'next-song') {
                     nextSong()
+                } else if (msg === 'pause-song') {
+                    playPause()
                 } else {
                     log('unhandled message from server', true)
                 }
