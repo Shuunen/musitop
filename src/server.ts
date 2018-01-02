@@ -1,6 +1,6 @@
 'use strict'
 
-import { exists as fileExists, readFile, readFileSync, statSync as fileStatSync } from 'fs'
+import { createReadStream, exists as fileExists, readFileSync, ReadStream, Stats, statSync as fileStatSync } from 'fs'
 import { IncomingMessage as Request, ServerResponse as Response } from 'http'
 import { createServer as createSecureServer, Server as SecureServer, ServerOptions } from 'https'
 import { lookup as mimeLookup } from 'mime-types'
@@ -29,8 +29,11 @@ export default class Server {
     }
 
     onRequest(request: Request, response: Response): void {
-        Log.info(`Server : got request "${request.method} ${request.url}"`)
-        const reqPath: string = request.url + ''
+        let reqPath: string = request.url + ''
+        Log.info(`Server : got request "${request.method} ${reqPath}"`)
+        if (reqPath === '/') {
+            reqPath += '/index.html'
+        }
         let fullPath: string = pathJoin(serverRoot, reqPath)
         if (reqPath.includes('song')) {
             fullPath = this.getRandomSong()
@@ -44,21 +47,28 @@ export default class Server {
                 response.end(`File ${fullPath} not found!`)
                 return
             }
-            // if is a directory, then look for index.html
-            if (fileStatSync(fullPath).isDirectory()) {
-                fullPath += '/index.html'
+            const stat: Stats = fileStatSync(fullPath)
+            const total: number = stat.size
+            if (request.headers.range) {
+                const range: string = request.headers.range + ''
+                const parts: string[] = range.replace(/bytes=/, '').split('-')
+                const partialstart: string = parts[0]
+                const partialend: string = parts[1]
+
+                const start: number = parseInt(partialstart, 10)
+                const end: number = partialend ? parseInt(partialend, 10) : total - 1
+                const chunksize: number = (end - start) + 1
+                const readStream: ReadStream = createReadStream(fullPath, { start, end })
+                response.writeHead(206, {
+                    'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
+                    'Accept-Ranges': 'bytes', 'Content-Length': chunksize,
+                    'Content-Type': 'video/mp4',
+                })
+                readStream.pipe(response)
+            } else {
+                response.writeHead(200, { 'Content-Length': total, 'Content-Type': mimeType })
+                createReadStream(fullPath).pipe(response)
             }
-            // read file from file system
-            readFile(fullPath, (err, data) => {
-                if (err) {
-                    response.statusCode = 500
-                    response.end(`Error getting the file: ${err}.`)
-                } else {
-                    // if the file is found, set Content-type and send data
-                    response.setHeader('Content-type', mimeType)
-                    response.end(data)
-                }
-            })
         })
     }
 }
