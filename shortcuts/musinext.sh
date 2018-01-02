@@ -4,7 +4,7 @@
 
 HERE=$(dirname $0)
 cd $HERE/..
-node client.js --musicIs=next
+node build/src/client next-song
 
 # date > $HERE/musinext.log
 # whereis node >> $HERE/musinext.log

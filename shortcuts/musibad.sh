@@ -1,3 +1,3 @@
 HERE=$(dirname $0)
 cd $HERE/..
-node client.js --musicIs=bad
+node build/src/client hate-song

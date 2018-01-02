@@ -1,3 +1,3 @@
 HERE=$(dirname $0)
 cd $HERE/..
-node client.js --musicIs=pause
+node build/src/client pause-song

@@ -1,2 +1,2 @@
 cd ..
-node client.js --musicIs=pause
+node build/src/client pause-song

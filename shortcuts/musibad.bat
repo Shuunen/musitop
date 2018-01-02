@@ -1,2 +1,2 @@
 cd ..
-node client.js --musicIs=bad
+node build/src/client hate-song

@@ -1,2 +1,2 @@
 cd ..
-node client.js --musicIs=good
+node build/src/client love-song
