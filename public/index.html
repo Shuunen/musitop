@@ -25,10 +25,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
 
         h1 {
-            margin-top: 4rem;
+            margin-bottom: 1rem;
+            transform: skew(10deg);
+            font-family: monospace;
+            font-size: 2.8rem;
         }
 
         .line {
@@ -39,10 +43,15 @@
             color: red;
         }
 
+        .player {
+            margin-bottom: 7rem;
+        }
+
         .log {
             position: absolute;
             bottom: 0;
             left: 0;
+            display: none;
             border: 2px dashed lightgray;
             padding: 10px;
             min-height: 10vh;
@@ -54,29 +63,35 @@
 
         .buttons {
             margin-top: 1rem;
-            justify-content: space-around;
-            width: 80%;
+            width: 100%;
+            margin-left: -25px;
         }
 
         .button {
             flex: 1;
-            margin: 0.4rem;
             height: 4rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: 1rem;
+            transform: skew(-20deg);
+            min-width: 19%;
             font-size: 20px;
             text-transform: uppercase;
             font-family: monospace;
             letter-spacing: 1px;
             padding: 0;
+            font-weight: bold;
         }
 
-        .button i {
-            font-style: normal;
-            font-weight: bold;
+        .button+.button {
+            border-left: 0;
+        }
+
+        .button:first-child,
+        .button:last-child {
+            color: white;
+            min-width: calc(20% + 20px);
         }
     </style>
 </head>
@@ -84,33 +99,26 @@
 <body>
     <h1>Musitop</h1>
 
-    <div class="log"></div>
+    <div class="player">
+        <audio controls preload="auto">
+            <!-- autoplay -->
+            <source type="audio/mpeg"> Your browser does not support the audio element.
+        </audio>
 
-    <audio controls preload="auto">
-        <!-- autoplay -->
-        <source type="audio/mpeg"> Your browser does not support the audio element.
-    </audio>
-
-    <div class="line buttons">
-        <button class="button refresh" onclick="document.location.reload()">
-            <i>( )</i>
-            <div>Reload</div>
-        </button>
-        <button class="button play" onclick="playPause(this)">
-            <i>i></i>
-            <div>Play</div>
-        </button>
-        <button class="button next" onclick="nextSong(true)">
-            <i>>></i>
-            <div>Next</div>
-        </button>
+        <div class="line buttons">
+            <button class="button hate" onclick="hateSong(true)" style="background: indianred">&lt;/3</button>
+            <button class="button prev" onclick="prevSong(true)">&lt;&lt;</button>
+            <button class="button play" onclick="playPause(true)">i&gt;</button>
+            <button class="button next" onclick="nextSong(true)">&gt;&gt;</button>
+            <button class="button love" onclick="loveSong(true)" style="background: darkseagreen">&lt;3</button>
+        </div>
     </div>
 
+    <div class="log"></div>
+
     <script>
-        const player = document.querySelector('audio')
-        const playPauseButton = document.querySelector('.button.play')
+        // Logger
         const logEl = document.querySelector('.log')
-        player.autoplay = false
         function log(str, isError) {
             console.log(str)
             const line = document.createElement('div')
@@ -122,28 +130,58 @@
             logEl.appendChild(line)
             logEl.scrollTo(0, logEl.scrollHeight)
         }
-        function nextSong() {
-            log('sending "next-song" to server socket')
-            // dont do more playPause will do it & update btn accordingly
-            socket.send('next-song')
+        function toggleLog() {
+            logEl.style.display = (!logEl.style.display || logEl.style.display === 'none' ? 'block' : 'none');
+            sessionStorage['musitop.logDisplay'] = logEl.style.display
         }
-        function playPause() {
+        function checkLogVisibility() {
+            if (sessionStorage['musitop.logDisplay']) {
+                logEl.style.display = sessionStorage['musitop.logDisplay']
+            }
+        }
+        // Player
+        const player = document.querySelector('audio')
+        const playPauseButton = document.querySelector('.button.play')
+        player.autoplay = false
+        function nextSong() { sendAction('next-song') }
+        function prevSong() { sendAction('prev-song') }
+        function loveSong() { sendAction('love-song') }
+        function hateSong() { sendAction('hate-song') }
+        function playPause(fromUser) {
             if (player.paused) {
-                player.play()
+                if (sessionStorage['musitop.lastStatus'] && sessionStorage['musitop.lastStatus'] === 'paused') {
+                    log('restoring song state, lastStatus was paused so don\'t start/play current song')
+                    delete sessionStorage['musitop.lastStatus']
+                    return;
+                }
+                if (sessionStorage['musitop.currentTime']) {
+                    log('restoring song currentTime from ls')
+                    player.currentTime = sessionStorage['musitop.currentTime']
+                    delete sessionStorage['musitop.currentTime']
+                    setTimeout(function () { player.play() }, 100)
+                } else {
+                    player.play()
+                }
                 log('playPause : was paused -> do play')
             } else {
                 player.pause()
                 log('playPause : was playing -> do pause')
+                if (fromUser) {
+                    sessionStorage['musitop.lastStatus'] = 'paused'
+                }
             }
         }
         function updateStatus() {
             log('updateStatus')
-            playPauseButton.innerHTML = player.paused ? '<i>i></i><div>Play</div>' : '<i>ii</i><div>Pause</div>'
+            playPauseButton.innerHTML = player.paused ? 'i&gt;' : 'ii'
         }
-        player.addEventListener('ended', nextSong)
-        player.addEventListener('pause', updateStatus)
-        player.addEventListener('play', updateStatus)
-        player.addEventListener('canplay', playPause)
+        // Cron
+        function cron() {
+            if (!player.paused) {
+                // log('setting currentTime in st')
+                sessionStorage['musitop.currentTime'] = player.currentTime
+            }
+        }
         // WebSocket
         var socket = null
         function connectSocket() {
@@ -166,7 +204,24 @@
                 connectSocket()
             }
         }
-        connectSocket()
+        function sendAction(action) {
+            log(`sending "${action}" to server socket`)
+            // avoid using this currentTime for next song :)
+            delete sessionStorage['musitop.currentTime']
+            socket.send(action)
+        }
+        // init
+        function init() {
+            player.addEventListener('ended', nextSong)
+            player.addEventListener('pause', updateStatus)
+            player.addEventListener('play', updateStatus)
+            player.addEventListener('canplay', playPause)
+            document.addEventListener('dblclick', toggleLog)
+            connectSocket()
+            checkLogVisibility()
+            setInterval(cron, 1000)
+        }
+        init()
     </script>
 </body>
 

@@ -5,14 +5,7 @@
     ],
     "jsRules": {},
     "rules": {
-        "align": [
-            true,
-            "arguments",
-            "elements",
-            "members",
-            "parameters",
-            "statements"
-        ],
+        "align": false,
         "arrow-parens": false,
         "arrow-return-shorthand": true,
         "await-promise": true,

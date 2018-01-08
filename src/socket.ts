@@ -8,8 +8,8 @@ import Song from './song'
 
 export default class Socket {
 
-    messagesToBroadcast: string[] = ['love-song', 'pause-song']
-    messagesToHandle: string[] = ['hate-song', 'next-song', 'prev-song']
+    actionsToBroadcast: string[] = ['love-song', 'pause-song']
+    actionsToHandle: string[] = ['hate-song', 'next-song', 'prev-song']
     instance: WebSocketServer
     clients: WebSocket[]
     playlist: Playlist
@@ -35,22 +35,28 @@ export default class Socket {
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
             // if the message need to be broadcasted to clients
-            if (this.messagesToBroadcast.indexOf(message) !== -1) {
-                Log.info('Socket : received action to broadcast "' + message + '"')
-                this.broadcast(message)
-            } else if (this.messagesToHandle.indexOf(message) !== -1) {
-                Log.info('Socket : received action to handle "' + message + '"')
-                if (message === 'next-song') {
+            let action: string = message
+            if (this.actionsToBroadcast.indexOf(action) !== -1) {
+                Log.info('Socket : received action to broadcast "' + action + '"')
+                this.broadcast(action)
+            } else if (this.actionsToHandle.indexOf(action) !== -1) {
+                Log.info('Socket : received action to handle "' + action + '"')
+                if (action === 'hate-song') {
+                    Log.info('Socket : deleting current song')
+                    this.playlist.deleteCurrentSong()
+                    action = 'next-song'
+                }
+                if (action === 'next-song') {
                     this.playlist.current++
                     this.broadcast('song-changed')
-                } else if (message === 'prev-song') {
+                } else if (action === 'prev-song') {
                     this.playlist.current--
                     this.broadcast('song-changed')
                 } else {
-                    Log.info('Socket : action not-handled yet "' + message + '"')
+                    Log.info('Socket : action not-handled yet "' + action + '"')
                 }
             } else {
-                Log.info('Socket : received non-handled message "' + message + '"')
+                Log.info('Socket : received non-handled action "' + action + '"')
             }
         })
     }

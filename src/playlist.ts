@@ -1,5 +1,6 @@
 'use strict'
 
+import * as del from 'del'
 import * as fs from 'fs'
 import * as path from 'path'
 import AppConfig from './config'
@@ -62,5 +63,18 @@ export default class Playlist {
     getCurrentSong(): string {
         Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
         return this.list[this.current]
+    }
+
+    fileName(filePath: string): string {
+        // input  : "C:\Stuff\Music\to test\Mike feat. Snowball - Animal.mp3"
+        // output : "Mike feat. Snowball - Animal"
+        return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.')
+    }
+
+    deleteCurrentSong(): void {
+        const songPath: string = this.getCurrentSong()
+        del([songPath], { force: true }).then(() => {
+            Log.info('Playlist : Deleted "' + this.fileName(songPath) + '"')
+        }).catch(error => Log.error(error))
     }
 }
