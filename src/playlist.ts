@@ -61,6 +61,13 @@ export default class Playlist {
     }
 
     getCurrentSong(): string {
+        if (this.current < 0) {
+            // before first song -> going to last
+            this.current = (this.list.length - 1)
+        } else if (this.current > (this.list.length - 1)) {
+            // after last song -> going to first
+            this.current = 0
+        }
         Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
         return this.list[this.current]
     }
