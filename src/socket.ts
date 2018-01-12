@@ -63,7 +63,7 @@ export default class Socket {
 
     addClient(client: WebSocket): void {
         this.clients.push(client)
-        client.send('song-changed')
+        client.send('song-ready')
         Log.info(`Socket : ${this.clients.length} client(s) connected !`)
     }
 

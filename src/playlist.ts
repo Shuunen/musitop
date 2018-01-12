@@ -1,7 +1,7 @@
 'use strict'
 
 import * as del from 'del'
-import * as fs from 'fs'
+import * as glob from 'glob'
 import * as path from 'path'
 import AppConfig from './config'
 import Log from './log'
@@ -36,20 +36,12 @@ export default class Playlist {
                 reject('musicPath is not defined')
             }
             Log.info('Playlist : scanning "' + musicPath + '" for songs')
-            fs.readdir(musicPath, (err, files) => {
+            glob(musicPath + '/**/*.mp3', (err, files) => {
                 if (err) {
                     Log.error(err)
                     reject('failed at reading path')
                 } else {
-                    const list: string[] = []
-                    files.forEach(fileName => {
-                        const filePath: string = path.join(musicPath, fileName)
-                        const fileStat: fs.Stats = fs.statSync(filePath)
-                        if (fileStat.isFile() && (fileName.indexOf('.mp3') !== -1)) {
-                            list.push(filePath)
-                        }
-                    })
-                    resolve(list)
+                    resolve(files)
                 }
             })
         })

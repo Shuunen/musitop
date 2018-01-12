@@ -90,8 +90,10 @@ function connectSocket() {
     socket.onmessage = event => {
         const msg = event.data
         log('client ws web : got this message from server "' + msg + '"')
-        if (msg === 'song-changed') {
+        if (msg === 'song-ready') {
             getSong()
+        } else if (msg === 'song-changed') {
+            getSong(true)
         } else if (msg === 'pause-song') {
             playPause()
         } else if (msg === 'love-song') {
