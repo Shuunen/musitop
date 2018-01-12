@@ -8,8 +8,7 @@ import Song from './song'
 
 export default class Socket {
 
-    actionsToBroadcast: string[] = ['love-song', 'pause-song']
-    actionsToHandle: string[] = ['hate-song', 'next-song', 'prev-song']
+    actions: string[] = ['love-song', 'pause-song', 'hate-song', 'next-song', 'prev-song']
     instance: WebSocketServer
     clients: WebSocket[]
     playlist: Playlist
@@ -35,23 +34,25 @@ export default class Socket {
         ws.on('message', (message: string) => {
             // log the received message and send it back to the client
             // if the message need to be broadcasted to clients
-            let action: string = message
-            if (this.actionsToBroadcast.indexOf(action) !== -1) {
-                Log.info('Socket : received action to broadcast "' + action + '"')
-                this.broadcast(action)
-            } else if (this.actionsToHandle.indexOf(action) !== -1) {
+            const action: string = message
+            if (this.actions.indexOf(action) !== -1) {
                 Log.info('Socket : received action to handle "' + action + '"')
                 if (action === 'hate-song') {
                     Log.info('Socket : deleting current song')
                     this.playlist.deleteCurrentSong()
-                    action = 'next-song'
-                }
-                if (action === 'next-song') {
-                    this.playlist.current++
+                    this.broadcast('song-changed')
+                } else if (action === 'pause-song') {
+                    this.broadcast(action)
+                } else if (action === 'next-song') {
+                    this.playlist.nextSong()
                     this.broadcast('song-changed')
                 } else if (action === 'prev-song') {
-                    this.playlist.current--
+                    this.playlist.prevSong()
                     this.broadcast('song-changed')
+                } else if (action === 'love-song') {
+                    Log.info('Socket : mark current song as "loved"')
+                    this.playlist.loveCurrentSong()
+                    this.broadcast(action)
                 } else {
                     Log.info('Socket : action not-handled yet "' + action + '"')
                 }

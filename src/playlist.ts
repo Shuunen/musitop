@@ -1,6 +1,7 @@
 'use strict'
 
 import * as del from 'del'
+import * as fs from 'fs'
 import * as glob from 'glob'
 import * as path from 'path'
 import AppConfig from './config'
@@ -11,6 +12,7 @@ export default class Playlist {
 
     current: number = 0
     list: string[] = []
+    moveSong: boolean = false
 
     constructor() {
         Log.info('Playlist : in constructor')
@@ -60,20 +62,76 @@ export default class Playlist {
             // after last song -> going to first
             this.current = 0
         }
+        const songPath: string = this.list[this.current]
         Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
-        return this.list[this.current]
+        Log.info(`Playlist : ${this.fileName(songPath)}`)
+        return songPath
+    }
+
+    nextSong(reverse: boolean = false): void {
+        if (this.moveSong) {
+            Log.info('Playlist : will move song to keep folder')
+            this.moveCurrentSong()
+        } else {
+            Log.info('Playlist : nothing to move')
+        }
+        if (reverse) {
+            this.current--
+        } else {
+            this.current++
+        }
+        Log.info('Playlist : new position', this.current + 1)
+    }
+
+    prevSong(): void {
+        this.nextSong(true)
     }
 
     fileName(filePath: string): string {
         // input  : "C:\Stuff\Music\to test\Mike feat. Snowball - Animal.mp3"
         // output : "Mike feat. Snowball - Animal"
-        return path.basename(filePath).split('.').reverse().splice(1).reverse().join('.')
+        let fileName: string = ''
+        try {
+            fileName = path.basename(filePath).split('.').reverse().splice(1).reverse().join('.')
+        } catch (error) {
+            Log.error('Failed at getting filename for "', filePath, '"')
+            throw error
+        }
+        return fileName
     }
 
     deleteCurrentSong(): void {
-        const songPath: string = this.getCurrentSong()
+        const songPath: string = this.removeCurrentSongFromList()
         del([songPath], { force: true }).then(() => {
             Log.info('Playlist : Deleted "' + this.fileName(songPath) + '"')
-        }).catch(error => Log.error(error))
+        }).catch(error => {
+            Log.error('Playlist : Delete failed')
+            throw error
+        })
+    }
+
+    removeCurrentSongFromList(): string {
+        const songPath: string = this.getCurrentSong()
+        this.list.splice(this.current, 1)
+        return songPath
+    }
+
+    loveCurrentSong(): void {
+        Log.info('Playlist : will move song before playing the next one')
+        this.moveSong = true
+    }
+
+    moveCurrentSong(): void {
+        const songPath: string = this.removeCurrentSongFromList()
+        const newSongPath: string = path.join(AppConfig.keepPath, path.basename(songPath))
+        fs.rename(songPath, newSongPath, error => {
+            if (error) {
+                Log.error('Playlist : Move failed')
+                throw error
+            } else {
+                Log.info('Playlist : Moved ', this.fileName(songPath))
+            }
+            this.moveSong = false
+        })
     }
 }

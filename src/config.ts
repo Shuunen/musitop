@@ -15,5 +15,6 @@ export default config
 export interface IAppOptions {
     host: string
     musicPath: string
+    keepPath: string
     port: number
 }
