@@ -116,6 +116,9 @@ function connectSocket() {
         connectSocket()
     }
 }
+window.addEventListener('beforeunload', function () {
+    socket.close();
+});
 function sendAction(action) {
     log(`sending "${action}" to server socket`)
     // avoid using this currentTime for next song :)
