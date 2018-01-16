@@ -81,7 +81,7 @@ export default class Playlist {
         }
         if (reverse) {
             this.current--
-        } else {
+        } else if (!this.moveSong) {
             this.current++
         }
         delete this.currentSong
