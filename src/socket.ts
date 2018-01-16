@@ -20,6 +20,7 @@ export default class Socket {
         this.clients = []
         this.instance = new WebSocketServer({ server })
         this.instance.on('connection', (ws: WebSocket) => this.onConnection(ws))
+        this.instance.on('error', (error) => Log.info('Socket : got error', error))
         this.instance.on('open', () => Log.info('Socket : is open'))
         this.instance.on('close', () => Log.info('Socket : is close'))
     }
@@ -39,8 +40,7 @@ export default class Socket {
                 Log.info('Socket : received action to handle "' + action + '"')
                 if (action === 'hate-song') {
                     Log.info('Socket : deleting current song')
-                    this.playlist.deleteCurrentSong()
-                    this.broadcast('song-changed')
+                    this.playlist.deleteCurrentSong().then(() => this.broadcast('song-changed'))
                 } else if (action === 'pause-song') {
                     this.broadcast(action)
                 } else if (action === 'next-song') {
@@ -60,11 +60,13 @@ export default class Socket {
                 Log.info('Socket : received non-handled action "' + action + '"')
             }
         })
+        ws.on('error', () => Log.info('Socket : client disconnected'))
     }
 
     addClient(client: WebSocket): void {
         this.clients.push(client)
         client.send('song-ready')
+        client.send('song-data:' + JSON.stringify(this.playlist.getCurrentSong()))
         Log.info(`Socket : ${this.clients.length} client(s) connected !`)
     }
 
@@ -93,6 +95,9 @@ export default class Socket {
             // reverse to delete indexes from higher to lower to avoid deleting wrong indexes
             clientsToDelete = clientsToDelete.reverse()
             clientsToDelete.forEach(clientIndex => this.clients.splice(clientIndex, 1))
+        }
+        if (action === 'song-changed') {
+            this.broadcast('song-data:' + JSON.stringify(this.playlist.getCurrentSong()))
         }
     }
 }

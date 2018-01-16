@@ -21,6 +21,7 @@ function checkLogVisibility() {
     }
 }
 // Player
+const title = document.querySelector('h2')
 const loveButton = document.querySelector('.button.love')
 const player = document.querySelector('audio')
 const playPauseButton = document.querySelector('.button.play')
@@ -68,6 +69,9 @@ function updateStatus() {
         log('updateStatus : was paused -> do play')
     }
 }
+function updateSongData(data) {
+    title.innerText = data.artist + ' - ' + data.title
+}
 function getSong(justChanged) {
     if (justChanged) {
         delete sessionStorage['musitop.currentTime']
@@ -89,14 +93,18 @@ function connectSocket() {
     socket.onopen = () => log('client ws web : open :)')
     socket.onmessage = event => {
         const msg = event.data
-        log('client ws web : got this message from server "' + msg + '"')
-        if (msg === 'song-ready') {
+        log('client ws web : got this message from server "' + msg.split(':')[0] + '"')
+        if (msg.includes('song-data')) {
+            const song = JSON.parse(msg.split('song-data:')[1])
+            log(song)
+            updateSongData(song)
+        } else if (msg.includes('song-ready')) {
             getSong()
-        } else if (msg === 'song-changed') {
+        } else if (msg.includes('song-changed')) {
             getSong(true)
-        } else if (msg === 'pause-song') {
+        } else if (msg.includes('pause-song')) {
             playPause()
-        } else if (msg === 'love-song') {
+        } else if (msg.includes('love-song')) {
             loveButton.classList.add('active')
         } else {
             log('unhandled message from server', true)

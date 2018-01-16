@@ -11,6 +11,7 @@ import Song from './song'
 export default class Playlist {
 
     current: number = 0
+    currentSong: Song
     list: string[] = []
     moveSong: boolean = false
 
@@ -54,7 +55,7 @@ export default class Playlist {
         return this.list[Math.floor(Math.random() * this.list.length)]
     }
 
-    getCurrentSong(): string {
+    getCurrentSong(): Song {
         if (this.current < 0) {
             // before first song -> going to last
             this.current = (this.list.length - 1)
@@ -62,10 +63,13 @@ export default class Playlist {
             // after last song -> going to first
             this.current = 0
         }
-        const songPath: string = this.list[this.current]
-        Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
-        Log.info(`Playlist : ${this.fileName(songPath)}`)
-        return songPath
+        if (!this.currentSong) {
+            const songPath: string = this.list[this.current]
+            Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
+            Log.info(`Playlist : ${this.fileName(songPath)}`)
+            this.currentSong = new Song(songPath)
+        }
+        return this.currentSong
     }
 
     nextSong(reverse: boolean = false): void {
@@ -80,6 +84,7 @@ export default class Playlist {
         } else {
             this.current++
         }
+        delete this.currentSong
         Log.info('Playlist : new position', this.current + 1)
     }
 
@@ -100,18 +105,22 @@ export default class Playlist {
         return fileName
     }
 
-    deleteCurrentSong(): void {
+    deleteCurrentSong(): Promise<boolean> {
         const songPath: string = this.removeCurrentSongFromList()
-        del([songPath], { force: true }).then(() => {
-            Log.info('Playlist : Deleted "' + this.fileName(songPath) + '"')
-        }).catch(error => {
-            Log.error('Playlist : Delete failed')
-            throw error
-        })
+        return del([songPath], { force: true })
+            .then(() => {
+                Log.info('Playlist : Deleted "' + this.fileName(songPath) + '"')
+                return true
+            })
+            .catch(error => {
+                Log.error('Playlist : Delete failed')
+                throw error
+            })
+            .then(() => delete this.currentSong)
     }
 
     removeCurrentSongFromList(): string {
-        const songPath: string = this.getCurrentSong()
+        const songPath: string = this.getCurrentSong().filepath
         this.list.splice(this.current, 1)
         return songPath
     }

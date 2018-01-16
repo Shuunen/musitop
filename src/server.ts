@@ -38,7 +38,7 @@ export default class Server {
         }
         let fullPath: string = pathJoin(serverRoot, reqPath)
         if (reqPath.includes('song')) {
-            fullPath = this.playlist.getCurrentSong()
+            fullPath = this.playlist.getCurrentSong().filepath
         }
         const mimeType: string = mimeLookup(fullPath)
         // Log.info('Server : mime detected :', mimeType)
