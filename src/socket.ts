@@ -63,14 +63,15 @@ export default class Socket {
         ws.on('error', () => Log.info('Socket : client disconnected'))
     }
 
-    addClient(client: WebSocket): void {
+    async addClient(client: WebSocket): Promise<void> {
         this.clients.push(client)
         client.send('song-ready')
-        client.send('song-data:' + JSON.stringify(this.playlist.getCurrentSong()))
+        const song: Song = await this.playlist.getCurrentSong()
+        client.send('song-data:' + JSON.stringify(song))
         Log.info(`Socket : ${this.clients.length} client(s) connected !`)
     }
 
-    broadcast(action: string): void {
+    async broadcast(action: string): Promise<void> {
         if (!this.clients.length) {
             Log.info('Socket : no clients = no broadcast :)')
         } else {
@@ -97,7 +98,8 @@ export default class Socket {
             clientsToDelete.forEach(clientIndex => this.clients.splice(clientIndex, 1))
         }
         if (action === 'song-changed') {
-            this.broadcast('song-data:' + JSON.stringify(this.playlist.getCurrentSong()))
+            const song: Song = await this.playlist.getCurrentSong()
+            this.broadcast('song-data:' + JSON.stringify(song))
         }
     }
 }

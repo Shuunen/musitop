@@ -30,7 +30,7 @@ export default class Server {
         Log.info(`Server : listening on https://${AppConfig.host}:${AppConfig.port}`)
     }
 
-    onRequest(request: Request, response: Response): void {
+    async onRequest(request: Request, response: Response): Promise<void> {
         let reqPath: string = request.url + ''
         Log.info(`Server : got request "${request.method} ${reqPath}"`)
         if (reqPath === '/') {
@@ -38,7 +38,8 @@ export default class Server {
         }
         let fullPath: string = pathJoin(serverRoot, reqPath)
         if (reqPath.includes('song')) {
-            fullPath = this.playlist.getCurrentSong().filepath
+            const song: Song = await this.playlist.getCurrentSong()
+            fullPath = song.filepath
         }
         const mimeType: string = mimeLookup(fullPath)
         // Log.info('Server : mime detected :', mimeType)
