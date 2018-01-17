@@ -23,15 +23,6 @@ export default class Playlist {
         })
     }
 
-    play(): Promise<Song> {
-        return new Promise(resolve => {
-            const filepath: string = this.list[0]
-            Log.info('Playlist : creating song with filepath', filepath)
-            const song: Song = new Song(filepath)
-            resolve(song)
-        })
-    }
-
     getSongs(): Promise<string[]> {
         return new Promise((resolve, reject) => {
             const musicPath: string = AppConfig.musicPath
@@ -55,27 +46,21 @@ export default class Playlist {
         return this.list[Math.floor(Math.random() * this.list.length)]
     }
 
-    getCurrentSong(): Promise<Song> {
-        return new Promise(resolve => {
-            if (this.current < 0) {
-                // before first song -> going to last
-                this.current = (this.list.length - 1)
-            } else if (this.current > (this.list.length - 1)) {
-                // after last song -> going to first
-                this.current = 0
-            }
-            if (!this.currentSong) {
-                const songPath: string = this.list[this.current]
-                Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
-                Log.info(`Playlist : ${this.fileName(songPath)}`)
-                new Song(songPath).setMetadata().then(song => {
-                    this.currentSong = song
-                    resolve(this.currentSong)
-                })
-            } else {
-                resolve(this.currentSong)
-            }
-        })
+    async getCurrentSong(): Promise<Song> {
+        if (this.current < 0) {
+            // before first song -> going to last
+            this.current = (this.list.length - 1)
+        } else if (this.current > (this.list.length - 1)) {
+            // after last song -> going to first
+            this.current = 0
+        }
+        if (!this.currentSong) {
+            const songPath: string = this.list[this.current]
+            Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
+            Log.info(`Playlist : ${this.fileName(songPath)}`)
+            this.currentSong = await new Song(songPath).setMetadata()
+        }
+        return this.currentSong
     }
 
     nextSong(reverse: boolean = false): void {
@@ -111,20 +96,18 @@ export default class Playlist {
         return fileName
     }
 
-    deleteCurrentSong(): Promise<boolean> {
-        return this.removeCurrentSongFromList().then((songPath: string) => {
-            return del([songPath], { force: true })
-                .then(() => {
-                    Log.info('Playlist : Deleted "' + this.fileName(songPath) + '"')
-                    return true
-                })
-                .catch(error => {
-                    Log.error('Playlist : Delete failed')
-                    throw error
-                })
-                .then(() => delete this.currentSong)
-        })
-
+    async deleteCurrentSong(): Promise<boolean> {
+        const songPath: string = await this.removeCurrentSongFromList()
+        return del([songPath], { force: true })
+            .then(() => {
+                Log.info('Playlist : Deleted "' + this.fileName(songPath) + '"')
+                return true
+            })
+            .catch(error => {
+                Log.error('Playlist : Delete failed')
+                throw error
+            })
+            .then(() => delete this.currentSong)
     }
 
     async removeCurrentSongFromList(): Promise<string> {
