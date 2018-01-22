@@ -63,10 +63,10 @@ export default class Playlist {
         return this.currentSong
     }
 
-    nextSong(reverse: boolean = false): void {
+    async nextSong(reverse: boolean = false): Promise<boolean> {
         if (this.moveSong) {
             Log.info('Playlist : will move song to keep folder')
-            this.moveCurrentSong()
+            await this.moveCurrentSong()
         } else {
             Log.info('Playlist : nothing to move')
         }
@@ -77,6 +77,7 @@ export default class Playlist {
         }
         delete this.currentSong
         Log.info('Playlist : new position', this.current + 1)
+        return Promise.resolve(true)
     }
 
     prevSong(): void {

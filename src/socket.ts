@@ -32,7 +32,7 @@ export default class Socket {
     onConnection(ws: WebSocket): void {
         this.addClient(ws)
         // connection is up, let's add a simple simple event
-        ws.on('message', (message: string) => {
+        ws.on('message', async (message: string) => {
             // log the received message and send it back to the client
             // if the message need to be broadcasted to clients
             const action: string = message
@@ -44,7 +44,7 @@ export default class Socket {
                 } else if (action === 'pause-song') {
                     this.broadcast(action)
                 } else if (action === 'next-song') {
-                    this.playlist.nextSong()
+                    await this.playlist.nextSong()
                     this.broadcast('song-changed')
                 } else if (action === 'prev-song') {
                     this.playlist.prevSong()
