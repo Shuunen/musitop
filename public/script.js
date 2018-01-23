@@ -30,7 +30,7 @@ player.autoplay = false
 function nextSong() { sendAction('next-song') }
 function prevSong() { sendAction('prev-song') }
 function loveSong() { sendAction('love-song') }
-function hateSong() { sendAction('hate-song') }
+function hateSong() { if (confirm('Are u Sure ? This will delete the file !')) sendAction('hate-song') }
 function playPause(fromButton) {
     let fromUser = (fromButton === true)
     if (player.paused) {
