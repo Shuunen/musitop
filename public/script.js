@@ -20,6 +20,16 @@ function checkLogVisibility() {
         logEl.style.display = sessionStorage['musitop.logDisplay']
     }
 }
+// Utils
+function shuffle(array) {
+    var i = 0, j = 0, temp = null
+    for (i = array.length - 1; i > 0; i -= 1) {
+        j = Math.floor(Math.random() * (i + 1))
+        temp = array[i]
+        array[i] = array[j]
+        array[j] = temp
+    }
+}
 // Player
 const title = document.querySelector('h2')
 const loveButton = document.querySelector('.button.love')
@@ -125,6 +135,21 @@ function sendAction(action) {
     delete sessionStorage['musitop.currentTime']
     socket.send(action)
 }
+// theme
+const themes = [
+    {
+        background: 'https://media1.giphy.com/media/3ov9k6nCKUAHnzL41q/giphy.gif',
+        color: 'yellow'
+    },
+    {
+        background: 'https://media.giphy.com/media/3o7aD9y2CKtGHRfhOE/giphy.gif',
+        color: 'violet'
+    }
+]
+shuffle(themes)
+const theme = themes[0]
+document.body.style.backgroundImage = 'url("' + theme.background + '")'
+document.body.style.color = theme.color
 // init
 function init() {
     player.addEventListener('ended', nextSong)

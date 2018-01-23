@@ -41,11 +41,6 @@ export default class Playlist {
         })
     }
 
-    getRandomSong(): string {
-        // Log.info(`Playlist : getRandomSong from ${this.list.length}`)
-        return this.list[Math.floor(Math.random() * this.list.length)]
-    }
-
     async getCurrentSong(): Promise<Song> {
         if (this.current < 0) {
             // before first song -> going to last
