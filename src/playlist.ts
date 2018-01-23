@@ -35,10 +35,23 @@ export default class Playlist {
                     Log.error(err)
                     reject('failed at reading path')
                 } else {
+                    this.shuffle(files)
                     resolve(files)
                 }
             })
         })
+    }
+
+    shuffle(array: [{}]): void {
+        let i: number = 0
+        let j: number = 0
+        let temp: {} = {}
+        for (i = array.length - 1; i > 0; i -= 1) {
+            j = Math.floor(Math.random() * (i + 1))
+            temp = array[i]
+            array[i] = array[j]
+            array[j] = temp
+        }
     }
 
     async getCurrentSong(): Promise<Song> {
