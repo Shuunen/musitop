@@ -125,9 +125,15 @@ export default class Playlist {
         return song.filepath
     }
 
-    loveCurrentSong(): void {
-        Log.info('Playlist : will move song before playing the next one')
-        this.moveSong = true
+    loveCurrentSong(): boolean {
+        if (!this.moveSong) {
+            Log.info('Playlist : will move song before playing the next one')
+            this.moveSong = true
+        } else {
+            Log.info('Playlist : canceled last love :\'\'\'(')
+            this.moveSong = false
+        }
+        return this.moveSong
     }
 
     async moveCurrentSong(): Promise<void> {

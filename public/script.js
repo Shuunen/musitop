@@ -1,7 +1,7 @@
 // Logger
 const logEl = document.querySelector('.log')
 function log(str, isError) {
-    console.log(str)
+    console.log(str) // eslint-disable-line
     const line = document.createElement('div')
     line.classList.add('line')
     if (isError) {
@@ -9,7 +9,8 @@ function log(str, isError) {
     }
     line.textContent = str
     logEl.appendChild(line)
-    logEl.scrollTo(0, logEl.scrollHeight)
+    // TODO : this is crashing on mobile :/
+    // logEl.scrollTo(0, logEl.scrollHeight)
 }
 function toggleLog() {
     logEl.style.display = (!logEl.style.display || logEl.style.display === 'none' ? 'block' : 'none')
@@ -60,7 +61,10 @@ function playPause(fromButton) {
             }, 100)
         } else if (!willPlay) {
             log('no currentTime in ls, just playing song')
-            player.play()
+            // apparently sync play freeze on mobile :p
+            setTimeout(function () {
+                player.play()
+            }, 100)
         }
     } else {
         player.pause()
@@ -114,6 +118,8 @@ function connectSocket() {
             getSong(true)
         } else if (msg.includes('pause-song')) {
             playPause()
+        } else if (msg.includes('unlove-song')) {
+            loveButton.classList.remove('active')
         } else if (msg.includes('love-song')) {
             loveButton.classList.add('active')
         } else {
@@ -127,8 +133,8 @@ function connectSocket() {
     }
 }
 window.addEventListener('beforeunload', function () {
-    socket.close();
-});
+    socket.close()
+})
 function sendAction(action) {
     log(`sending "${action}" to server socket`)
     // avoid using this currentTime for next song :)
@@ -161,4 +167,8 @@ function init() {
     checkLogVisibility()
     setInterval(cron, 1000)
 }
-init()
+try {
+    init()
+} catch (error) {
+    console.error(error) // eslint-disable-line
+}

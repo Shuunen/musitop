@@ -37,6 +37,10 @@
             font-size: 2.8rem;
         }
 
+        h2 {
+            text-align: center;
+        }
+
         .line {
             display: flex;
         }
@@ -45,8 +49,12 @@
             color: red;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .player {
-            margin-bottom: 7rem;
+            margin-bottom: 4rem;
         }
 
         .log {
@@ -65,8 +73,9 @@
 
         .buttons {
             margin-top: 1rem;
-            width: 100%;
-            margin-left: -25px;
+            width: 72vw;
+            margin-left: -28px;
+            max-width: 300px;
         }
 
         .button {
@@ -111,7 +120,37 @@
 
         .button.love.active {
             background: darkgreen;
+            border-left: solid 2px;
             transform: rotate(-90deg) skewY(20deg) scaleX(0.8) scaleY(1.4);
+        }
+
+        @media (max-width: 400px) {
+            .buttons {
+                flex-wrap: wrap;
+                margin-left: 0;
+            }
+            .button {
+                transform: skew(0deg);
+            }
+            .button:first-child,
+            .button:last-child {
+                min-width: 100%;
+                transform: skew(-20deg);
+            }
+            .button:first-child {
+                margin-left: 12px;
+            }
+            .button:first-child+.button {
+                border-left: solid 2px;
+            }
+            .button:last-child {
+                margin-left: -12px;
+                margin-right: 10px;
+                border-left: solid 2px;
+            }
+            .button.love.active {
+                transform: rotate(-20deg) skewY(20deg) translate(21px, -2px) scaleX(0.94);
+            }
         }
     </style>
 </head>
@@ -122,7 +161,7 @@
     <h2></h2>
 
     <div class="player">
-        <audio controls preload="auto">
+        <audio controls preload="auto" class="hidden">
             <!-- autoplay -->
             <source type="audio/mpeg"> Your browser does not support the audio element.
         </audio>

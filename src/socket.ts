@@ -51,8 +51,8 @@ export default class Socket {
                     this.broadcast('song-changed')
                 } else if (action === 'love-song') {
                     Log.info('Socket : mark current song as "loved"')
-                    this.playlist.loveCurrentSong()
-                    this.broadcast(action)
+                    const love: boolean = this.playlist.loveCurrentSong()
+                    this.broadcast((!love ? 'un' : '') + action)
                 } else {
                     Log.info('Socket : action not-handled yet "' + action + '"')
                 }
