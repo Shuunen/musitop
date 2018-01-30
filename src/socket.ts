@@ -8,7 +8,7 @@ import Song from './song'
 
 export default class Socket {
 
-    actions: string[] = ['love-song', 'pause-song', 'hate-song', 'next-song', 'prev-song']
+    actions: string[] = ['love-song', 'pause-song', 'hate-song', 'delete-song', 'next-song', 'prev-song']
     instance: WebSocketServer
     clients: WebSocket[]
     playlist: Playlist
@@ -38,9 +38,11 @@ export default class Socket {
             const action: string = message
             if (this.actions.indexOf(action) !== -1) {
                 Log.info('Socket : received action to handle "' + action + '"')
-                if (action === 'hate-song') {
+                if (action === 'delete-song') {
                     Log.info('Socket : deleting current song')
                     this.playlist.deleteCurrentSong().then(() => this.broadcast('song-changed'))
+                } else if (action === 'hate-song') {
+                    this.broadcast(action)
                 } else if (action === 'pause-song') {
                     this.broadcast(action)
                 } else if (action === 'next-song') {

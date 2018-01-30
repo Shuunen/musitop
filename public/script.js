@@ -31,23 +31,60 @@ function shuffle(array) {
         array[j] = temp
     }
 }
+function animate(element, animation, duration) {
+    return new Promise(function (resolve, reject) {
+        if (duration === Infinity) {
+            element.classList.add('infinite')
+        } else {
+            duration = duration || 0
+            if (duration) {
+                element.style.animationDuration = duration + 's'
+            }
+            setTimeout(function () {
+                if (element.classList.contains('animated') && element.classList.contains(animation)) {
+                    element.classList.remove('animated', animation);
+                    element.style.animationDuration = '';
+                    element.style.animationDelay = '';
+                    resolve(element);
+                } else {
+                    reject();
+                }
+            }, (duration || 1) * 1000);
+        }
+        element.classList.add('animated', animation);
+    });
+}
+function alarm(activated) {
+    if (activated) {
+        animate(appTitle, 'tada', Infinity)
+        animate(title, 'wobble', Infinity)
+        animate(playerEl, 'swing', Infinity)
+    } else {
+        appTitle.classList = ''
+        title.classList = ''
+        playerEl.classList = 'player'
+    }
+}
 // Player
+const appTitle = document.querySelector('h1')
 const title = document.querySelector('h2')
 const loveButton = document.querySelector('.button.love')
+const hateButton = document.querySelector('.button.hate')
+const playerEl = document.querySelector('.player')
 const player = document.querySelector('audio')
 const playPauseButton = document.querySelector('.button.play')
 let willPlay = false
 player.autoplay = false
-function nextSong() { sendAction('next-song') }
-function prevSong() { sendAction('prev-song') }
-function loveSong() { sendAction('love-song') }
-function hateSong() { if (confirm('Are u Sure ? This will delete the file !')) sendAction('hate-song') }
+function nextSong(button) { sendAction('next-song') }
+function prevSong(button) { sendAction('prev-song') }
+function loveSong(button) { sendAction('love-song') }
+function hateSong(button) { sendAction('hate-song') }
 function playPause(fromButton) {
     let fromUser = (fromButton === true)
     if (player.paused) {
         if (!fromUser && sessionStorage['musitop.lastStatus'] && sessionStorage['musitop.lastStatus'] === 'paused') {
             log('restoring song state, lastStatus was paused so don\'t start/play current song')
-            // delete sessionStorage['musitop.lastStatus']
+            delete sessionStorage['musitop.lastStatus']
             return
         }
         if (sessionStorage['musitop.currentTime']) {
@@ -92,6 +129,7 @@ function getSong(justChanged) {
     }
     player.src = '/song?time=' + new Date().getTime()
     loveButton.classList.remove('active')
+    alarm(false)
 }
 // Cron
 function cron() {
@@ -122,6 +160,8 @@ function connectSocket() {
             loveButton.classList.remove('active')
         } else if (msg.includes('love-song')) {
             loveButton.classList.add('active')
+        } else if (msg.includes('hate-song')) {
+            alarm(true)
         } else {
             log('unhandled message from server', true)
         }
@@ -138,7 +178,7 @@ window.addEventListener('beforeunload', function () {
 function sendAction(action) {
     log(`sending "${action}" to server socket`)
     // avoid using this currentTime for next song :)
-    delete sessionStorage['musitop.currentTime']
+    // delete sessionStorage['musitop.currentTime']
     socket.send(action)
 }
 // theme

@@ -6,153 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Musitop - Minimal client</title>
-    <style>
-        html,
-        body {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        body * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-size: 14px;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-size: cover;
-            background-position: center;
-        }
-
-        h1 {
-            margin-bottom: 0;
-            transform: skew(10deg);
-            font-family: monospace;
-            font-size: 2.8rem;
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        .line {
-            display: flex;
-        }
-
-        .line.error {
-            color: red;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .player {
-            margin-bottom: 4rem;
-        }
-
-        .log {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            display: none;
-            border: 2px dashed currentColor;
-            padding: 10px;
-            min-height: 10vh;
-            max-height: 30vh;
-            width: calc(100vw - 2rem);
-            margin: 1rem;
-            overflow: auto;
-        }
-
-        .buttons {
-            margin-top: 1rem;
-            width: 72vw;
-            margin-left: -28px;
-            max-width: 300px;
-        }
-
-        .button {
-            flex: 1;
-            height: 4rem;
-            color: currentColor;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transform: skew(-20deg);
-            min-width: 19%;
-            font-size: 20px;
-            text-transform: uppercase;
-            font-family: monospace;
-            letter-spacing: 1px;
-            padding: 0;
-            font-weight: bold;
-            transition: transform 1s;
-            background: darkslategrey;
-            border-color: currentColor;
-            border-width: 2px;
-            border-style: double;
-        }
-
-        .button+.button {
-            border-left: 0;
-        }
-
-        .button:first-child,
-        .button:last-child {
-            min-width: calc(20% + 20px);
-        }
-
-        .button.hate {
-            background: indianred
-        }
-
-        .button.love {
-            background: darkseagreen
-        }
-
-        .button.love.active {
-            background: darkgreen;
-            border-left: solid 2px;
-            transform: rotate(-90deg) skewY(20deg) scaleX(0.8) scaleY(1.4);
-        }
-
-        @media (max-width: 400px) {
-            .buttons {
-                flex-wrap: wrap;
-                margin-left: 0;
-            }
-            .button {
-                transform: skew(0deg);
-            }
-            .button:first-child,
-            .button:last-child {
-                min-width: 100%;
-                transform: skew(-20deg);
-            }
-            .button:first-child {
-                margin-left: 12px;
-            }
-            .button:first-child+.button {
-                border-left: solid 2px;
-            }
-            .button:last-child {
-                margin-left: -12px;
-                margin-right: 10px;
-                border-left: solid 2px;
-            }
-            .button.love.active {
-                transform: rotate(-20deg) skewY(20deg) translate(21px, -2px) scaleX(0.94);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -167,11 +22,11 @@
         </audio>
 
         <div class="line buttons">
-            <button class="button hate" onclick="hateSong(true)">&lt;/3</button>
-            <button class="button prev" onclick="prevSong(true)">&lt;&lt;</button>
-            <button class="button play" onclick="playPause(true)">i&gt;</button>
-            <button class="button next" onclick="nextSong(true)">&gt;&gt;</button>
-            <button class="button love" onclick="loveSong(true)">&lt;3</button>
+            <button class="button hate" onclick="hateSong(this, true)">&lt;/3</button>
+            <button class="button prev" onclick="prevSong(this, true)">&lt;&lt;</button>
+            <button class="button play" onclick="playPause(this, true)">i&gt;</button>
+            <button class="button next" onclick="nextSong(this, true)">&gt;&gt;</button>
+            <button class="button love" onclick="loveSong(this, true)">&lt;3</button>
         </div>
     </div>
 
