@@ -79,12 +79,13 @@ function nextSong(button) { sendAction('next-song') }
 function prevSong(button) { sendAction('prev-song') }
 function loveSong(button) { sendAction('love-song') }
 function hateSong(button) { sendAction('hate-song') }
-function playPause(fromButton) {
+function playPause(button, fromButton) {
     let fromUser = (fromButton === true)
+    log(`in playPause, fromUser ? ${fromUser}`)
     if (player.paused) {
         if (!fromUser && sessionStorage['musitop.lastStatus'] && sessionStorage['musitop.lastStatus'] === 'paused') {
             log('restoring song state, lastStatus was paused so don\'t start/play current song')
-            delete sessionStorage['musitop.lastStatus']
+            // delete sessionStorage['musitop.lastStatus']
             return
         }
         if (sessionStorage['musitop.currentTime']) {
@@ -106,6 +107,7 @@ function playPause(fromButton) {
     } else {
         player.pause()
         if (fromUser) {
+            log('pause from user, setting lastStatus to paused')
             sessionStorage['musitop.lastStatus'] = 'paused'
         }
     }

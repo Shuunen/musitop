@@ -137,6 +137,10 @@ export default class Playlist {
     }
 
     async moveCurrentSong(): Promise<void> {
+        if (!AppConfig.doMove) {
+            this.moveSong = false
+            return Promise.resolve()
+        }
         const songPath: string = await this.removeCurrentSongFromList()
         const newSongPath: string = path.join(AppConfig.keepPath, path.basename(songPath))
         fs.rename(songPath, newSongPath, error => {
