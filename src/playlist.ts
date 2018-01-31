@@ -11,7 +11,7 @@ import Song from './song'
 export default class Playlist {
 
     current: number = 0
-    currentSong: Song
+    currentSong: Promise<Song>
     list: string[] = []
     moveSong: boolean = false
 
@@ -19,7 +19,7 @@ export default class Playlist {
         Log.info('Playlist : in constructor')
         this.getSongs().then(list => {
             this.list = list
-            Log.info(`App : scanned ${this.list.length} songs !`)
+            Log.info(`Playlist : scanned ${this.list.length} songs !`)
         })
     }
 
@@ -54,7 +54,7 @@ export default class Playlist {
         }
     }
 
-    async getCurrentSong(): Promise<Song> {
+    getCurrentSong(): Promise<Song> {
         if (this.current < 0) {
             // before first song -> going to last
             this.current = (this.list.length - 1)
@@ -66,7 +66,7 @@ export default class Playlist {
             const songPath: string = this.list[this.current]
             Log.info(`Playlist : Playing song ${this.current + 1} / ${this.list.length}`)
             Log.info(`Playlist : ${this.fileName(songPath)}`)
-            this.currentSong = await new Song(songPath).setMetadata()
+            this.currentSong = new Song(songPath).setMetadata()
         }
         return this.currentSong
     }

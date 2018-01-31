@@ -13,7 +13,7 @@ export default class App {
     list: string[]
 
     constructor() {
-        Log.info('App : in constructor')
+        Log.info('App      : in constructor')
         this.playlist = new Playlist()
         this.server = new Server(this.playlist)
         this.socket = new Socket(this.server.instance, this.playlist)

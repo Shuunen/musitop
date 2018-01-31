@@ -13,21 +13,22 @@ export default class Song {
 
     constructor(filepath: string) {
         if (!filepath) {
-            Log.error('Song : cannot init without a filepath')
+            Log.error('Song     : cannot init without a filepath')
             return
         }
-        // Log.info('Song : in constructor with filepath', filepath)
+        // Log.info('Song     : in constructor with filepath', filepath)
         this.filepath = filepath
     }
 
     setMetadata(): Promise<Song> {
+        Log.info('Song     : getting metadata for current song')
         return this.getMetadata().then((metadata: IMusicMetadata) => {
             if (metadata) {
-                Log.info('Song : got metadata', metadata)
+                Log.info('Song     : successfuly got metadata')
                 this.artist = metadata.artist[0]
                 this.title = metadata.title
             } else {
-                Log.warn('Song : did not got any metadata for song')
+                Log.warn('Song     : did not got any metadata for song')
             }
             return this
         })

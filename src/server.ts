@@ -19,7 +19,7 @@ export default class Server {
     playlist: Playlist
 
     constructor(playlist: Playlist) {
-        Log.info('Server : in constructor')
+        Log.info('Server   : in constructor')
         this.playlist = playlist
         const serverOptions: ServerOptions = {
             cert: readFileSync(`./certs/${AppConfig.host}.crt`),
@@ -27,12 +27,12 @@ export default class Server {
         }
         this.instance = createSecureServer(serverOptions, this.onRequest.bind(this))
         this.instance.listen(AppConfig.port)
-        Log.info(`Server : listening on https://${AppConfig.host}:${AppConfig.port}`)
+        Log.info(`Server   : listening on https://${AppConfig.host}:${AppConfig.port}`)
     }
 
     async onRequest(request: Request, response: Response): Promise<void> {
         let reqPath: string = request.url + ''
-        Log.info(`Server : got request "${request.method} ${reqPath}"`)
+        Log.info(`Server   : got request "${request.method} ${reqPath}"`)
         if (reqPath === '/') {
             reqPath += '/index.html'
         }
@@ -42,7 +42,7 @@ export default class Server {
             fullPath = song.filepath
         }
         const mimeType: string = mimeLookup(fullPath)
-        // Log.info('Server : mime detected :', mimeType)
+        // Log.info('Server   : mime detected :', mimeType)
         fileExists(fullPath, exist => {
             if (!exist) {
                 // if the file is not found, return 404
