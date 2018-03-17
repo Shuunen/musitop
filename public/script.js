@@ -42,17 +42,17 @@ function animate(element, animation, duration) {
             }
             setTimeout(function () {
                 if (element.classList.contains('animated') && element.classList.contains(animation)) {
-                    element.classList.remove('animated', animation);
-                    element.style.animationDuration = '';
-                    element.style.animationDelay = '';
-                    resolve(element);
+                    element.classList.remove('animated', animation)
+                    element.style.animationDuration = ''
+                    element.style.animationDelay = ''
+                    resolve(element)
                 } else {
-                    reject();
+                    reject()
                 }
-            }, (duration || 1) * 1000);
+            }, (duration || 1) * 1000)
         }
-        element.classList.add('animated', animation);
-    });
+        element.classList.add('animated', animation)
+    })
 }
 function alarm(activated) {
     if (activated) {
@@ -81,7 +81,7 @@ function loveSong(button) { sendAction('love-song') }
 function hateSong(button) { sendAction('hate-song') }
 function playPause(button, fromButton) {
     let fromUser = (fromButton === true)
-    log(`in playPause, fromUser ? ${fromUser}`)
+    log(`playPause : ${fromUser ? 'user' : 'system'} wants to ${player.paused ? 'play' : 'pause'}`)
     if (player.paused) {
         if (!fromUser && sessionStorage['musitop.lastStatus'] && sessionStorage['musitop.lastStatus'] === 'paused') {
             log('restoring song state, lastStatus was paused so don\'t start/play current song')
